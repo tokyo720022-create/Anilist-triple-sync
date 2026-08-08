@@ -24,7 +24,6 @@ jobs:
       - name: Run AniList Sync
         env:
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
-          # Maps to the exact name in your screenshot
           DISCORD_ANILIST_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
           DISCORD_ANILIST_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           ANILIST_ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
@@ -35,7 +34,6 @@ jobs:
           MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
           MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
           MAL_1_REFRESH_TOKEN: ${{ secrets.MAL_1_REFRESH_TOKEN }}
-          # Maps to the exact name in your screenshot
           DISCORD_MAL1_WEBHOOK: ${{ secrets.DISCORD_MAL1_ANIME_WEBHOOK }}
           DISCORD_MAL_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
           MAL_ERROR_REPORT: ${{ secrets.MAL_ERROR_REPORT }}
@@ -45,9 +43,7 @@ jobs:
         env:
           MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
           MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
-          # Expects the clean name (MAL_2_REFRESH_TOKEN) - MAKE SURE YOU RENAMED THIS IN GITHUB!
           MAL_2_REFRESH_TOKEN: ${{ secrets.MAL_2_REFRESH_TOKEN }}
-          # Assuming you used this pattern for MAL 2 as well
           DISCORD_MAL2_WEBHOOK: ${{ secrets.DISCORD_MAL2_ANIME_WEBHOOK }}
           DISCORD_MAL_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
           MAL_ERROR_REPORT: ${{ secrets.MAL_ERROR_REPORT }}
@@ -57,8 +53,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # The '|| true' stops the script from crashing if it can't find new JSON files yet
           git add *.json || true 
-          git commit -m "chore: update tokens, sync times, and thread map [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: update tokens, sync DBs, and thread map [skip ci]" || echo "No changes to commit"
           git push
           
