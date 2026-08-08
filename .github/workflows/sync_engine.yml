@@ -1,13 +1,19 @@
-name: Triple Sync Engine
+name: AniList Maximum Overdrive
 
 on:
   schedule:
-    - cron: '30 3,7,11,17 * * *' 
+    # Runs every 5 minutes from 6:30 AM to 11:25 PM IST
+    - cron: '*/5 1-17 * * *' 
   workflow_dispatch:
 
 jobs:
-  sync_all:
+  sync_engine:
     runs-on: ubuntu-latest
+    
+    # Prevents multiple 5-min runs from overlapping and crashing each other
+    concurrency:
+      group: anilist-engine
+      cancel-in-progress: false 
 
     steps:
       - name: Checkout Repository
@@ -21,42 +27,20 @@ jobs:
       - name: Install Dependencies
         run: pip install requests
 
-      - name: Run AniList Sync
+      - name: Run Master Engine
         env:
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
           DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
           DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
-          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
+          DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
           ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
-        run: python anilist_sync.py
-
-      - name: Run MAL 1 Sync
-        env:
-          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
-          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
-          MAL_REFRESH_TOKEN: ${{ secrets.MAL_1_REFRESH_TOKEN }}
-          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_MAL1_ANIME_WEBHOOK }}
-          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_MAL1_MANGA_WEBHOOK }}
-          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
-          ERROR_REPORT_WEBHOOK: ${{ secrets.MAL_ERROR_REPORT }}
-        run: python mal_1_sync.py
-
-      - name: Run MAL 2 Sync
-        env:
-          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
-          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
-          MAL_REFRESH_TOKEN: ${{ secrets.MAL_2_REFRESH_TOKEN }}
-          # Update these two lines below if you create specific MAL 2 webhooks!
-          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_MAL1_ANIME_WEBHOOK }}
-          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_MAL1_MANGA_WEBHOOK }}
-          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
-          ERROR_REPORT_WEBHOOK: ${{ secrets.MAL_ERROR_REPORT }}
-        run: python mal_2_sync.py
+        run: python anilist_engine.py
 
       - name: Save Engine Memory
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add *.json || true 
-          git commit -m "chore: update tokens, sync DBs, and thread map [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: state memory update [skip ci]" || echo "No changes to commit"
           git push
+          
