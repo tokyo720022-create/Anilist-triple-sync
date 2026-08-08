@@ -1,5 +1,6 @@
 import os
 import json
+import time # Added for rate limiting
 import traceback
 import requests
 from sync_utils import load_database, save_database, fetch_source_activity, send_item_log, send_run_report, send_error_report
@@ -10,11 +11,12 @@ TOKEN_FILE = "mal1_token.json"
 
 CLIENT_ID = os.environ['MAL_CLIENT_ID']
 CLIENT_SECRET = os.environ['MAL_CLIENT_SECRET']
-INITIAL_REFRESH = os.environ['MAL_1_REFRESH_TOKEN']
+INITIAL_REFRESH = os.environ['MAL_REFRESH_TOKEN']
 
-WEBHOOK_URL = os.environ['DISCORD_MAL1_WEBHOOK']
-LOG_WEBHOOK = os.environ['DISCORD_MAL_LOG_WEBHOOK']
-ERROR_WEBHOOK = os.environ['MAL_ERROR_REPORT']
+ANIME_WEBHOOK = os.environ['DISCORD_ANIME_WEBHOOK']
+MANGA_WEBHOOK = os.environ['DISCORD_MANGA_WEBHOOK']
+LOG_WEBHOOK = os.environ['DISCORD_LOG_WEBHOOK']
+ERROR_WEBHOOK = os.environ['ERROR_REPORT_WEBHOOK']
 
 def get_mal_access_token():
     refresh_token = INITIAL_REFRESH
@@ -63,10 +65,14 @@ def main():
             
             if media_id not in db or db[media_id] < current_progress:
                 push_to_mal(item, access_token)
-                send_item_log(WEBHOOK_URL, item['title'], current_progress, item['img'], item['type'], item['list_name'])
+                
+                target_webhook = ANIME_WEBHOOK if item['type'] == "ANIME" else MANGA_WEBHOOK
+                send_item_log(target_webhook, item['title'], current_progress, item['img'], item['type'], item['list_name'])
                 
                 db[media_id] = current_progress
                 updates_made += 1
+                
+                time.sleep(2)
 
         if updates_made > 0:
             save_database(DB_FILE, db)
@@ -78,4 +84,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
