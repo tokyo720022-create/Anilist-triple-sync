@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # Explicitly grants permission to commit the JSON DBs back to GitHub
+  contents: write
 
 jobs:
   sync_engine:
@@ -36,6 +36,7 @@ jobs:
           DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
           DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
+          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} # <--- VIP FAVORITES WEBHOOK
           ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
         run: python anilist_engine.py
 
@@ -43,13 +44,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Scoops up all database files (sync, airing, threads, and auto-delete messages)
           git add *.json || true 
-          
-          # git diff prevents failing if the database didn't actually change
           git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
-          
-          # Pushes the new memory securely back to your private repo
           git push
           
