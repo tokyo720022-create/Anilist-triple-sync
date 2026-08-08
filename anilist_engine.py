@@ -9,28 +9,53 @@ from datetime import datetime
 SOURCE_USERNAME = "Orewatokyo"
 DB_SYNC_FILE = "db_sync.json"
 DB_AIRING_FILE = "db_airing.json"
+DB_THREADS_FILE = "db_threads.json"     # Remembers your Thread IDs
+DB_MESSAGES_FILE = "db_messages.json"   # Tracks Message IDs for the 48-hour auto-delete
 
 TARGET_TOKEN = os.environ.get('ANILIST_TARGET_TOKEN')
 ANIME_WEBHOOK = os.environ.get('DISCORD_ANIME_WEBHOOK')
 MANGA_WEBHOOK = os.environ.get('DISCORD_MANGA_WEBHOOK')
 AIRING_WEBHOOK = os.environ.get('DISCORD_AIRING_WEBHOOK')
+LOG_WEBHOOK = os.environ.get('DISCORD_LOG_WEBHOOK')
 ERROR_WEBHOOK = os.environ.get('ERROR_REPORT_WEBHOOK')
 
 # --- DATABASE LOGIC ---
-def load_db(file_name):
+def load_db(file_name, default_type=dict):
     if os.path.exists(file_name):
         with open(file_name, "r") as f:
             return json.load(f)
-    return {}
+    return default_type()
 
 def save_db(file_name, data):
     with open(file_name, "w") as f:
         json.dump(data, f, indent=4)
 
+# --- 48-HOUR AUTO-DELETE LOGIC ---
+def cleanup_old_messages(msg_db):
+    """Hunts down and deletes any Discord message older than 48 hours (172,800 seconds)."""
+    current_time = int(time.time())
+    active_messages = []
+    deleted_count = 0
+    
+    for msg in msg_db:
+        # If older than 48 hours, send the DELETE strike to Discord
+        if current_time - msg["timestamp"] > 172800:
+            try:
+                requests.delete(msg["delete_url"])
+                deleted_count += 1
+                time.sleep(1) # Rate limit protection
+            except:
+                pass
+        else:
+            # Keep the message in memory if it hasn't expired yet
+            active_messages.append(msg)
+            
+    return active_messages, deleted_count
+
 # --- DISCORD LOGIC ---
-def send_sync_log(webhook_url, item):
-    """Formats and sends the exact 6-point update log."""
-    if not webhook_url:
+def send_sync_log(base_webhook, item, list_name, thread_db, msg_db):
+    """Routes to threads dynamically, formats sleek logs, and stores IDs for auto-deletion."""
+    if not base_webhook:
         return
 
     media = item['media']
@@ -38,48 +63,86 @@ def send_sync_log(webhook_url, item):
     media_type = media['type']
     
     romaji = media['title']['romaji'] or "Unknown"
-    english = media['title']['english'] or "No English Title"
+    english = media['title']['english'] or "N/A"
     image = media['coverImage']['extraLarge']
     
-    # Calculate Remaining
     total = media['episodes'] if media_type == "ANIME" else media['chapters']
-    remaining = (total - progress) if total else "Unknown (Ongoing)"
+    if total:
+        left_count = total - progress
+        unit = "Episode" if media_type == "ANIME" else "Chapter"
+        remaining_str = f"{left_count} {unit}{'s' if left_count != 1 else ''} left"
+    else:
+        remaining_str = "Ongoing / Unknown"
     
-    # Progress Text
-    prog_type = "Episode" if media_type == "ANIME" else "Chapter"
+    type_icon = "🎬" if media_type == "ANIME" else "📖"
+    prog_label = "Episode" if media_type == "ANIME" else "Chapter"
     
-    # Build Description
-    desc = f"**1. Romaji:** {romaji}\n**2. English:** {english}\n"
+    lines = [
+        f"🇯🇵 **Romaji:** {romaji}",
+        f"🌐 **English:** {english}",
+        f"{type_icon} **Watched/Read:** {prog_label} {progress}",
+        f"⏳ **Remaining:** {remaining_str}"
+    ]
     
-    # 3. Start Date (Only if progress is 1 and start date exists)
     start = item.get('startedAt', {})
     if progress == 1 and start and start.get('year'):
-        desc += f"**3. Start Date:** {start['year']}-{start.get('month', 1):02d}-{start.get('day', 1):02d}\n"
+        lines.append(f"🗓️ **Started:** {start['year']}-{start.get('month', 1):02d}-{start.get('day', 1):02d}")
         
-    desc += f"**4. Watched/Read:** {progress}\n"
-    desc += f"**5. {prog_type}s Left:** {remaining}\n"
-    
-    # 6. End Date (Only if completed)
     end = item.get('completedAt', {})
     if total and progress == total and end and end.get('year'):
-        desc += f"**6. End Date:** {end['year']}-{end.get('month', 1):02d}-{end.get('day', 1):02d}\n"
+        lines.append(f"🏁 **Finished:** {end['year']}-{end.get('month', 1):02d}-{end.get('day', 1):02d}")
 
     payload = {
         "embeds": [{
-            "title": f"🔄 Target Synced: {romaji}",
-            "description": desc,
+            "title": f"⚡ Target Synced | {romaji}",
+            "description": "\n".join(lines),
             "color": 3447003,
             "image": {"url": image}
         }]
     }
+
+    # --- AUTONOMOUS THREAD ROUTING ---
+    if media_type not in thread_db:
+        thread_db[media_type] = {}
+        
+    existing_thread_id = thread_db[media_type].get(list_name)
+    
+    if existing_thread_id:
+        target_url = f"{base_webhook}?thread_id={existing_thread_id}&wait=true"
+    else:
+        target_url = f"{base_webhook}?wait=true"
+        payload["thread_name"] = list_name # Triggers Discord to spawn a new thread
+
     try:
-        requests.post(webhook_url, json=payload)
+        response = requests.post(target_url, json=payload)
+        
+        # --- MESSAGE MEMORY FOR AUTO-DELETE ---
+        if response.status_code in [200, 201, 204]:
+            data = response.json()
+            msg_id = data.get("id")
+            new_thread_id = data.get("channel_id")
+            
+            # Save new thread ID to database if we just spawned it
+            if not existing_thread_id and new_thread_id:
+                thread_db[media_type][list_name] = new_thread_id
+                existing_thread_id = new_thread_id
+                
+            # Log the exact deletion URL for the 48-hour purge
+            if msg_id:
+                delete_url = f"{base_webhook}/messages/{msg_id}"
+                if existing_thread_id:
+                    delete_url += f"?thread_id={existing_thread_id}"
+                    
+                msg_db.append({
+                    "delete_url": delete_url,
+                    "timestamp": int(time.time())
+                })
+                
     except Exception as e:
         print(f"Error sending sync log: {e}")
-    time.sleep(2) # Anti-spam rate limit protection
+    time.sleep(2)
 
 def send_airing_alert(media):
-    """Sends an alert for anime airing within 90 minutes."""
     if not AIRING_WEBHOOK:
         return
 
@@ -102,6 +165,26 @@ def send_airing_alert(media):
         print(f"Error sending airing alert: {e}")
     time.sleep(2)
 
+def send_run_report(count, deleted_count):
+    if not LOG_WEBHOOK:
+        return
+
+    desc = f"Successfully synced **{count}** new updates to the target account and routed them to their list threads."
+    if deleted_count > 0:
+        desc += f"\n🧹 **Auto-Cleanup:** Purged {deleted_count} expired logs (48h limit)."
+
+    payload = {
+        "embeds": [{
+            "title": "⚙️ Engine Shutdown & Saved",
+            "description": desc,
+            "color": 3066993
+        }]
+    }
+    try:
+        requests.post(LOG_WEBHOOK, json=payload)
+    except Exception as e:
+        print(f"Error sending run report: {e}")
+
 def send_error(error_msg, stack_trace):
     if not ERROR_WEBHOOK:
         return
@@ -120,13 +203,14 @@ def send_error(error_msg, stack_trace):
 
 # --- CORE ENGINE LOGIC ---
 def fetch_anilist_data():
-    """Grabs both Sync Data and Airing Data in two safe GraphQL pulls."""
     url = 'https://graphql.anilist.co'
     
+    # We added 'name' to the lists query so Discord knows which thread to use
     query = '''
     query ($username: String, $type: MediaType) {
       MediaListCollection(userName: $username, type: $type) {
         lists {
+          name
           entries {
             mediaId
             progress
@@ -171,15 +255,22 @@ def push_to_target(media_id, progress):
 
 def main():
     try:
-        sync_db = load_db(DB_SYNC_FILE)
-        airing_db = load_db(DB_AIRING_FILE)
+        # Load all memories
+        sync_db = load_db(DB_SYNC_FILE, dict)
+        airing_db = load_db(DB_AIRING_FILE, dict)
+        thread_db = load_db(DB_THREADS_FILE, dict)
+        msg_db = load_db(DB_MESSAGES_FILE, list) # Loads as a list
+        
+        # Run the 48-Hour Purge first
+        msg_db, deleted_count = cleanup_old_messages(msg_db)
         
         lists = fetch_anilist_data()
         current_time = int(time.time())
-        updates_made = False
+        update_count = 0
         airings_found = False
 
         for lst in lists:
+            list_name = lst.get('name', 'General')
             for entry in lst['entries']:
                 media_id = str(entry['mediaId'])
                 progress = entry['progress']
@@ -188,10 +279,13 @@ def main():
                 # 1. SYNC LOGIC
                 if media_id not in sync_db or sync_db[media_id] < progress:
                     push_to_target(int(media_id), progress)
+                    
                     webhook = ANIME_WEBHOOK if media['type'] == "ANIME" else MANGA_WEBHOOK
-                    send_sync_log(webhook, entry)
+                    # Passes list_name, thread_db, and msg_db directly into the Discord router
+                    send_sync_log(webhook, entry, list_name, thread_db, msg_db)
+                    
                     sync_db[media_id] = progress
-                    updates_made = True
+                    update_count += 1
 
                 # 2. AIRING LOGIC (90 Minute Warning)
                 if media['type'] == "ANIME" and entry['status'] == "CURRENT" and media.get('nextAiringEpisode'):
@@ -199,7 +293,6 @@ def main():
                     ep = str(media['nextAiringEpisode']['episode'])
                     time_until = air_time - current_time
                     
-                    # If airing within 90 mins (5400 seconds) AND hasn't been alerted yet
                     if 0 < time_until <= 5400:
                         db_key = f"{media_id}_ep{ep}"
                         if db_key not in airing_db:
@@ -207,11 +300,15 @@ def main():
                             airing_db[db_key] = True
                             airings_found = True
 
-        # Save memories if anything changed
-        if updates_made:
-            save_db(DB_SYNC_FILE, sync_db)
-        if airings_found:
-            save_db(DB_AIRING_FILE, airing_db)
+        # 3. SHUTDOWN & SAVE LOGIC
+        if update_count > 0 or deleted_count > 0:
+            send_run_report(update_count, deleted_count)
+            
+        # Always save memory if anything changed (threads, deletes, airings, syncs)
+        save_db(DB_SYNC_FILE, sync_db)
+        save_db(DB_AIRING_FILE, airing_db)
+        save_db(DB_THREADS_FILE, thread_db)
+        save_db(DB_MESSAGES_FILE, msg_db)
 
     except Exception as e:
         send_error(str(e), traceback.format_exc())
