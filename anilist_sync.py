@@ -1,4 +1,5 @@
 import os
+import time  # Added for rate limiting
 import traceback
 import requests
 from sync_utils import load_database, save_database, fetch_source_activity, send_item_log, send_run_report, send_error_report
@@ -7,9 +8,10 @@ SOURCE_USERNAME = "Orewatokyo"
 DB_FILE = "db_anilist_target.json"
 
 TARGET_TOKEN = os.environ['ANILIST_TARGET_TOKEN']
-WEBHOOK_URL = os.environ['DISCORD_ANILIST_WEBHOOK']
-LOG_WEBHOOK = os.environ['DISCORD_ANILIST_LOG_WEBHOOK']
-ERROR_WEBHOOK = os.environ['ANILIST_ERROR_REPORT_WEBHOOK']
+ANIME_WEBHOOK = os.environ['DISCORD_ANIME_WEBHOOK']
+MANGA_WEBHOOK = os.environ['DISCORD_MANGA_WEBHOOK']
+LOG_WEBHOOK = os.environ['DISCORD_LOG_WEBHOOK']
+ERROR_WEBHOOK = os.environ['ERROR_REPORT_WEBHOOK']
 
 def push_to_target(media_id, progress):
     url = 'https://graphql.anilist.co'
@@ -33,10 +35,16 @@ def main():
             
             if media_id not in db or db[media_id] < current_progress:
                 push_to_target(int(media_id), current_progress)
-                send_item_log(WEBHOOK_URL, item['title'], current_progress, item['img'], item['type'], item['list_name'])
+                
+                # Routes to the correct webhook based on type
+                target_webhook = ANIME_WEBHOOK if item['type'] == "ANIME" else MANGA_WEBHOOK
+                send_item_log(target_webhook, item['title'], current_progress, item['img'], item['type'], item['list_name'])
                 
                 db[media_id] = current_progress
                 updates_made += 1
+                
+                # THE POSTER FIX: Sleeps for 2 seconds to prevent Discord spam blocks
+                time.sleep(2)
 
         if updates_made > 0:
             save_database(DB_FILE, db)
@@ -48,4 +56,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
