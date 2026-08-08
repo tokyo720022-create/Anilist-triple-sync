@@ -1,7 +1,6 @@
 import os
 import json
 import requests
-import traceback
 
 THREAD_MEMORY_FILE = "discord_threads.json"
 
@@ -17,7 +16,6 @@ def save_thread_memory(memory_data):
         json.dump(memory_data, f, indent=4)
 
 def send_item_log(webhook_url, title, progress, img, media_type, list_name):
-    """Autonomous routing: Creates a thread if missing, or routes to an existing one."""
     memory = load_thread_memory()
     progress_text = f"Episode {progress}" if media_type == "ANIME" else f"Chapter {progress}"
     
@@ -68,18 +66,30 @@ def send_error_report(webhook_url, target_system, error_msg, stack_trace):
     }
     requests.post(webhook_url, json=data)
 
+
+# --- DATABASE LOGIC ---
+def load_database(db_file):
+    if os.path.exists(db_file):
+        with open(db_file, "r") as f:
+            return json.load(f)
+    return {} 
+
+def save_database(db_file, db_data):
+    with open(db_file, "w") as f:
+        json.dump(db_data, f, indent=4)
+
+
 # --- ANILIST SOURCE FETCH LOGIC ---
-def fetch_source_activity(username, last_sync):
+def fetch_source_activity(username):
     url = 'https://graphql.anilist.co'
     query = '''
     query ($username: String, $type: MediaType) {
-      MediaListCollection(userName: $username, type: $type, sort: UPDATED_TIME_DESC) {
+      MediaListCollection(userName: $username, type: $type) {
         lists {
           name
           entries {
             mediaId
             progress
-            updatedAt
             media {
               idMal
               type
@@ -103,17 +113,15 @@ def fetch_source_activity(username, last_sync):
         for media_list in data['data']['MediaListCollection']['lists']:
             list_name = media_list['name']
             for entry in media_list['entries']:
-                if entry['updatedAt'] > last_sync:
-                    updates.append({
-                        'mediaId': entry['mediaId'],
-                        'idMal': entry['media']['idMal'],
-                        'title': entry['media']['title']['romaji'],
-                        'progress': entry['progress'],
-                        'img': entry['media']['coverImage']['large'],
-                        'type': entry['media']['type'],
-                        'list_name': list_name,
-                        'updatedAt': entry['updatedAt']
-                    })
+                updates.append({
+                    'mediaId': str(entry['mediaId']), 
+                    'idMal': entry['media']['idMal'],
+                    'title': entry['media']['title']['romaji'],
+                    'progress': entry['progress'],
+                    'img': entry['media']['coverImage']['large'],
+                    'type': entry['media']['type'],
+                    'list_name': list_name
+                })
     
-    return sorted(updates, key=lambda x: x['updatedAt'])
-  
+    return updates
+                      
