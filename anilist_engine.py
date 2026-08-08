@@ -53,23 +53,32 @@ def cleanup_old_messages(msg_db):
     return active_messages, deleted_count
 
 # --- DISCORD LOGIC ---
-def send_sync_log(base_webhook, item, list_name, thread_db, msg_db):
+def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
+    """Routes updates to Anime-specific threads, includes ratings, and blasts Finale Alerts."""
     if not base_webhook:
         return
 
-    media = item['media']
-    progress = item['progress']
+    media = entry['media']
+    progress = entry['progress']
+    score = entry.get('scoreRaw', 0) 
     media_type = media['type']
     
     romaji = media['title']['romaji'] or "Unknown"
     english = media['title']['english'] or "N/A"
     image = media['coverImage']['extraLarge']
     
+    # Calculate Remaining & Trigger Finale Alert
     total = media['episodes'] if media_type == "ANIME" else media['chapters']
     if total:
         left_count = total - progress
         unit = "Episode" if media_type == "ANIME" else "Chapter"
-        remaining_str = f"{left_count} {unit}{'s' if left_count != 1 else ''} left"
+        
+        if left_count == 1:
+            remaining_str = f"**1 {unit} left!** 🚨 **FINALE INBOUND!** 🔥"
+        elif left_count == 0:
+            remaining_str = "**0 (Completed!)** 🏆"
+        else:
+            remaining_str = f"{left_count} {unit}{'s' if left_count != 1 else ''} left"
     else:
         remaining_str = "Ongoing / Unknown"
     
@@ -83,11 +92,14 @@ def send_sync_log(base_webhook, item, list_name, thread_db, msg_db):
         f"⏳ **Remaining:** {remaining_str}"
     ]
     
-    start = item.get('startedAt', {})
+    if score > 0:
+        lines.append(f"⭐ **Rating:** {int(score)}/100")
+    
+    start = entry.get('startedAt', {})
     if progress == 1 and start and start.get('year'):
         lines.append(f"🗓️ **Started:** {start['year']}-{start.get('month', 1):02d}-{start.get('day', 1):02d}")
         
-    end = item.get('completedAt', {})
+    end = entry.get('completedAt', {})
     if total and progress == total and end and end.get('year'):
         lines.append(f"🏁 **Finished:** {end['year']}-{end.get('month', 1):02d}-{end.get('day', 1):02d}")
 
@@ -100,27 +112,34 @@ def send_sync_log(base_webhook, item, list_name, thread_db, msg_db):
         }]
     }
 
+    # --- AUTONOMOUS THREAD ROUTING ---
     if media_type not in thread_db:
         thread_db[media_type] = {}
         
-    existing_thread_id = thread_db[media_type].get(list_name)
+    existing_thread_id = thread_db[media_type].get(media_id)
     
     if existing_thread_id:
         target_url = f"{base_webhook}?thread_id={existing_thread_id}&wait=true"
     else:
         target_url = f"{base_webhook}?wait=true"
-        payload["thread_name"] = list_name 
+        payload["thread_name"] = romaji[:90] 
 
     try:
         response = requests.post(target_url, json=payload, timeout=15)
         
+        # --- THE SAFETY NET ---
+        if response.status_code == 400 and "thread_name" in payload:
+            print(f"[WARNING] Discord blocked thread creation for {romaji}. Falling back to standard message.")
+            del payload["thread_name"]
+            response = requests.post(f"{base_webhook}?wait=true", json=payload, timeout=15)
+
         if response.status_code in [200, 201, 204]:
             data = response.json()
             msg_id = data.get("id")
             new_thread_id = data.get("channel_id")
             
             if not existing_thread_id and new_thread_id:
-                thread_db[media_type][list_name] = new_thread_id
+                thread_db[media_type][media_id] = new_thread_id
                 existing_thread_id = new_thread_id
                 
             if msg_id:
@@ -164,7 +183,7 @@ def send_run_report(count, deleted_count):
     if not LOG_WEBHOOK:
         return
 
-    desc = f"Successfully synced **{count}** new updates to the target account and routed them to their list threads."
+    desc = f"Successfully synced **{count}** new updates to the target account and routed them to their designated threads."
     if deleted_count > 0:
         desc += f"\n🧹 **Auto-Cleanup:** Purged {deleted_count} expired logs (48h limit)."
 
@@ -204,10 +223,10 @@ def fetch_anilist_data():
     query ($username: String, $type: MediaType) {
       MediaListCollection(userName: $username, type: $type) {
         lists {
-          name
           entries {
             mediaId
             progress
+            scoreRaw: score(format: POINT_100) 
             status
             startedAt { year month day }
             completedAt { year month day }
@@ -241,13 +260,17 @@ def fetch_anilist_data():
             
     return all_lists
 
-def push_to_target(media_id, progress):
+def push_to_target(media_id, progress, scoreRaw):
     if not TARGET_TOKEN:
         return
     url = 'https://graphql.anilist.co'
-    query = '''mutation ($mediaId: Int, $progress: Int) { SaveMediaListEntry (mediaId: $mediaId, progress: $progress) { id } }'''
+    query = '''mutation ($mediaId: Int, $progress: Int, $scoreRaw: Int) { SaveMediaListEntry (mediaId: $mediaId, progress: $progress, scoreRaw: $scoreRaw) { id } }'''
     headers = {'Authorization': f'Bearer {TARGET_TOKEN}', 'Content-Type': 'application/json'}
-    requests.post(url, json={'query': query, 'variables': {'mediaId': media_id, 'progress': progress}}, headers=headers, timeout=15)
+    variables = {'mediaId': media_id, 'progress': progress}
+    if scoreRaw > 0:
+        variables['scoreRaw'] = int(scoreRaw)
+        
+    requests.post(url, json={'query': query, 'variables': variables}, headers=headers, timeout=15)
 
 def main():
     try:
@@ -266,24 +289,25 @@ def main():
 
         print("[SYSTEM] Scanning for new watchlist updates...")
         for lst in lists:
-            list_name = lst.get('name', 'General')
             for entry in lst['entries']:
                 media_id = str(entry['mediaId'])
                 progress = entry['progress']
+                scoreRaw = entry.get('scoreRaw', 0)
                 media = entry['media']
                 
-                # 1. SYNC LOGIC
-                if media_id not in sync_db or sync_db[media_id] < progress:
-                    print(f"[SYNC] Pushing Target Update -> {media['title']['romaji']} (Progress: {progress})")
-                    push_to_target(int(media_id), progress)
+                current_state = f"{progress}-{scoreRaw}"
+                saved_state = sync_db.get(media_id, "0-0")
+                
+                if current_state != saved_state:
+                    print(f"[SYNC] Pushing Target Update -> {media['title']['romaji']} (Prog: {progress} | Score: {scoreRaw})")
+                    push_to_target(int(media_id), progress, scoreRaw)
                     
                     webhook = ANIME_WEBHOOK if media['type'] == "ANIME" else MANGA_WEBHOOK
-                    send_sync_log(webhook, entry, list_name, thread_db, msg_db)
+                    send_sync_log(webhook, entry, media_id, thread_db, msg_db)
                     
-                    sync_db[media_id] = progress
+                    sync_db[media_id] = current_state
                     update_count += 1
 
-                # 2. AIRING LOGIC (90 Minute Warning)
                 if media['type'] == "ANIME" and entry['status'] == "CURRENT" and media.get('nextAiringEpisode'):
                     air_time = media['nextAiringEpisode']['airingAt']
                     ep = str(media['nextAiringEpisode']['episode'])
@@ -300,7 +324,6 @@ def main():
         if update_count == 0:
             print("[SYSTEM] Zero updates found. Target is completely synced.")
 
-        # 3. SHUTDOWN & SAVE LOGIC
         if update_count > 0 or deleted_count > 0:
             send_run_report(update_count, deleted_count)
             
@@ -316,3 +339,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
