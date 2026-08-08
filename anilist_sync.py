@@ -2,60 +2,45 @@ import os
 import json
 import requests
 import traceback
+from sync_utils import fetch_source_activity, send_item_log, send_run_report, send_error_report
 
-THREAD_MEMORY_FILE = "discord_threads.json"
+SOURCE_USERNAME = "Orewatokyo" # Your main public account
+SYNC_FILE = "sync_data_anilist.json"
+TARGET_TOKEN = os.environ['ANILIST_TARGET_TOKEN']
+WEBHOOK_URL = os.environ['DISCORD_ANILIST_WEBHOOK']
+LOG_WEBHOOK = os.environ['DISCORD_ANILIST_LOG_WEBHOOK']
+ERROR_WEBHOOK = os.environ['ANILIST_ERROR_REPORT_WEBHOOK']
 
-def load_thread_memory():
-    """Loads the dynamic thread map, or creates an empty one if it's the first run."""
-    if os.path.exists(THREAD_MEMORY_FILE):
-        with open(THREAD_MEMORY_FILE, "r") as f:
-            return json.load(f)
-    return {"ANIME": {}, "MANGA": {}}
-
-def save_thread_memory(memory_data):
-    """Saves the newly created thread IDs so they are never duplicated."""
-    with open(THREAD_MEMORY_FILE, "w") as f:
-        json.dump(memory_data, f, indent=4)
-
-def send_item_log(webhook_url, title, progress, img, media_type, list_name):
-    """Autonomous routing: Creates a thread if missing, or routes to an existing one."""
-    
-    memory = load_thread_memory()
-    progress_text = f"Episode {progress}" if media_type == "ANIME" else f"Chapter {progress}"
-    
-    # Base Payload
-    payload = {
-        "embeds": [{
-            "title": f"🔄 Synced: {title}",
-            "description": f"Updated to **{progress_text}**\n📂 AniList Source: {list_name}",
-            "color": 3447003,
-            "image": {"url": img}
-        }]
+def push_to_target(media_id, progress):
+    url = 'https://graphql.anilist.co'
+    query = '''
+    mutation ($mediaId: Int, $progress: Int) {
+      SaveMediaListEntry (mediaId: $mediaId, progress: $progress) { id }
     }
+    '''
+    headers = {'Authorization': f'Bearer {TARGET_TOKEN}', 'Content-Type': 'application/json'}
+    requests.post(url, json={'query': query, 'variables': {'mediaId': media_id, 'progress': progress}}, headers=headers)
 
-    # 1. Check if we already created a thread for this AniList category
-    existing_thread_id = memory[media_type].get(list_name)
-    
-    if existing_thread_id:
-        # Route to existing thread
-        target_url = f"{webhook_url}?thread_id={existing_thread_id}&wait=true"
-        requests.post(target_url, json=payload)
-    
-    else:
-        # 2. Spawn a brand new thread automatically
-        payload["thread_name"] = list_name # This tells Discord to create the thread!
-        target_url = f"{webhook_url}?wait=true" # wait=true returns the new thread data
+def main():
+    try:
+        last_sync = json.load(open(SYNC_FILE)).get("last_updated", 0) if os.path.exists(SYNC_FILE) else 0
+        new_data = fetch_source_activity(SOURCE_USERNAME, last_sync)
         
-        response = requests.post(target_url, json=payload)
+        highest_timestamp = last_sync
+        for item in new_data:
+            push_to_target(item['mediaId'], item['progress'])
+            send_item_log(WEBHOOK_URL, item['title'], item['progress'], item['img'], item['type'], item['list_name'])
+            highest_timestamp = max(highest_timestamp, item['updatedAt'])
+
+        if new_data:
+            with open(SYNC_FILE, "w") as f:
+                json.dump({"last_updated": highest_timestamp}, f)
+            
+        send_run_report(LOG_WEBHOOK, "AniList Target", "Success", len(new_data))
         
-        # 3. Harvest the new ID and save it to memory
-        if response.status_code in [200, 201, 204]:
-            try:
-                new_thread_id = response.json().get("channel_id")
-                if new_thread_id:
-                    memory[media_type][list_name] = new_thread_id
-                    save_thread_memory(memory)
-                    print(f"✅ Auto-created new thread for {list_name}: {new_thread_id}")
-            except Exception as e:
-                print(f"Could not parse new thread ID: {e}")
-          
+    except Exception as e:
+        send_error_report(ERROR_WEBHOOK, "AniList Target Sync", str(e), traceback.format_exc())
+
+if __name__ == "__main__":
+    main()
+                          
