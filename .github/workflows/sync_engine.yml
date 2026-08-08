@@ -2,11 +2,12 @@ name: AniList Maximum Overdrive
 
 on:
   schedule:
+    # Runs every 5 minutes from 6:30 AM to 11:25 PM IST (1:00 to 17:55 UTC)
     - cron: '*/5 1-17 * * *' 
   workflow_dispatch:
 
 permissions:
-  contents: write # Explicitly grants permission to commit & push back to the repo
+  contents: write # Explicitly grants permission to commit the JSON DBs back to GitHub
 
 jobs:
   sync_engine:
@@ -34,6 +35,7 @@ jobs:
           DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
           DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
         run: python anilist_engine.py
 
@@ -41,7 +43,13 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Scoops up all database files (sync, airing, threads, and auto-delete messages)
           git add *.json || true 
+          
+          # git diff prevents failing if the database didn't actually change
           git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
+          
+          # Pushes the new memory securely back to your private repo
           git push
           
