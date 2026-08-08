@@ -1,0 +1,11 @@
+      - name: Save Memory (Commit Sync & Thread Data)
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Add all the memory files, including the new dynamic thread map
+          git add sync_data_anilist.json sync_data_mal1.json sync_data_mal2.json discord_threads.json
+          
+          # Commit and push. [skip ci] prevents infinite action loops.
+          git commit -m "chore: engine log and thread map updated [skip ci]" || echo "No changes to commit"
+          git push
