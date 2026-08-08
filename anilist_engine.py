@@ -102,11 +102,13 @@ def send_error(error_msg, stack_trace):
 
 # --- CORE ENGINE LOGIC ---
 def fetch_anilist_data():
-    """Grabs both Sync Data and Airing Data in one massive GraphQL pull."""
+    """Grabs both Sync Data and Airing Data in two safe GraphQL pulls."""
     url = 'https://graphql.anilist.co'
+    
+    # We added $type back into the query since AniList strictly requires it
     query = '''
-    query ($username: String) {
-      MediaListCollection(userName: $username, sort: UPDATED_TIME_DESC) {
+    query ($username: String, $type: MediaType) {
+      MediaListCollection(userName: $username, type: $type) {
         lists {
           entries {
             mediaId
@@ -127,31 +129,23 @@ def fetch_anilist_data():
       }
     }
     '''
-    response = requests.post(url, json={'query': query, 'variables': {'username': SOURCE_USERNAME}})
-    response.raise_for_status()
-    return response.json()['data']['MediaListCollection']['lists']
-
-def push_to_target(media_id, progress):
-    url = 'https://graphql.anilist.co'
-    query = '''mutation ($mediaId: Int, $progress: Int) { SaveMediaListEntry (mediaId: $mediaId, progress: $progress) { id } }'''
-    headers = {'Authorization': f'Bearer {TARGET_TOKEN}', 'Content-Type': 'application/json'}
-    requests.post(url, json={'query': query, 'variables': {'mediaId': media_id, 'progress': progress}}, headers=headers)
-
-def main():
-    try:
-        sync_db = load_db(DB_SYNC_FILE)
-        airing_db = load_db(DB_AIRING_FILE)
+    all_lists = []
+    
+    # The engine now loops to pull Anime and Manga separately
+    for media_type in ["ANIME", "MANGA"]:
+        variables = {'username': SOURCE_USERNAME, 'type': media_type}
+        response = requests.post(url, json={'query': query, 'variables': variables})
         
-        lists = fetch_anilist_data()
-        current_time = int(time.time())
-        updates_made = False
-        airings_found = False
-
-        for lst in lists:
-            for entry in lst['entries']:
-                media_id = str(entry['mediaId'])
-                progress = entry['progress']
-                media = entry['media']
+        # If AniList rejects the query, this prints the EXACT reason why in Discord
+        if response.status_code != 200:
+            raise Exception(f"AniList API Error {response.status_code}: {response.text}")
+            
+        data = response.json()
+        if 'errors' not in data and 'data' in data and data['data'].get('MediaListCollection'):
+            all_lists.extend(data['data']['MediaListCollection']['lists'])
+            
+    return all_lists
+    
                 
                 # 1. SYNC LOGIC
                 if media_id not in sync_db or sync_db[media_id] < progress:
