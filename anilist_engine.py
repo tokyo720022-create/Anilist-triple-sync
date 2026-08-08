@@ -12,11 +12,20 @@ DB_AIRING_FILE = "db_airing.json"
 DB_THREADS_FILE = "db_threads.json"
 DB_MESSAGES_FILE = "db_messages.json"
 
+# ==============================================================================
+# ⭐ VIP PRIORITY FAVORITES LIST
+# ==============================================================================
+PRIORITY_FAVORITES = [
+    "One Piece",
+    "Detective Conan",
+]
+
 TARGET_TOKEN = os.environ.get('ANILIST_TARGET_TOKEN')
 ANIME_WEBHOOK = os.environ.get('DISCORD_ANIME_WEBHOOK')
 MANGA_WEBHOOK = os.environ.get('DISCORD_MANGA_WEBHOOK')
 AIRING_WEBHOOK = os.environ.get('DISCORD_AIRING_WEBHOOK')
 LOG_WEBHOOK = os.environ.get('DISCORD_LOG_WEBHOOK')
+FAVORITES_WEBHOOK = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 ERROR_WEBHOOK = os.environ.get('ERROR_REPORT_WEBHOOK')
 
 # --- DATABASE LOGIC ---
@@ -30,6 +39,21 @@ def save_db(file_name, data):
     with open(file_name, "w") as f:
         json.dump(data, f, indent=4)
     print(f"[MEMORY] Successfully saved {file_name}")
+
+def is_favorite(entry):
+    media = entry['media']
+    media_id = media['mediaId'] if 'mediaId' in media else entry.get('mediaId')
+    romaji = (media['title']['romaji'] or "").lower()
+    english = (media['title']['english'] or "").lower()
+    
+    for item in PRIORITY_FAVORITES:
+        if isinstance(item, int) and item == media_id:
+            return True
+        elif isinstance(item, str):
+            target = item.lower()
+            if target in romaji or target in english:
+                return True
+    return False
 
 # --- 48-HOUR AUTO-DELETE LOGIC ---
 def cleanup_old_messages(msg_db):
@@ -53,8 +77,61 @@ def cleanup_old_messages(msg_db):
     return active_messages, deleted_count
 
 # --- DISCORD LOGIC ---
+def send_favorite_alert(entry):
+    if not FAVORITES_WEBHOOK:
+        return
+
+    media = entry['media']
+    progress = entry['progress']
+    score = entry.get('scoreRaw', 0)
+    media_type = media['type']
+    
+    romaji = media['title']['romaji'] or "Unknown"
+    english = media['title']['english'] or "N/A"
+    image = media['coverImage']['extraLarge']
+    
+    total = media['episodes'] if media_type == "ANIME" else media['chapters']
+    unit = "Episode" if media_type == "ANIME" else "Chapter"
+    
+    if total:
+        left_count = total - progress
+        if left_count == 1:
+            remaining_str = f"**1 {unit} left!** 🚨 **FINALE INBOUND!** 🔥"
+        elif left_count == 0:
+            remaining_str = "**COMPLETED!** 🏆"
+        else:
+            remaining_str = f"{left_count} {unit}s remaining"
+    else:
+        remaining_str = "Ongoing / Active Release"
+
+    type_icon = "👑🎬" if media_type == "ANIME" else "👑📖"
+    
+    lines = [
+        f"🌟 **VIP FAVORITE UPDATE DETECTED** 🌟",
+        f"🇯🇵 **Title:** {romaji}",
+        f"🌐 **English:** {english}",
+        f"{type_icon} **Current Progress:** {unit} {progress}",
+        f"⏳ **Status:** {remaining_str}"
+    ]
+    
+    if score > 0:
+        lines.append(f"⭐ **Rating:** {int(score)}/100")
+
+    payload = {
+        "embeds": [{
+            "title": f"🔥 VIP RELEASE ALERT | {romaji}",
+            "description": "\n".join(lines),
+            "color": 16766720, 
+            "image": {"url": image}
+        }]
+    }
+    try:
+        requests.post(FAVORITES_WEBHOOK, json=payload, timeout=15)
+    except Exception as e:
+        print(f"[ERROR] Failed to send VIP favorite alert: {e}")
+    time.sleep(2)
+
 def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
-    """Routes updates to Anime-specific threads, includes ratings, and blasts Finale Alerts."""
     if not base_webhook:
         return
 
@@ -67,7 +144,6 @@ def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
     english = media['title']['english'] or "N/A"
     image = media['coverImage']['extraLarge']
     
-    # Calculate Remaining & Trigger Finale Alert
     total = media['episodes'] if media_type == "ANIME" else media['chapters']
     if total:
         left_count = total - progress
@@ -112,7 +188,6 @@ def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
         }]
     }
 
-    # --- AUTONOMOUS THREAD ROUTING ---
     if media_type not in thread_db:
         thread_db[media_type] = {}
         
@@ -127,7 +202,6 @@ def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
     try:
         response = requests.post(target_url, json=payload, timeout=15)
         
-        # --- THE SAFETY NET ---
         if response.status_code == 400 and "thread_name" in payload:
             print(f"[WARNING] Discord blocked thread creation for {romaji}. Falling back to standard message.")
             del payload["thread_name"]
@@ -256,7 +330,6 @@ def fetch_anilist_data():
         if 'errors' not in data and 'data' in data and data['data'].get('MediaListCollection'):
             chunk = data['data']['MediaListCollection']['lists']
             all_lists.extend(chunk)
-            print(f"[INFO] Fetched {len(chunk)} lists for {media_type}")
             
     return all_lists
 
@@ -298,6 +371,13 @@ def main():
                 current_state = f"{progress}-{scoreRaw}"
                 saved_state = sync_db.get(media_id, "0-0")
                 
+                # --- THE AMNESIA PATCH ---
+                # Silently converts old integer memory (e.g., 12) to new string format ("12-0")
+                if isinstance(saved_state, int):
+                    saved_state = f"{saved_state}-0"
+                    sync_db[media_id] = saved_state 
+                # -------------------------
+                
                 if current_state != saved_state:
                     print(f"[SYNC] Pushing Target Update -> {media['title']['romaji']} (Prog: {progress} | Score: {scoreRaw})")
                     push_to_target(int(media_id), progress, scoreRaw)
@@ -305,6 +385,9 @@ def main():
                     webhook = ANIME_WEBHOOK if media['type'] == "ANIME" else MANGA_WEBHOOK
                     send_sync_log(webhook, entry, media_id, thread_db, msg_db)
                     
+                    if is_favorite(entry):
+                        send_favorite_alert(entry)
+
                     sync_db[media_id] = current_state
                     update_count += 1
 
@@ -316,8 +399,11 @@ def main():
                     if 0 < time_until <= 5400:
                         db_key = f"{media_id}_ep{ep}"
                         if db_key not in airing_db:
-                            print(f"[ALERT] Spawning 90-Min Alert for {media['title']['romaji']}")
                             send_airing_alert(media)
+                            
+                            if is_favorite(entry):
+                                send_favorite_alert(entry)
+                                
                             airing_db[db_key] = True
                             airings_found = True
 
@@ -339,4 +425,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
