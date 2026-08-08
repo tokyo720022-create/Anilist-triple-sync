@@ -1,11 +1,11 @@
 import os
 import json
-import requests
 import traceback
-from sync_utils import fetch_source_activity, send_item_log, send_run_report, send_error_report
+import requests
+from sync_utils import load_database, save_database, fetch_source_activity, send_item_log, send_run_report, send_error_report
 
 SOURCE_USERNAME = "Orewatokyo"
-SYNC_FILE = "sync_data_mal2.json"
+DB_FILE = "db_mal_2.json"
 TOKEN_FILE = "mal2_token.json"
 
 CLIENT_ID = os.environ['MAL_CLIENT_ID']
@@ -53,24 +53,29 @@ def push_to_mal(item, access_token):
 def main():
     try:
         access_token = get_mal_access_token()
-        last_sync = json.load(open(SYNC_FILE)).get("last_updated", 0) if os.path.exists(SYNC_FILE) else 0
-        new_data = fetch_source_activity(SOURCE_USERNAME, last_sync)
+        db = load_database(DB_FILE)
+        new_data = fetch_source_activity(SOURCE_USERNAME)
         
-        highest_timestamp = last_sync
+        updates_made = 0
         for item in new_data:
-            push_to_mal(item, access_token)
-            send_item_log(WEBHOOK_URL, item['title'], item['progress'], item['img'], item['type'], item['list_name'])
-            highest_timestamp = max(highest_timestamp, item['updatedAt'])
-
-        if new_data:
-            with open(SYNC_FILE, "w") as f:
-                json.dump({"last_updated": highest_timestamp}, f)
+            media_id = item['mediaId']
+            current_progress = item['progress']
             
-        send_run_report(LOG_WEBHOOK, "MAL Account 2", "Success", len(new_data))
+            if media_id not in db or db[media_id] < current_progress:
+                push_to_mal(item, access_token)
+                send_item_log(WEBHOOK_URL, item['title'], current_progress, item['img'], item['type'], item['list_name'])
+                
+                db[media_id] = current_progress
+                updates_made += 1
+
+        if updates_made > 0:
+            save_database(DB_FILE, db)
+            
+        send_run_report(LOG_WEBHOOK, "MAL Account 2", "Success", updates_made)
         
     except Exception as e:
         send_error_report(ERROR_WEBHOOK, "MAL 2 Sync", str(e), traceback.format_exc())
 
 if __name__ == "__main__":
     main()
-      
+    
