@@ -24,29 +24,33 @@ jobs:
       - name: Run AniList Sync
         env:
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
-          DISCORD_ANILIST_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
-          DISCORD_ANILIST_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
-          ANILIST_ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
+          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
+          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
+          ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
         run: python anilist_sync.py
 
       - name: Run MAL 1 Sync
         env:
           MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
           MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
-          MAL_1_REFRESH_TOKEN: ${{ secrets.MAL_1_REFRESH_TOKEN }}
-          DISCORD_MAL1_WEBHOOK: ${{ secrets.DISCORD_MAL1_ANIME_WEBHOOK }}
-          DISCORD_MAL_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
-          MAL_ERROR_REPORT: ${{ secrets.MAL_ERROR_REPORT }}
+          MAL_REFRESH_TOKEN: ${{ secrets.MAL_1_REFRESH_TOKEN }}
+          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_MAL1_ANIME_WEBHOOK }}
+          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_MAL1_MANGA_WEBHOOK }}
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
+          ERROR_REPORT_WEBHOOK: ${{ secrets.MAL_ERROR_REPORT }}
         run: python mal_1_sync.py
 
       - name: Run MAL 2 Sync
         env:
           MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
           MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
-          MAL_2_REFRESH_TOKEN: ${{ secrets.MAL_2_REFRESH_TOKEN }}
-          DISCORD_MAL2_WEBHOOK: ${{ secrets.DISCORD_MAL2_ANIME_WEBHOOK }}
-          DISCORD_MAL_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
-          MAL_ERROR_REPORT: ${{ secrets.MAL_ERROR_REPORT }}
+          MAL_REFRESH_TOKEN: ${{ secrets.MAL_2_REFRESH_TOKEN }}
+          # Update these two lines below if you create specific MAL 2 webhooks!
+          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_MAL1_ANIME_WEBHOOK }}
+          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_MAL1_MANGA_WEBHOOK }}
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_MAL_LOG_WEBHOOK }}
+          ERROR_REPORT_WEBHOOK: ${{ secrets.MAL_ERROR_REPORT }}
         run: python mal_2_sync.py
 
       - name: Save Engine Memory
@@ -56,4 +60,3 @@ jobs:
           git add *.json || true 
           git commit -m "chore: update tokens, sync DBs, and thread map [skip ci]" || echo "No changes to commit"
           git push
-          
