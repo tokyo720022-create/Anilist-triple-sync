@@ -15,7 +15,6 @@ jobs:
     
     concurrency:
       group: anilist-engine
-      # THE BUG KILLER: Prevents stale ghost queues from stacking up
       cancel-in-progress: true 
 
     steps:
@@ -38,17 +37,14 @@ jobs:
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
           DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
-          ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
+          DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
         run: python anilist_engine.py
 
       - name: Save Engine Memory
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Force syncs the latest database before saving to prevent conflicts
           git pull origin main --rebase || true 
-          
           git add *.json || true 
           git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
           git push
