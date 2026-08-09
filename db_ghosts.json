@@ -199,5 +199,25 @@
         "progress": 8,
         "score": 9,
         "type": "MANGA"
+    },
+    "Hitori ja Dekinai mon!": {
+        "progress": 9,
+        "score": 9,
+        "type": "MANGA"
+    },
+    "Kawaii Imouto to Ikenai Koto Shiteimasu!": {
+        "progress": 9,
+        "score": 10,
+        "type": "MANGA"
+    },
+    "Paihame Kazoku": {
+        "progress": 0,
+        "score": 7,
+        "type": "MANGA"
+    },
+    "Onanie Master Kurosawa": {
+        "progress": 0,
+        "score": 0,
+        "type": "MANGA"
     }
 }
