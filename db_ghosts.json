@@ -149,5 +149,55 @@
         "progress": 0,
         "score": 0,
         "type": "MANGA"
+    },
+    "Doukutsuou kara Hajimeru Rakuen Life: Bannou no Saikutsu Skill de Saikyou ni!?": {
+        "progress": 5,
+        "score": 9,
+        "type": "MANGA"
+    },
+    "Lout of Count's Family": {
+        "progress": 13,
+        "score": 9,
+        "type": "MANGA"
+    },
+    "Okiraku Ryoushu no Tanoshii Ryouchi Bouei": {
+        "progress": 44,
+        "score": 0,
+        "type": "MANGA"
+    },
+    "Tensai Shoujo demo Baka Mitai ni Ecchi ni Narimasu.": {
+        "progress": 1,
+        "score": 10,
+        "type": "MANGA"
+    },
+    "The Max Level Hero Strikes Back": {
+        "progress": 11,
+        "score": 0,
+        "type": "MANGA"
+    },
+    "Gal na Imouto wa Saimin Play de Ikimakuru!": {
+        "progress": 6,
+        "score": 8,
+        "type": "MANGA"
+    },
+    "Iyagaru Imouto wo Oshitaoshite Iroiro to H na Koto wo Shitai!": {
+        "progress": 9,
+        "score": 0,
+        "type": "MANGA"
+    },
+    "Mesugaki, Chorosugi w": {
+        "progress": 6,
+        "score": 10,
+        "type": "MANGA"
+    },
+    "Nani Suru no!? Oniichan!!": {
+        "progress": 9,
+        "score": 10,
+        "type": "MANGA"
+    },
+    "Shiori-sensei wa Ochi\u2661chin no Sodateya-san": {
+        "progress": 8,
+        "score": 9,
+        "type": "MANGA"
     }
 }
