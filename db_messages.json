@@ -1526,5 +1526,9 @@
     {
         "delete_url": "https://discord.com/api/webhooks/1535592631730438155/dr83vAWmk1xLelFMuD7TcmloX2dpZL9J7SBbMoLiElT6U0KYDCvw0TliEuqhJrJ9gpdg/messages/1535692641298161799?thread_id=1535592577732972636",
         "timestamp": 1786208057
+    },
+    {
+        "delete_url": "https://discord.com/api/webhooks/1535593514568519770/sVkhUwHWTx0nv8Ekiw3hZ34Yryr80RSk47r38z0EqdGlY2qoxC9dKgjzag-wECX-ijny/messages/1535819218816208987",
+        "timestamp": 1786238235
     }
 ]
