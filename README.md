@@ -69,10 +69,13 @@ The active hit-list for the 48-Hour Auto-Purge.
     {
         "delete_url": "[https://discord.com/api/webhooks/.../messages/123456789](https://discord.com/api/webhooks/.../messages/123456789)",
         "timestamp": 1723171800
-    }
-]
+         }
+  ]
+  ```
+
 
 🏗️ III. COMMAND CENTER BLUEPRINT
+
 To fully utilize this architecture, the Discord server must be rigidly structured. The engine targets six highly specialized pipelines.
 | Channel Name | Purpose | Webhook Secret Variable |
 |---|---|---|
@@ -82,7 +85,9 @@ To fully utilize this architecture, the Discord server must be rigidly structure
 | #priority-favorites | S-Tier updates (Gold embeds). | DISCORD_FAVORITES_WEBHOOK |
 | #anime-airing-alerts | Live 90-minute countdowns. | DISCORD_AIRING_WEBHOOK |
 | #anilist-error-report | Critical failure stack traces. | ANILIST_ERROR_REPORT_WEBHOOK |
+
 🚀 IV. DEPLOYMENT PROTOCOL
+
 To forge this engine from scratch or deploy it on a new repository, follow these precise deployment steps.
 Step 1: The Codebase
  * Fork or clone this repository.
@@ -144,9 +149,11 @@ jobs:
           git push
 
 Step 3: The Security Grid (Secrets)
+
 Navigate to Settings ➡️ Secrets and variables ➡️ Actions ➡️ New repository secret.
 You must generate and lock in all 7 secrets perfectly matching the environment variables listed in the YAML file above.
  * Note: The ANILIST_TARGET_TOKEN is an OAuth bearer token obtained via the AniList Developer portal.
+   
 🛠️ V. MAINTENANCE & OVERRIDE PROTOCOLS
 The engine is autonomous, but GitHub enforces a strict inactivity rule for scheduled workflows.
 The 60-Day Directive
@@ -171,10 +178,15 @@ For developers analyzing the backend, the anilist_engine.py script executes the 
  * Target Push (push_to_target): If a delta is found, fires a mutation to the target AniList account.
  * Routing Matrix: Sends relevant Webhook POST requests to standard channels, VIP channels, and Log channels.
  * Memory Save: Dumps the updated dictionaries back into the JSON files for GitHub Actions to commit.
+
+ * 
 📜 VII. LICENSE & LEGAL
+
 This software operates under the MIT License. The ultimate standard for open-source structural freedom.
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. The author assumes absolutely zero liability for broken webhook chains, missing database files, or Discord API rate-limiting resulting from misuse of this architecture.
+
+
 > Forged by Tokyo. 👑
 > 
 
