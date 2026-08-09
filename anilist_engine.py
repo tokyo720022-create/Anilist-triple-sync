@@ -125,12 +125,11 @@ def execute_48hr_purge():
 # ==========================================
 # 🔎 4. ANILIST GRAPHQL CORE (THE FETCH)
 # ==========================================
-
 def fetch_anilist_inventory(username):
     """Executes a massive paginated GraphQL sweep of the source AniList account."""
     print(f"[ENGINE] Fetching Full Inventory for Source: {username}...")
     
-    # 🛠️ PATCH: hasNextPage is now correctly nested inside pageInfo
+    # 🛠️ PATCH: Changed "scoreRaw" to "score" in the query to satisfy AniList API
     query = '''
     query ($userName: String, $page: Int) {
       Page(page: $page, perPage: 50) {
@@ -140,7 +139,7 @@ def fetch_anilist_inventory(username):
         mediaList(userName: $userName) {
           mediaId
           progress
-          scoreRaw
+          score
           status
           media {
             title { romaji english }
@@ -159,18 +158,15 @@ def fetch_anilist_inventory(username):
     
     while has_next_page:
         variables = {"userName": username, "page": page}
-        # 🛠️ PATCH: Added headers to ensure the API respects the request
         response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables}, headers=HEADERS)
         
         if response.status_code != 200:
             print(f"[ERROR] Failed to fetch AniList data. Status: {response.status_code}")
-            print(f"[DEBUG] API Response: {response.text}") # This will reveal exactly what AniList didn't like
+            print(f"[DEBUG] API Response: {response.text}") 
             break
             
         data = response.json().get('data', {}).get('Page', {})
         media_list = data.get('mediaList', [])
-        
-        # 🛠️ PATCH: Correctly mapping the new pageInfo location
         has_next_page = data.get('pageInfo', {}).get('hasNextPage', False)
         
         for item in media_list:
@@ -179,7 +175,7 @@ def fetch_anilist_inventory(username):
             inventory[title] = {
                 "mediaId": item['mediaId'],
                 "progress": item['progress'],
-                "scoreRaw": item['scoreRaw'],
+                "scoreRaw": item.get('score', 0), # 🛠️ PATCH: Maps the API 'score' to our internal DB structure
                 "type": media['type'],
                 "cover": media['coverImage']['large'] if media.get('coverImage') else None,
                 "nextAiring": media.get('nextAiringEpisode')
@@ -190,6 +186,8 @@ def fetch_anilist_inventory(username):
         
     print(f"[ENGINE] Inventory Sweep Complete. Tracked {len(inventory)} total entries.")
     return inventory
+    
+  
 
 # ==========================================
 # ⏰ 5. AIRING INTELLIGENCE PROTOCOL
