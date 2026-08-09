@@ -122,7 +122,6 @@ def execute_48hr_purge():
         del messages_db[key]
     save_db(DB_MESSAGES, messages_db)
 
-
 # ==========================================
 # 🔎 4. ANILIST GRAPHQL CORE (THE FETCH)
 # ==========================================
@@ -184,17 +183,15 @@ def fetch_anilist_inventory(username):
                 "type": media['type'],
                 "cover": media['coverImage']['large'] if media.get('coverImage') else None,
                 "nextAiring": media.get('nextAiringEpisode'),
-                "romaji": romaji_title, # 🛠️ PATCH: Store Romaji explicitly
-                "english": eng_title    # 🛠️ PATCH: Store English explicitly
+                "romaji": romaji_title,
+                "english": eng_title
             }
         
         page += 1
-        time.sleep(1)
+        time.sleep(1) # Prevent AniList IP ban
         
     print(f"[ENGINE] Inventory Sweep Complete. Tracked {len(inventory)} total entries.")
     return inventory
-            
-
 
 # ==========================================
 # ⏰ 5. AIRING INTELLIGENCE PROTOCOL
@@ -257,7 +254,7 @@ def sweep_mal_xml(known_titles_pool):
         for manga in root.findall('manga'):
             mal_title = manga.find('manga_title').text
             
-            # 🛠️ PATCH: Check the lowercase MAL title against the lowercase pool
+            # Check the lowercase MAL title against the lowercase pool
             if mal_title.lower() not in known_titles_pool and mal_title not in ghosts:
                 chaps = manga.find('my_read_chapters').text
                 score = manga.find('my_score').text
@@ -273,6 +270,38 @@ def sweep_mal_xml(known_titles_pool):
         
     return ghosts
 
+def execute_ghost_radar(ghost_db):
+    """Hunts the AniList API for missing ghosts and auto-assimilates."""
+    if not ghost_db: return ghost_db
+    print(f"[GHOST RADAR] Hunting AniList Database for {len(ghost_db)} ghost targets...")
+    
+    search_query = '''query ($search: String) { Media (search: $search, type: MANGA) { id title { romaji english } } }'''
+    mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
+    
+    assimilated = []
+    for title, data in list(ghost_db.items()):
+        # Attempt to find the ghost
+        res = requests.post('https://graphql.anilist.co', json={'query': search_query, 'variables': {"search": title}}, headers=HEADERS)
+        
+        if res.status_code == 200:
+            result = res.json().get('data', {}).get('Media')
+            if result:
+                media_id = result['id']
+                
+                # Assimilate into Target Account
+                if TARGET_TOKEN:
+                    mut_vars = {"id": media_id, "prog": data["chapters"], "score": data["score"] * 10}
+                    requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': mut_vars}, headers=HEADERS)
+                
+                send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** was successfully added to AniList and injected into your account.\n\n**Restored Chapters:** {data['chapters']}", 3066993)
+                assimilated.append(title)
+                
+        time.sleep(1.5) # Anti-rate limit
+        
+    # Clear found ghosts from the database
+    for title in assimilated:
+        del ghost_db[title]
+    return ghost_db
 
 # ==========================================
 # ⚡ 7. THE MASTER SYNC ENGINE (CORE DELTA)
@@ -337,24 +366,23 @@ if __name__ == '__main__':
     # 2. Extract massive AniList database chunk
     live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
     
-    # 🛠️ PATCH: Build a bilingual, lowercase title pool for the Ghost Radar
+    # 3. Build a bilingual, lowercase title pool for the Ghost Radar
     known_titles_pool = set()
     for data in live_inventory.values():
         if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
         if data.get('english'): known_titles_pool.add(data['english'].lower())
     
-    # 3. Detect incoming 90-minute anime drops
+    # 4. Detect incoming 90-minute anime drops
     process_airing_countdowns(live_inventory)
     
-    # 4. Process core Source-to-Target Sync & standard Webhooks
+    # 5. Process core Source-to-Target Sync & standard Webhooks
     execute_master_sync(live_inventory)
     
-    # 5. Drop & Forget MAL Ghost XML Sweep
+    # 6. Drop & Forget MAL Ghost XML Sweep
     ghost_db = sweep_mal_xml(known_titles_pool)
     
-    # 6. Actively hunt the AniList database for missing entries
+    # 7. Actively hunt the AniList database for missing entries
     updated_ghost_db = execute_ghost_radar(ghost_db)
     save_db(DB_GHOSTS, updated_ghost_db)
     
     print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
-    
