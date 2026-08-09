@@ -125,14 +125,18 @@ def execute_48hr_purge():
 # ==========================================
 # 🔎 4. ANILIST GRAPHQL CORE (THE FETCH)
 # ==========================================
+
 def fetch_anilist_inventory(username):
     """Executes a massive paginated GraphQL sweep of the source AniList account."""
     print(f"[ENGINE] Fetching Full Inventory for Source: {username}...")
     
+    # 🛠️ PATCH: hasNextPage is now correctly nested inside pageInfo
     query = '''
     query ($userName: String, $page: Int) {
       Page(page: $page, perPage: 50) {
-        hasNextPage
+        pageInfo {
+          hasNextPage
+        }
         mediaList(userName: $userName) {
           mediaId
           progress
@@ -155,15 +159,19 @@ def fetch_anilist_inventory(username):
     
     while has_next_page:
         variables = {"userName": username, "page": page}
-        response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables})
+        # 🛠️ PATCH: Added headers to ensure the API respects the request
+        response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables}, headers=HEADERS)
         
         if response.status_code != 200:
             print(f"[ERROR] Failed to fetch AniList data. Status: {response.status_code}")
+            print(f"[DEBUG] API Response: {response.text}") # This will reveal exactly what AniList didn't like
             break
             
         data = response.json().get('data', {}).get('Page', {})
         media_list = data.get('mediaList', [])
-        has_next_page = data.get('hasNextPage', False)
+        
+        # 🛠️ PATCH: Correctly mapping the new pageInfo location
+        has_next_page = data.get('pageInfo', {}).get('hasNextPage', False)
         
         for item in media_list:
             media = item['media']
