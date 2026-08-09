@@ -115,14 +115,6 @@
         "chapters": 0,
         "score": 0
     },
-    "Doukutsuou kara Hajimeru Rakuen Life: Bannou no Saikutsu Skill de Saikyou ni!?": {
-        "chapters": 5,
-        "score": 9
-    },
-    "Lout of Count's Family": {
-        "chapters": 13,
-        "score": 9
-    },
     "Okiraku Ryoushu no Tanoshii Ryouchi Bouei": {
         "chapters": 44,
         "score": 0
@@ -158,5 +150,20 @@
     "Magicraft Meister": {
         "chapters": 0,
         "score": 0
+    },
+    "Hahaoya Shikkaku: Elite Oyako no M Buta Netorare Tenraku Jinsei": {
+        "progress": 1,
+        "score": 10,
+        "type": "MANGA"
+    },
+    "Tadashii Seikyouiku.": {
+        "progress": 0,
+        "score": 0,
+        "type": "MANGA"
+    },
+    "Tensei Shoujo wa Mazu Ippo kara Hajimetai": {
+        "progress": 0,
+        "score": 0,
+        "type": "MANGA"
     }
 }
