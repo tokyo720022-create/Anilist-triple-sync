@@ -136,11 +136,6 @@
         "score": 9,
         "type": "MANGA"
     },
-    "Hitori ja Dekinai mon!": {
-        "progress": 9,
-        "score": 9,
-        "type": "MANGA"
-    },
     "Kawaii Imouto to Ikenai Koto Shiteimasu!": {
         "progress": 9,
         "score": 10,
@@ -219,6 +214,11 @@
     "Tensai Shoujo demo Baka Mitai ni Ecchi ni Narimasu.": {
         "progress": 1,
         "score": 10,
+        "type": "MANGA"
+    },
+    "The Max Level Hero Strikes Back": {
+        "progress": 11,
+        "score": 0,
         "type": "MANGA"
     }
 }
