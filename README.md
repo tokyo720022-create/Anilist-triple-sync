@@ -71,3 +71,110 @@ The active hit-list for the 48-Hour Auto-Purge.
         "timestamp": 1723171800
     }
 ]
+
+🏗️ III. COMMAND CENTER BLUEPRINT
+To fully utilize this architecture, the Discord server must be rigidly structured. The engine targets six highly specialized pipelines.
+| Channel Name | Purpose | Webhook Secret Variable |
+|---|---|---|
+| #anilist-anime | Standard anime episode progress logs. | DISCORD_ANILIST_ANIME_WEBHOOK |
+| #anilist-manga | Standard manga chapter progress logs. | DISCORD_ANILIST_MANGA_WEBHOOK |
+| #anilist-log | Rolling 48-hour digest and run reports. | DISCORD_ANILIST_LOG_WEBHOOK |
+| #priority-favorites | S-Tier updates (Gold embeds). | DISCORD_FAVORITES_WEBHOOK |
+| #anime-airing-alerts | Live 90-minute countdowns. | DISCORD_AIRING_WEBHOOK |
+| #anilist-error-report | Critical failure stack traces. | ANILIST_ERROR_REPORT_WEBHOOK |
+🚀 IV. DEPLOYMENT PROTOCOL
+To forge this engine from scratch or deploy it on a new repository, follow these precise deployment steps.
+Step 1: The Codebase
+ * Fork or clone this repository.
+ * Ensure anilist_engine.py is present in the root directory.
+ * Edit the SOURCE_USERNAME variable at the top of the Python script to match the target source account.
+ * Add desired media titles or AniList IDs to the PRIORITY_FAVORITES array.
+Step 2: The Action Workflow
+ * Navigate to .github/workflows/.
+ * Ensure sync_engine.yml is present with the following exact specifications:
+name: AniList Maximum Overdrive
+
+on:
+  schedule:
+    # 30 2-17 UTC exactly translates to 8:00 AM through 11:00 PM IST
+    - cron: '30 2-17 * * *' 
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync_engine:
+    runs-on: ubuntu-latest
+    
+    concurrency:
+      group: anilist-engine
+      cancel-in-progress: true 
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Run Master Engine
+        env:
+          ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
+          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
+          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
+          DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
+          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
+          ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
+        run: python anilist_engine.py
+
+      - name: Save Engine Memory
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git pull origin main --rebase || true 
+          git add *.json || true 
+          git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
+          git push
+
+Step 3: The Security Grid (Secrets)
+Navigate to Settings ➡️ Secrets and variables ➡️ Actions ➡️ New repository secret.
+You must generate and lock in all 7 secrets perfectly matching the environment variables listed in the YAML file above.
+ * Note: The ANILIST_TARGET_TOKEN is an OAuth bearer token obtained via the AniList Developer portal.
+🛠️ V. MAINTENANCE & OVERRIDE PROTOCOLS
+The engine is autonomous, but GitHub enforces a strict inactivity rule for scheduled workflows.
+The 60-Day Directive
+If no new code is pushed to the repository for 60 consecutive days, GitHub will disable the cron schedule to save server resources.
+ * Warning Sign: An automated email from GitHub stating "Your workflow is about to be disabled."
+ * The Fix: Click the link in the email and click the Keep workflow active button.
+ * The Proactive Fix: Open the GitHub Mobile App, navigate to the Actions tab, and manually click Run workflow once every two months to reset the 60-day timer.
+Manual Override Execution
+To bypass the 1-hour schedule and force an immediate sync (e.g., immediately after completing a massive episode binge):
+ * Open the GitHub Mobile App.
+ * Select this repository.
+ * Tap Actions.
+ * Select AniList Maximum Overdrive.
+ * Tap Run workflow.
+   The engine will execute immediately, sync the data, and update the memory vault without breaking the standard hourly loop.
+🖥️ VI. SYSTEM ARCHITECTURE (PYTHON LOGIC)
+For developers analyzing the backend, the anilist_engine.py script executes the following primary functions linearly:
+ * Memory Load: Parses local JSON files.
+ * Cleanup Sweep (cleanup_old_messages): Evaluates UNIX timestamps and fires DELETE requests to Discord.
+ * GraphQL Query (fetch_anilist_data): Queries the AniList API for a complete user inventory (Anime + Manga).
+ * Delta Comparison: Compares current live API data against db_sync.json.
+ * Target Push (push_to_target): If a delta is found, fires a mutation to the target AniList account.
+ * Routing Matrix: Sends relevant Webhook POST requests to standard channels, VIP channels, and Log channels.
+ * Memory Save: Dumps the updated dictionaries back into the JSON files for GitHub Actions to commit.
+📜 VII. LICENSE & LEGAL
+This software operates under the MIT License. The ultimate standard for open-source structural freedom.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. The author assumes absolutely zero liability for broken webhook chains, missing database files, or Discord API rate-limiting resulting from misuse of this architecture.
+> Forged by Tokyo. 👑
+> 
+
