@@ -1,426 +1,388 @@
 import os
-import time
 import json
-import traceback
+import time
 import requests
-from datetime import datetime
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 
-# --- CONFIGURATION ---
+# ==========================================
+# ⚙️ 1. SYSTEM CONFIGURATION & SECRETS
+# ==========================================
 SOURCE_USERNAME = "Orewatokyo"
-DB_SYNC_FILE = "db_sync.json"
-DB_AIRING_FILE = "db_airing.json"
-DB_MESSAGES_FILE = "db_messages.json" # thread_db has been permanently purged
+TARGET_TOKEN = os.environ.get('ANILIST_TARGET_TOKEN')
 
-# ==============================================================================
-# ⭐ VIP PRIORITY FAVORITES LIST
-# ==============================================================================
+# Discord Webhook Pipelines
+WEBHOOK_ANIME = os.environ.get('DISCORD_ANIME_WEBHOOK')
+WEBHOOK_MANGA = os.environ.get('DISCORD_MANGA_WEBHOOK')
+WEBHOOK_AIRING = os.environ.get('DISCORD_AIRING_WEBHOOK')
+WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
+WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
+WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
+
+# Memory Vaults
+DB_SYNC = 'db_sync.json'
+DB_MESSAGES = 'db_messages.json'
+DB_GHOSTS = 'db_ghosts.json'
+DB_AIRING = 'db_airing.json'
+XML_FILE_PATH = 'mal_export.xml'
+
+# S-Tier VIP Radar (Hardcoded targets for Gold Embeds)
 PRIORITY_FAVORITES = [
-    "One Piece",
-    "Detective Conan",
+    "One Piece", 
+    "Detective Conan", 
+    "JoJo's Bizarre Adventure",
+    "Dragon Ball Z"
 ]
 
-TARGET_TOKEN = os.environ.get('ANILIST_TARGET_TOKEN')
-ANIME_WEBHOOK = os.environ.get('DISCORD_ANIME_WEBHOOK')
-MANGA_WEBHOOK = os.environ.get('DISCORD_MANGA_WEBHOOK')
-AIRING_WEBHOOK = os.environ.get('DISCORD_AIRING_WEBHOOK')
-LOG_WEBHOOK = os.environ.get('DISCORD_LOG_WEBHOOK')
-FAVORITES_WEBHOOK = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
-ERROR_WEBHOOK = os.environ.get('ERROR_REPORT_WEBHOOK')
+HEADERS = {
+    'Authorization': f'Bearer {TARGET_TOKEN}' if TARGET_TOKEN else '',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+}
 
-# --- DATABASE LOGIC ---
-def load_db(file_name, default_type=dict):
-    if os.path.exists(file_name):
-        with open(file_name, "r") as f:
-            return json.load(f)
-    return default_type()
+# ==========================================
+# 🧠 2. MEMORY VAULT MANAGEMENT
+# ==========================================
+def load_db(filepath):
+    """Loads a JSON memory matrix."""
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, 'r') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
 
-def save_db(file_name, data):
-    with open(file_name, "w") as f:
+def save_db(filepath, data):
+    """Locks data into the JSON memory matrix."""
+    with open(filepath, 'w') as f:
         json.dump(data, f, indent=4)
-    print(f"[MEMORY] Successfully saved {file_name}")
 
-def is_favorite(entry):
-    media = entry['media']
-    media_id = media['mediaId'] if 'mediaId' in media else entry.get('mediaId')
-    romaji = (media['title']['romaji'] or "").lower()
-    english = (media['title']['english'] or "").lower()
+# ==========================================
+# 📡 3. DISCORD COMMUNICATION PROTOCOLS
+# ==========================================
+def send_discord_alert(webhook_url, title, description, color, thumbnail=None):
+    """Fires a customized embed directly to the command center."""
+    if not webhook_url: return
     
-    for item in PRIORITY_FAVORITES:
-        if isinstance(item, int) and item == media_id:
-            return True
-        elif isinstance(item, str):
-            target = item.lower()
-            if target in romaji or target in english:
-                return True
-    return False
-
-# --- 48-HOUR AUTO-DELETE LOGIC ---
-def cleanup_old_messages(msg_db):
-    print("[SYSTEM] Running 48-hour auto-cleanup scan...")
-    current_time = int(time.time())
-    active_messages = []
-    deleted_count = 0
-    
-    for msg in msg_db:
-        if current_time - msg["timestamp"] > 172800:
-            try:
-                requests.delete(msg["delete_url"], timeout=15)
-                deleted_count += 1
-                time.sleep(1) 
-            except Exception as e:
-                print(f"[WARNING] Failed to delete expired log: {e}")
-        else:
-            active_messages.append(msg)
-            
-    print(f"[SYSTEM] Cleanup complete. {deleted_count} messages purged.")
-    return active_messages, deleted_count
-
-# --- DISCORD LOGIC ---
-def send_favorite_alert(entry):
-    if not FAVORITES_WEBHOOK:
-        return
-
-    media = entry['media']
-    progress = entry['progress']
-    score = entry.get('scoreRaw', 0)
-    media_type = media['type']
-    
-    romaji = media['title']['romaji'] or "Unknown"
-    english = media['title']['english'] or "N/A"
-    image = media['coverImage']['extraLarge']
-    
-    total = media['episodes'] if media_type == "ANIME" else media['chapters']
-    unit = "Episode" if media_type == "ANIME" else "Chapter"
-    
-    if total:
-        left_count = total - progress
-        if left_count == 1:
-            remaining_str = f"**1 {unit} left!** 🚨 **FINALE INBOUND!** 🔥"
-        elif left_count == 0:
-            remaining_str = "**COMPLETED!** 🏆"
-        else:
-            remaining_str = f"{left_count} {unit}s remaining"
-    else:
-        remaining_str = "Ongoing / Active Release"
-
-    type_icon = "👑🎬" if media_type == "ANIME" else "👑📖"
-    
-    lines = [
-        f"🌟 **VIP FAVORITE UPDATE DETECTED** 🌟",
-        f"🇯🇵 **Title:** {romaji}",
-        f"🌐 **English:** {english}",
-        f"{type_icon} **Current Progress:** {unit} {progress}",
-        f"⏳ **Status:** {remaining_str}"
-    ]
-    
-    if score > 0:
-        lines.append(f"⭐ **Rating:** {int(score)}/100")
-
-    payload = {
-        "embeds": [{
-            "title": f"🔥 VIP RELEASE ALERT | {romaji}",
-            "description": "\n".join(lines),
-            "color": 16766720, 
-            "image": {"url": image}
-        }]
+    embed = {
+        "title": title,
+        "description": description,
+        "color": color,
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
-    try:
-        requests.post(FAVORITES_WEBHOOK, json=payload, timeout=15)
-    except Exception as e:
-        print(f"[ERROR] Failed to send VIP favorite alert: {e}")
-    time.sleep(2)
-
-def send_sync_log(base_webhook, entry, msg_db):
-    """Blasts updates directly to the main channel with 100% delivery guarantee."""
-    if not base_webhook:
-        return
-
-    media = entry['media']
-    progress = entry['progress']
-    score = entry.get('scoreRaw', 0) 
-    media_type = media['type']
-    
-    romaji = media['title']['romaji'] or "Unknown"
-    english = media['title']['english'] or "N/A"
-    image = media['coverImage']['extraLarge']
-    
-    total = media['episodes'] if media_type == "ANIME" else media['chapters']
-    if total:
-        left_count = total - progress
-        unit = "Episode" if media_type == "ANIME" else "Chapter"
+    if thumbnail:
+        embed["thumbnail"] = {"url": thumbnail}
         
-        if left_count == 1:
-            remaining_str = f"**1 {unit} left!** 🚨 **FINALE INBOUND!** 🔥"
-        elif left_count == 0:
-            remaining_str = "**0 (Completed!)** 🏆"
-        else:
-            remaining_str = f"{left_count} {unit}{'s' if left_count != 1 else ''} left"
-    else:
-        remaining_str = "Ongoing / Unknown"
+    payload = {"embeds": [embed]}
     
-    type_icon = "🎬" if media_type == "ANIME" else "📖"
-    prog_label = "Episode" if media_type == "ANIME" else "Chapter"
+    # Fire and capture Discord message ID for the Auto-Purge log
+    response = requests.post(webhook_url + "?wait=true", json=payload)
     
-    lines = [
-        f"🇯🇵 **Romaji:** {romaji}",
-        f"🌐 **English:** {english}",
-        f"{type_icon} **Watched/Read:** {prog_label} {progress}",
-        f"⏳ **Remaining:** {remaining_str}"
-    ]
-    
-    if score > 0:
-        lines.append(f"⭐ **Rating:** {int(score)}/100")
-    
-    start = entry.get('startedAt', {})
-    if progress == 1 and start and start.get('year'):
-        lines.append(f"🗓️ **Started:** {start['year']}-{start.get('month', 1):02d}-{start.get('day', 1):02d}")
-        
-    end = entry.get('completedAt', {})
-    if total and progress == total and end and end.get('year'):
-        lines.append(f"🏁 **Finished:** {end['year']}-{end.get('month', 1):02d}-{end.get('day', 1):02d}")
-
-    payload = {
-        "embeds": [{
-            "title": f"⚡ Target Synced | {romaji}",
-            "description": "\n".join(lines),
-            "color": 3447003,
-            "image": {"url": image}
-        }]
-    }
-
-    try:
-        target_url = f"{base_webhook}?wait=true"
-        response = requests.post(target_url, json=payload, timeout=15)
-        
-        # If Discord blocks the message, this forces the script to print the EXACT reason
-        response.raise_for_status() 
-
-        if response.status_code in [200, 201, 204]:
-            data = response.json()
-            msg_id = data.get("id")
-            
+    if response.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
+        try:
+            msg_id = response.json().get("id")
             if msg_id:
-                delete_url = f"{base_webhook}/messages/{msg_id}"
-                msg_db.append({
-                    "delete_url": delete_url,
-                    "timestamp": int(time.time())
-                })
+                messages_db = load_db(DB_MESSAGES)
                 
-    except Exception as e:
-        print(f"[ERROR] Failed to send Discord sync log for {romaji}: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"[DISCORD API RESPONSE]: {e.response.text}")
-            
-    time.sleep(2)
+                # Bulletproof memory format check just in case
+                if isinstance(messages_db, list):
+                    messages_db = {}
+                    
+                messages_db[msg_id] = {
+                    "timestamp": time.time(),
+                    "delete_url": f"{webhook_url}/messages/{msg_id}"
+                }
+                save_db(DB_MESSAGES, messages_db)
+        except Exception:
+            pass
 
-def send_airing_alert(media):
-    if not AIRING_WEBHOOK:
-        return
-
-    romaji = media['title']['romaji']
-    image = media['coverImage']['extraLarge']
-    ep = media['nextAiringEpisode']['episode']
-    air_time = media['nextAiringEpisode']['airingAt']
+def execute_48hr_purge():
+    """Wipes logs older than 48 hours (172800 seconds) from the grid."""
+    print("[SYSTEM] Executing 48-Hour Log Purge...")
+    messages_db = load_db(DB_MESSAGES)
     
-    payload = {
-        "embeds": [{
-            "title": f"🔥 AIRING ALERT: {romaji}",
-            "description": f"**Episode {ep}** is dropping!\n\n**Telecast Time:** <t:{air_time}:F>\n**Live Countdown:** <t:{air_time}:R>",
-            "color": 15158332,
-            "image": {"url": image}
-        }]
-    }
-    try:
-        requests.post(AIRING_WEBHOOK, json=payload, timeout=15)
-    except Exception as e:
-        print(f"[ERROR] Failed to send airing alert: {e}")
-    time.sleep(2)
-
-def send_run_report(updated_items, deleted_count, msg_db):
-    if not LOG_WEBHOOK:
-        return
-
-    if updated_items:
-        desc = "**Recent Activity (Last 48h):**\n" + "\n".join(updated_items)
-    else:
-        desc = "No new updates."
-
-    if deleted_count > 0:
-        desc += f"\n\n🧹 **Auto-Cleanup:** Purged {deleted_count} expired logs from the grid."
-
-    payload = {
-        "embeds": [{
-            "title": "⚙️ Engine Shutdown & Saved",
-            "description": desc,
-            "color": 3066993
-        }]
-    }
-    try:
-        target_url = f"{LOG_WEBHOOK}?wait=true"
-        response = requests.post(target_url, json=payload, timeout=15)
+    # --- BULLETPROOF AMNESIA PATCH ---
+    if isinstance(messages_db, list):
+        print("[SYSTEM] Legacy List format detected. Reformatting memory matrix...")
+        messages_db = {}
+    # ---------------------------------
         
-        if response.status_code in [200, 201, 204]:
-            data = response.json()
-            msg_id = data.get("id")
+    current_time = time.time()
+    keys_to_delete = []
+    
+    for msg_id, data in messages_db.items():
+        if current_time - data["timestamp"] > 172800:
+            del_response = requests.delete(data["delete_url"])
+            if del_response.status_code == 204:
+                keys_to_delete.append(msg_id)
+            time.sleep(1) # Tactical delay to prevent Discord rate limits
             
-            if msg_id:
-                delete_url = f"{LOG_WEBHOOK}/messages/{msg_id}"
-                msg_db.append({
-                    "delete_url": delete_url,
-                    "timestamp": int(time.time())
-                })
-    except Exception as e:
-        print(f"[ERROR] Failed to send run report: {e}")
+    for key in keys_to_delete:
+        del messages_db[key]
+    save_db(DB_MESSAGES, messages_db)
 
-def send_error(error_msg, stack_trace):
-    if not ERROR_WEBHOOK:
-        return
-
-    payload = {
-        "embeds": [{
-            "title": "🚨 CRITICAL FAILURE: AniList Engine",
-            "description": f"**Error:** {error_msg}\n\n**Traceback:**\n```python\n{stack_trace[:3000]}\n```",
-            "color": 16711680
-        }]
-    }
-    try:
-        requests.post(ERROR_WEBHOOK, json=payload, timeout=15)
-    except Exception as e:
-        print(f"[ERROR] Engine failure logger crashed: {e}")
-
-# --- CORE ENGINE LOGIC ---
-def fetch_anilist_data():
-    print("[SYSTEM] Fetching data from AniList API...")
-    url = 'https://graphql.anilist.co'
+# ==========================================
+# 🔎 4. ANILIST GRAPHQL CORE (THE FETCH)
+# ==========================================
+def fetch_anilist_inventory(username):
+    """Executes a massive paginated GraphQL sweep of the source AniList account."""
+    print(f"[ENGINE] Fetching Full Inventory for Source: {username}...")
+    
     query = '''
-    query ($username: String, $type: MediaType) {
-      MediaListCollection(userName: $username, type: $type) {
-        lists {
-          entries {
-            mediaId
-            progress
-            scoreRaw: score(format: POINT_100) 
-            status
-            startedAt { year month day }
-            completedAt { year month day }
-            media {
-              type
-              episodes
-              chapters
-              title { romaji english }
-              coverImage { extraLarge }
-              nextAiringEpisode { airingAt episode }
-            }
+    query ($userName: String, $page: Int) {
+      Page(page: $page, perPage: 50) {
+        pageInfo {
+          hasNextPage
+        }
+        mediaList(userName: $userName) {
+          mediaId
+          progress
+          score
+          status
+          media {
+            title { romaji english }
+            type
+            coverImage { large }
+            nextAiringEpisode { airingAt episode }
           }
         }
       }
     }
     '''
-    all_lists = []
     
-    for media_type in ["ANIME", "MANGA"]:
-        variables = {'username': SOURCE_USERNAME, 'type': media_type}
-        response = requests.post(url, json={'query': query, 'variables': variables}, timeout=15)
+    inventory = {}
+    page = 1
+    has_next_page = True
+    
+    while has_next_page:
+        variables = {"userName": username, "page": page}
+        response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables}, headers=HEADERS)
         
         if response.status_code != 200:
-            raise Exception(f"AniList API Error {response.status_code}: {response.text}")
+            print(f"[ERROR] Failed to fetch AniList data. Status: {response.status_code}")
+            print(f"[DEBUG] API Response: {response.text}") 
+            break
             
-        data = response.json()
-        if 'errors' not in data and 'data' in data and data['data'].get('MediaListCollection'):
-            chunk = data['data']['MediaListCollection']['lists']
-            all_lists.extend(chunk)
-            
-    return all_lists
-
-def push_to_target(media_id, progress, scoreRaw):
-    if not TARGET_TOKEN:
-        return
-    url = 'https://graphql.anilist.co'
-    query = '''mutation ($mediaId: Int, $progress: Int, $scoreRaw: Int) { SaveMediaListEntry (mediaId: $mediaId, progress: $progress, scoreRaw: $scoreRaw) { id } }'''
-    headers = {'Authorization': f'Bearer {TARGET_TOKEN}', 'Content-Type': 'application/json'}
-    variables = {'mediaId': media_id, 'progress': progress}
-    if scoreRaw > 0:
-        variables['scoreRaw'] = int(scoreRaw)
+        data = response.json().get('data', {}).get('Page', {})
+        media_list = data.get('mediaList', [])
+        has_next_page = data.get('pageInfo', {}).get('hasNextPage', False)
         
-    requests.post(url, json={'query': query, 'variables': variables}, headers=headers, timeout=15)
+        for item in media_list:
+            media = item['media']
+            romaji_title = media['title'].get('romaji')
+            eng_title = media['title'].get('english')
+            
+            # Use English as the primary key if available, else Romaji
+            primary_title = eng_title or romaji_title
+            
+            inventory[primary_title] = {
+                "mediaId": item['mediaId'],
+                "progress": item['progress'],
+                "scoreRaw": item.get('score', 0), 
+                "type": media['type'],
+                "cover": media['coverImage']['large'] if media.get('coverImage') else None,
+                "nextAiring": media.get('nextAiringEpisode'),
+                "romaji": romaji_title,
+                "english": eng_title
+            }
+        
+        page += 1
+        time.sleep(1) # Prevent AniList IP ban
+        
+    print(f"[ENGINE] Inventory Sweep Complete. Tracked {len(inventory)} total entries.")
+    return inventory
 
-def main():
+# ==========================================
+# ⏰ 5. AIRING INTELLIGENCE PROTOCOL
+# ==========================================
+def process_airing_countdowns(inventory):
+    """Scans for episodes dropping within the next 90 minutes."""
+    airing_db = load_db(DB_AIRING)
+    
+    if isinstance(airing_db, list):
+        airing_db = {}
+        
+    current_time = int(time.time())
+    
+    for title, data in inventory.items():
+        next_airing = data.get('nextAiring')
+        if not next_airing:
+            continue
+            
+        airing_at = next_airing['airingAt']
+        ep_number = next_airing['episode']
+        time_until = airing_at - current_time
+        
+        db_key = f"{data['mediaId']}_ep{ep_number}"
+        
+        # If dropping within 90 mins (5400s) and we haven't alerted yet
+        if 0 < time_until <= 5400 and db_key not in airing_db:
+            mins_left = time_until // 60
+            print(f"[RADAR] Live Airing Alert: {title} Ep {ep_number} in {mins_left} mins!")
+            
+            send_discord_alert(
+                WEBHOOK_AIRING, 
+                f"🚨 AIRING COUNTDOWN: {title}", 
+                f"**Episode {ep_number}** will broadcast in Japan in exactly **{mins_left} minutes**!", 
+                15548997, 
+                data.get('cover')
+            )
+            airing_db[db_key] = True
+            
+    save_db(DB_AIRING, airing_db)
+
+# ==========================================
+# 👻 6. MAL GHOST RADAR PROTOCOLS
+# ==========================================
+def sweep_mal_xml(known_titles_pool):
+    """Parses MAL XML (if present) and isolates missing data."""
+    ghosts = load_db(DB_GHOSTS)
+    
+    if isinstance(ghosts, list):
+        ghosts = {}
+    
+    if not os.path.exists(XML_FILE_PATH):
+        return ghosts
+        
+    print("[GHOST RADAR] Sweeping MAL XML for unregistered anomalies...")
     try:
-        print("[SYSTEM] Engine Online. Loading memory arrays...")
-        sync_db = load_db(DB_SYNC_FILE, dict)
-        airing_db = load_db(DB_AIRING_FILE, dict)
-        msg_db = load_db(DB_MESSAGES_FILE, list) 
+        tree = ET.parse(XML_FILE_PATH)
+        root = tree.getroot()
         
-        msg_db, deleted_count = cleanup_old_messages(msg_db)
-        
-        lists = fetch_anilist_data()
-        current_time = int(time.time())
-        updated_items = []
-        airings_found = False
-
-        print("[SYSTEM] Scanning for new watchlist updates...")
-        for lst in lists:
-            for entry in lst['entries']:
-                media_id = str(entry['mediaId'])
-                progress = entry['progress']
-                scoreRaw = entry.get('scoreRaw', 0)
-                media = entry['media']
-                
-                current_state = f"{progress}-{scoreRaw}"
-                saved_state = sync_db.get(media_id, "0-0")
-                
-                if isinstance(saved_state, int):
-                    saved_state = f"{saved_state}-0"
-                    sync_db[media_id] = saved_state 
-                
-                if current_state != saved_state:
-                    print(f"[SYNC] Pushing Target Update -> {media['title']['romaji']} (Prog: {progress} | Score: {scoreRaw})")
-                    push_to_target(int(media_id), progress, scoreRaw)
-                    
-                    webhook = ANIME_WEBHOOK if media['type'] == "ANIME" else MANGA_WEBHOOK
-                    
-                    # Direct delivery format - completely bypasses the broken thread matrix
-                    send_sync_log(webhook, entry, msg_db)
-                    
-                    if is_favorite(entry):
-                        send_favorite_alert(entry)
-
-                    icon = "🎬" if media['type'] == "ANIME" else "📖"
-                    unit = "Ep" if media['type'] == "ANIME" else "Ch"
-                    updated_items.append(f"{icon} **{media['title']['romaji']}** - {unit} {progress}")
-
-                    sync_db[media_id] = current_state
-
-                if media['type'] == "ANIME" and entry['status'] == "CURRENT" and media.get('nextAiringEpisode'):
-                    air_time = media['nextAiringEpisode']['airingAt']
-                    ep = str(media['nextAiringEpisode']['episode'])
-                    time_until = air_time - current_time
-                    
-                    if 0 < time_until <= 5400:
-                        db_key = f"{media_id}_ep{ep}"
-                        if db_key not in airing_db:
-                            send_airing_alert(media)
-                            
-                            if is_favorite(entry):
-                                send_favorite_alert(entry)
-                                
-                            airing_db[db_key] = True
-                            airings_found = True
-
-        if len(updated_items) == 0:
-            print("[SYSTEM] Zero updates found. Target is completely synced.")
-
-        if len(updated_items) > 0 or deleted_count > 0:
-            send_run_report(updated_items, deleted_count, msg_db)
+        new_count = 0
+        for manga in root.findall('manga'):
+            mal_title = manga.find('manga_title').text
             
-        save_db(DB_SYNC_FILE, sync_db)
-        save_db(DB_AIRING_FILE, airing_db)
-        save_db(DB_MESSAGES_FILE, msg_db)
-        print("[SYSTEM] Engine Shutdown Sequence Complete.")
-
+            # Check the lowercase MAL title against the lowercase pool
+            if mal_title.lower() not in known_titles_pool and mal_title not in ghosts:
+                chaps = manga.find('my_read_chapters').text
+                score = manga.find('my_score').text
+                ghosts[mal_title] = {
+                    "chapters": int(chaps) if chaps else 0,
+                    "score": int(score) if score else 0
+                }
+                new_count += 1
+                
+        if new_count > 0: print(f"[GHOST RADAR] Isolated {new_count} NEW missing entries.")
     except Exception as e:
-        print(f"[CRITICAL ERROR] {e}")
-        send_error(str(e), traceback.format_exc())
+        print(f"[GHOST RADAR] XML Parse Error: {e}")
+        
+    return ghosts
 
-if __name__ == "__main__":
-    main()
+def execute_ghost_radar(ghost_db):
+    """Hunts the AniList API for missing ghosts and auto-assimilates."""
+    if not ghost_db: return ghost_db
+    print(f"[GHOST RADAR] Hunting AniList Database for {len(ghost_db)} ghost targets...")
+    
+    search_query = '''query ($search: String) { Media (search: $search, type: MANGA) { id title { romaji english } } }'''
+    mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
+    
+    assimilated = []
+    for title, data in list(ghost_db.items()):
+        # Attempt to find the ghost
+        res = requests.post('https://graphql.anilist.co', json={'query': search_query, 'variables': {"search": title}}, headers=HEADERS)
+        
+        if res.status_code == 200:
+            result = res.json().get('data', {}).get('Media')
+            if result:
+                media_id = result['id']
+                
+                # Assimilate into Target Account
+                if TARGET_TOKEN:
+                    mut_vars = {"id": media_id, "prog": data["chapters"], "score": data["score"] * 10}
+                    requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': mut_vars}, headers=HEADERS)
+                
+                send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** was successfully added to AniList and injected into your account.\n\n**Restored Chapters:** {data['chapters']}", 3066993)
+                assimilated.append(title)
+                
+        time.sleep(1.5) # Anti-rate limit
+        
+    # Clear found ghosts from the database
+    for title in assimilated:
+        del ghost_db[title]
+    return ghost_db
+
+# ==========================================
+# ⚡ 7. THE MASTER SYNC ENGINE (CORE DELTA)
+# ==========================================
+def execute_master_sync(inventory):
+    """Compares live API data to saved memory and executes mutations/webhooks."""
+    sync_db = load_db(DB_SYNC)
+    
+    if isinstance(sync_db, list):
+        sync_db = {}
+        
+    mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
+    
+    updates_made = 0
+    
+    for title, data in inventory.items():
+        media_id = str(data["mediaId"])
+        current_progress = data["progress"]
+        media_type = data["type"]
+        score_raw = data["scoreRaw"]
+        
+        # Check Delta (Has the progress changed since the last hourly run?)
+        if str(sync_db.get(media_id)) != str(current_progress):
+            print(f"[SYNC DELTA] Update Detected: {title} -> {current_progress}")
+            updates_made += 1
+            
+            # Fire Standard Webhook
+            webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
+            color = 3447003 if media_type == "ANIME" else 15105570
+            send_discord_alert(webhook, f"📺 UPDATE: {title}", f"Progress locked in at: **{current_progress}**", color, data.get('cover'))
+            
+            # Fire VIP Priority Alert
+            if title in PRIORITY_FAVORITES:
+                send_discord_alert(WEBHOOK_VIP, f"🔥 S-TIER VIP UPDATE: {title}", f"Target reached progress count: **{current_progress}**!", 15158332, data.get('cover'))
+                
+            # Execute Target Account Mutation
+            if TARGET_TOKEN:
+                mut_vars = {"id": data["mediaId"], "prog": current_progress, "score": score_raw}
+                mut_res = requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': mut_vars}, headers=HEADERS)
+                if mut_res.status_code != 200:
+                    print(f"[ERROR] Failed to mutate target account for {title}")
+            
+            # Lock the new progress into local memory
+            sync_db[media_id] = current_progress
+            
+    save_db(DB_SYNC, sync_db)
+    
+    if updates_made > 0:
+        send_discord_alert(WEBHOOK_LOG, "⚙️ ENGINE LOG", f"Cycle complete. Successfully synced **{updates_made}** new deltas.", 9807270)
+    else:
+        print("[ENGINE] No new deltas found. System idle.")
+
+# ==========================================
+# 🚀 8. INITIATION SEQUENCE
+# ==========================================
+if __name__ == '__main__':
+    print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
+    
+    # 1. Self-Cleaning Protocol
+    execute_48hr_purge()
+    
+    # 2. Extract massive AniList database chunk
+    live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
+    
+    # 3. Build a bilingual, lowercase title pool for the Ghost Radar
+    known_titles_pool = set()
+    for data in live_inventory.values():
+        if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
+        if data.get('english'): known_titles_pool.add(data['english'].lower())
+    
+    # 4. Detect incoming 90-minute anime drops
+    process_airing_countdowns(live_inventory)
+    
+    # 5. Process core Source-to-Target Sync & standard Webhooks
+    execute_master_sync(live_inventory)
+    
+    # 6. Drop & Forget MAL Ghost XML Sweep
+    ghost_db = sweep_mal_xml(known_titles_pool)
+    
+    # 7. Actively hunt the AniList database for missing entries
+    updated_ghost_db = execute_ghost_radar(ghost_db)
+    save_db(DB_GHOSTS, updated_ghost_db)
+    
+    print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
