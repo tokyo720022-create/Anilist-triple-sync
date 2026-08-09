@@ -84,6 +84,11 @@ def send_discord_alert(webhook_url, title, description, color, thumbnail=None):
             msg_id = response.json().get("id")
             if msg_id:
                 messages_db = load_db(DB_MESSAGES)
+                
+                # Bulletproof memory format check just in case
+                if isinstance(messages_db, list):
+                    messages_db = {}
+                    
                 messages_db[msg_id] = {
                     "timestamp": time.time(),
                     "delete_url": f"{webhook_url}/messages/{msg_id}"
@@ -96,6 +101,13 @@ def execute_48hr_purge():
     """Wipes logs older than 48 hours (172800 seconds) from the grid."""
     print("[SYSTEM] Executing 48-Hour Log Purge...")
     messages_db = load_db(DB_MESSAGES)
+    
+    # --- BULLETPROOF AMNESIA PATCH ---
+    if isinstance(messages_db, list):
+        print("[SYSTEM] Legacy List format detected. Reformatting memory matrix...")
+        messages_db = {}
+    # ---------------------------------
+        
     current_time = time.time()
     keys_to_delete = []
     
@@ -177,6 +189,10 @@ def fetch_anilist_inventory(username):
 def process_airing_countdowns(inventory):
     """Scans for episodes dropping within the next 90 minutes."""
     airing_db = load_db(DB_AIRING)
+    
+    if isinstance(airing_db, list):
+        airing_db = {}
+        
     current_time = int(time.time())
     
     for title, data in inventory.items():
@@ -212,6 +228,9 @@ def process_airing_countdowns(inventory):
 def sweep_mal_xml(known_titles):
     """Parses MAL XML (if present) and isolates missing data."""
     ghosts = load_db(DB_GHOSTS)
+    
+    if isinstance(ghosts, list):
+        ghosts = {}
     
     if not os.path.exists(XML_FILE_PATH):
         return ghosts
@@ -279,6 +298,10 @@ def execute_ghost_radar(ghost_db):
 def execute_master_sync(inventory):
     """Compares live API data to saved memory and executes mutations/webhooks."""
     sync_db = load_db(DB_SYNC)
+    
+    if isinstance(sync_db, list):
+        sync_db = {}
+        
     mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
     
     updates_made = 0
@@ -324,7 +347,7 @@ def execute_master_sync(inventory):
 # 🚀 8. INITIATION SEQUENCE
 # ==========================================
 if __name__ == '__main__':
-    print("=== MAXIMUM OVERDRIVE ENGINE: SPINING UP ===")
+    print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
     
     # 1. Self-Cleaning Protocol
     execute_48hr_purge()
