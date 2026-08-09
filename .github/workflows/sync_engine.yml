@@ -2,7 +2,6 @@ name: AniList Maximum Overdrive
 
 on:
   schedule:
-    # Executes every hour exactly at the top of the hour from 8:00 AM to 11:00 PM IST
     - cron: '30 2-17 * * *' 
   workflow_dispatch:
 
@@ -38,6 +37,7 @@ jobs:
           DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
           DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
+          DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }} # 🛠️ NEW
         run: python anilist_engine.py
 
       - name: Save Engine Memory
