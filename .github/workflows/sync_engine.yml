@@ -2,7 +2,7 @@ name: AniList Maximum Overdrive
 
 on:
   schedule:
-    # 30 2-17 UTC exactly translates to 8:00 AM through 11:00 PM IST
+    # Executes every hour exactly at the top of the hour from 8:00 AM to 11:00 PM IST
     - cron: '30 2-17 * * *' 
   workflow_dispatch:
 
