@@ -18,6 +18,7 @@ WEBHOOK_AIRING = os.environ.get('DISCORD_AIRING_WEBHOOK')
 WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
 WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
+WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') # 🛠️ NEW: Dedicated Trophy Room
 
 DB_SYNC = 'db_sync.json'
 DB_MESSAGES = 'db_messages.json'
@@ -111,30 +112,28 @@ def hex_to_int(hex_color):
 
 def manage_achievements_and_weekly(points_earned):
     ach_db = load_db(DB_ACHIEVEMENTS)
-    if not ach_db: ach_db = {"lifetime_g": 0, "weekly_g": 0, "current_week": datetime.now(timezone.utc).isocalendar()[1]}
-    
-    today = datetime.now(timezone.utc).date()
-    start_date = date(2026, 8, 10)
-    
-    if today < start_date:
-        return ach_db, False, False, False 
+    if not ach_db or "current_week" not in ach_db: 
+        ach_db = {"lifetime_g": 0, "weekly_g": 0, "current_week": datetime.now(timezone.utc).isocalendar()[1]}
         
     current_week = datetime.now(timezone.utc).isocalendar()[1]
     
     if current_week != ach_db["current_week"]:
-        final_weekly = ach_db["weekly_g"]
+        final_weekly = ach_db.get("weekly_g", 0)
         ach_db["weekly_g"] = 0
         ach_db["current_week"] = current_week
         random_color = random.randint(0, 16777215)
+        
+        # 🛠️ PATCH: Routed Weekly Report to Achievement Channel
         send_discord_alert(
-            WEBHOOK_LOG, "🔄 WEEKLY CYCLE COMPLETE", 
-            f"The grid has been wiped. You secured **{final_weekly} G** last week.\nTotal Lifetime Score: **{ach_db['lifetime_g']} G**.\n\nA new cycle begins now.", 
+            WEBHOOK_ACHIEVEMENTS, "🔄 WEEKLY CYCLE COMPLETE", 
+            f"The grid has been wiped. You secured **{final_weekly} G** last week.\nTotal Lifetime Score: **{ach_db.get('lifetime_g', 0)} G**.\n\nA new cycle begins now.", 
             random_color, None, None, None, override_name="System Oracle"
         )
 
-    old_weekly = ach_db["weekly_g"]
-    ach_db["weekly_g"] += points_earned
-    ach_db["lifetime_g"] += points_earned
+    old_weekly = ach_db.get("weekly_g", 0)
+    
+    ach_db["weekly_g"] = old_weekly + points_earned
+    ach_db["lifetime_g"] = ach_db.get("lifetime_g", 0) + points_earned
     
     hit_1k = old_weekly < 1000 and ach_db["weekly_g"] >= 1000
     hit_5k = old_weekly < 5000 and ach_db["weekly_g"] >= 5000
@@ -143,11 +142,13 @@ def manage_achievements_and_weekly(points_earned):
     save_db(DB_ACHIEVEMENTS, ach_db)
     return ach_db, hit_1k, hit_5k, is_prestige
 
-def drop_classified_ui(webhook, tier):
+def drop_classified_ui(tier):
+    """Fires directly into the dedicated Trophy Room."""
+    if not WEBHOOK_ACHIEVEMENTS: return
     if tier == 1000:
-        send_discord_alert(webhook, "💠 1,000 G REACHED", ">> CLASS-A MILESTONE CLEARED <<", 16776960, "https://i.imgur.com/QzXoX1j.gif")
+        send_discord_alert(WEBHOOK_ACHIEVEMENTS, "💠 1,000 G REACHED", ">> CLASS-A MILESTONE CLEARED <<", 16776960, "https://i.imgur.com/QzXoX1j.gif")
     elif tier == 5000:
-        send_discord_alert(webhook, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
+        send_discord_alert(WEBHOOK_ACHIEVEMENTS, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
 
 # ==========================================
 # 🔎 5. ANILIST GRAPHQL CORE
@@ -209,7 +210,7 @@ def fetch_anilist_inventory(username):
     return inventory
 
 # ==========================================
-# ⏰ 6. AIRING INTELLIGENCE (LIVE CLOCK)
+# ⏰ 6. AIRING INTELLIGENCE (DUAL-STAGE RADAR)
 # ==========================================
 def process_airing_countdowns(inventory):
     airing_db = load_db(DB_AIRING)
@@ -223,18 +224,33 @@ def process_airing_countdowns(inventory):
         airing_at = next_airing['airingAt']
         ep_number = next_airing['episode']
         time_until = airing_at - current_time
-        db_key = f"{data['mediaId']}_ep{ep_number}"
         
-        if 0 < time_until <= 5400 and db_key not in airing_db:
-            fields = [
-                {"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False},
-                {"name": "🇺🇸 English", "value": data['english'] or "N/A", "inline": False},
-                {"name": "📺 Telecast Time", "value": f"<t:{airing_at}:F>", "inline": False}, 
-                {"name": "⏳ Live Countdown", "value": f"<t:{airing_at}:R>", "inline": False}, 
-            ]
+        db_key = f"{data['mediaId']}_ep{ep_number}"
+        current_status = airing_db.get(db_key, "none")
+        
+        if time_until > 0:
+            alert_type = None
+            msg_title = ""
             
-            send_discord_alert(WEBHOOK_AIRING, f"🚨 AIRING ALERT: Episode {ep_number}", "", hex_to_int(data["color"]), data.get('cover'), fields)
-            airing_db[db_key] = True
+            if 3600 < time_until <= 10800 and current_status == "none":
+                alert_type = "3h"
+                msg_title = f"🕒 3-HOUR WARNING: Episode {ep_number}"
+                
+            elif 0 < time_until <= 3600 and current_status in ["none", "3h"]:
+                alert_type = "1h"
+                msg_title = f"🚨 FINAL 1-HOUR WARNING: Episode {ep_number}"
+
+            if alert_type:
+                fields = [
+                    {"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False},
+                    {"name": "🇺🇸 English", "value": data['english'] or "N/A", "inline": False},
+                    {"name": "📺 Telecast Time", "value": f"<t:{airing_at}:F>", "inline": False}, 
+                    {"name": "⏳ Live Countdown", "value": f"<t:{airing_at}:R>", "inline": False}, 
+                ]
+                
+                poster_color = hex_to_int(data["color"])
+                send_discord_alert(WEBHOOK_AIRING, msg_title, "", poster_color, data.get('cover'), fields)
+                airing_db[db_key] = alert_type
             
     save_db(DB_AIRING, airing_db)
 
@@ -244,7 +260,6 @@ def process_airing_countdowns(inventory):
 def sweep_mal_xml(known_titles_pool):
     ghosts = load_db(DB_GHOSTS)
     if isinstance(ghosts, list): ghosts = {}
-    new_count = 0
     
     if os.path.exists(XML_FILE_PATH):
         try:
@@ -255,7 +270,6 @@ def sweep_mal_xml(known_titles_pool):
                     chaps = manga.find('my_read_chapters').text
                     score = manga.find('my_score').text
                     ghosts[mal_title] = {"progress": int(chaps) if chaps else 0, "score": int(score) if score else 0, "type": "MANGA"}
-                    new_count += 1
         except Exception: pass
 
     if os.path.exists('mal_anime.xml'):
@@ -267,7 +281,6 @@ def sweep_mal_xml(known_titles_pool):
                     eps = anime.find('my_watched_episodes').text
                     score = anime.find('my_score').text
                     ghosts[mal_title] = {"progress": int(eps) if eps else 0, "score": int(score) if score else 0, "type": "ANIME"}
-                    new_count += 1
         except Exception: pass
         
     return ghosts
@@ -328,11 +341,12 @@ def execute_master_sync(inventory):
                 {"name": "📊 Status", "value": data["status"], "inline": False}
             ]
             
+            # 🛠️ PATCH: Keep the inline tracker for the main channels
             author_block = None
             if data["status"] == "COMPLETED":
                 author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"}
             else:
-                author_block = {"name": f"🎮 +{g_earned}G | Weekly: {ach_db['weekly_g']}G"}
+                author_block = {"name": f"🎮 +{g_earned}G | Weekly: {ach_db.get('weekly_g', 0)}G"}
 
             webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
             
@@ -351,10 +365,23 @@ def execute_master_sync(inventory):
                     {"name": "⏳ Left", "value": f"{chaps_left}", "inline": True}
                 ])
 
+            # Fire standard update to Anime/Manga Channel
             send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag)
             
-            if hit_1k: drop_classified_ui(webhook, 1000)
-            if hit_5k: drop_classified_ui(webhook, 5000)
+            # 🛠️ PATCH: Route massive milestones directly to Achievement Channel
+            if hit_1k: drop_classified_ui(1000)
+            if hit_5k: drop_classified_ui(5000)
+            
+            # 🛠️ PATCH: Drop a dedicated Trophy into the Achievement Channel if completed
+            if data["status"] == "COMPLETED" and WEBHOOK_ACHIEVEMENTS:
+                send_discord_alert(
+                    WEBHOOK_ACHIEVEMENTS, 
+                    f"🏆 SERIES CONQUERED: {title}", 
+                    f"You have fully cleared this series and secured **{g_earned} G** for the vault.\nTotal Lifetime Score: **{ach_db.get('lifetime_g', 0)} G**.", 
+                    color, 
+                    data.get('cover'),
+                    None, None, override_tag
+                )
                 
             if TARGET_TOKEN:
                 payload = {'query': mutation_query, 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}
