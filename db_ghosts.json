@@ -59,10 +59,6 @@
         "chapters": 10,
         "score": 10
     },
-    "Soubo Koukan Nikki": {
-        "chapters": 9,
-        "score": 0
-    },
     "Aniyome-san no Sewa wo Yaku": {
         "chapters": 0,
         "score": 0
@@ -134,91 +130,6 @@
     "Shiori-sensei wa Ochi\u2661chin no Sodateya-san": {
         "progress": 8,
         "score": 9,
-        "type": "MANGA"
-    },
-    "Kawaii Imouto to Ikenai Koto Shiteimasu!": {
-        "progress": 9,
-        "score": 10,
-        "type": "MANGA"
-    },
-    "Paihame Kazoku": {
-        "progress": 0,
-        "score": 7,
-        "type": "MANGA"
-    },
-    "Onanie Master Kurosawa": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Asumi-chan wa Lesbian Fuuzoku ni Kyoumi ga Arimasu!": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Harem de New Game+!!": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Imouto Trip\u2661": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Watashi, Isekai de Dorei ni Sarechaimashita (Naki) Shikamo Goshujinsama wa Seikaku no Warui Elf no Joousama (demo Chou Bijin \u2190 Koko Daiji): Munou Sugite Nonoshiraremakuru kedo Douryou no Orc ga Iyashi-kei da shi Sato no Elf wa Kawaii shi Kekkou Tanoshinderu Watashi desu.": {
-        "progress": 6,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Fangkai Nage Nuwu": {
-        "progress": 695,
-        "score": 10,
-        "type": "MANGA"
-    },
-    "Hahaoya Shikkaku: Elite Oyako no M Buta Netorare Tenraku Jinsei": {
-        "progress": 1,
-        "score": 10,
-        "type": "MANGA"
-    },
-    "Magicraft Meister": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Tadashii Seikyouiku.": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Tensei Shoujo wa Mazu Ippo kara Hajimetai": {
-        "progress": 0,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Doukutsuou kara Hajimeru Rakuen Life: Bannou no Saikutsu Skill de Saikyou ni!?": {
-        "progress": 5,
-        "score": 9,
-        "type": "MANGA"
-    },
-    "Lout of Count's Family": {
-        "progress": 13,
-        "score": 9,
-        "type": "MANGA"
-    },
-    "Okiraku Ryoushu no Tanoshii Ryouchi Bouei": {
-        "progress": 44,
-        "score": 0,
-        "type": "MANGA"
-    },
-    "Tensai Shoujo demo Baka Mitai ni Ecchi ni Narimasu.": {
-        "progress": 1,
-        "score": 10,
-        "type": "MANGA"
-    },
-    "The Max Level Hero Strikes Back": {
-        "progress": 11,
-        "score": 0,
         "type": "MANGA"
     }
 }
