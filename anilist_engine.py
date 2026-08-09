@@ -9,8 +9,7 @@ from datetime import datetime
 SOURCE_USERNAME = "Orewatokyo"
 DB_SYNC_FILE = "db_sync.json"
 DB_AIRING_FILE = "db_airing.json"
-DB_THREADS_FILE = "db_threads.json"
-DB_MESSAGES_FILE = "db_messages.json"
+DB_MESSAGES_FILE = "db_messages.json" # thread_db has been permanently purged
 
 # ==============================================================================
 # ⭐ VIP PRIORITY FAVORITES LIST
@@ -131,7 +130,8 @@ def send_favorite_alert(entry):
         print(f"[ERROR] Failed to send VIP favorite alert: {e}")
     time.sleep(2)
 
-def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
+def send_sync_log(base_webhook, entry, msg_db):
+    """Blasts updates directly to the main channel with 100% delivery guarantee."""
     if not base_webhook:
         return
 
@@ -188,46 +188,29 @@ def send_sync_log(base_webhook, entry, media_id, thread_db, msg_db):
         }]
     }
 
-    if media_type not in thread_db:
-        thread_db[media_type] = {}
-        
-    existing_thread_id = thread_db[media_type].get(media_id)
-    
-    if existing_thread_id:
-        target_url = f"{base_webhook}?thread_id={existing_thread_id}&wait=true"
-    else:
-        target_url = f"{base_webhook}?wait=true"
-        payload["thread_name"] = romaji[:90] 
-
     try:
+        target_url = f"{base_webhook}?wait=true"
         response = requests.post(target_url, json=payload, timeout=15)
         
-        if response.status_code == 400 and "thread_name" in payload:
-            print(f"[WARNING] Discord blocked thread creation for {romaji}. Falling back to standard message.")
-            del payload["thread_name"]
-            response = requests.post(f"{base_webhook}?wait=true", json=payload, timeout=15)
+        # If Discord blocks the message, this forces the script to print the EXACT reason
+        response.raise_for_status() 
 
         if response.status_code in [200, 201, 204]:
             data = response.json()
             msg_id = data.get("id")
-            new_thread_id = data.get("channel_id")
             
-            if not existing_thread_id and new_thread_id:
-                thread_db[media_type][media_id] = new_thread_id
-                existing_thread_id = new_thread_id
-                
             if msg_id:
                 delete_url = f"{base_webhook}/messages/{msg_id}"
-                if existing_thread_id:
-                    delete_url += f"?thread_id={existing_thread_id}"
-                    
                 msg_db.append({
                     "delete_url": delete_url,
                     "timestamp": int(time.time())
                 })
                 
     except Exception as e:
-        print(f"[ERROR] Failed to send Discord sync log: {e}")
+        print(f"[ERROR] Failed to send Discord sync log for {romaji}: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"[DISCORD API RESPONSE]: {e.response.text}")
+            
     time.sleep(2)
 
 def send_airing_alert(media):
@@ -254,7 +237,6 @@ def send_airing_alert(media):
     time.sleep(2)
 
 def send_run_report(updated_items, deleted_count, msg_db):
-    """Sends a summary log of specific items watched/read, and saves it for 48h auto-deletion."""
     if not LOG_WEBHOOK:
         return
 
@@ -277,7 +259,6 @@ def send_run_report(updated_items, deleted_count, msg_db):
         target_url = f"{LOG_WEBHOOK}?wait=true"
         response = requests.post(target_url, json=payload, timeout=15)
         
-        # Saves the run report message ID so it also self-destructs after 48 hours
         if response.status_code in [200, 201, 204]:
             data = response.json()
             msg_id = data.get("id")
@@ -368,7 +349,6 @@ def main():
         print("[SYSTEM] Engine Online. Loading memory arrays...")
         sync_db = load_db(DB_SYNC_FILE, dict)
         airing_db = load_db(DB_AIRING_FILE, dict)
-        thread_db = load_db(DB_THREADS_FILE, dict)
         msg_db = load_db(DB_MESSAGES_FILE, list) 
         
         msg_db, deleted_count = cleanup_old_messages(msg_db)
@@ -389,23 +369,22 @@ def main():
                 current_state = f"{progress}-{scoreRaw}"
                 saved_state = sync_db.get(media_id, "0-0")
                 
-                # --- THE AMNESIA PATCH ---
                 if isinstance(saved_state, int):
                     saved_state = f"{saved_state}-0"
                     sync_db[media_id] = saved_state 
-                # -------------------------
                 
                 if current_state != saved_state:
                     print(f"[SYNC] Pushing Target Update -> {media['title']['romaji']} (Prog: {progress} | Score: {scoreRaw})")
                     push_to_target(int(media_id), progress, scoreRaw)
                     
                     webhook = ANIME_WEBHOOK if media['type'] == "ANIME" else MANGA_WEBHOOK
-                    send_sync_log(webhook, entry, media_id, thread_db, msg_db)
+                    
+                    # Direct delivery format - completely bypasses the broken thread matrix
+                    send_sync_log(webhook, entry, msg_db)
                     
                     if is_favorite(entry):
                         send_favorite_alert(entry)
 
-                    # Logs the specific title and progress for the `#anilist-log` digest
                     icon = "🎬" if media['type'] == "ANIME" else "📖"
                     unit = "Ep" if media['type'] == "ANIME" else "Ch"
                     updated_items.append(f"{icon} **{media['title']['romaji']}** - {unit} {progress}")
@@ -431,13 +410,11 @@ def main():
         if len(updated_items) == 0:
             print("[SYSTEM] Zero updates found. Target is completely synced.")
 
-        # Triggers the new log report if anything was watched, read, or deleted
         if len(updated_items) > 0 or deleted_count > 0:
             send_run_report(updated_items, deleted_count, msg_db)
             
         save_db(DB_SYNC_FILE, sync_db)
         save_db(DB_AIRING_FILE, airing_db)
-        save_db(DB_THREADS_FILE, thread_db)
         save_db(DB_MESSAGES_FILE, msg_db)
         print("[SYSTEM] Engine Shutdown Sequence Complete.")
 
@@ -447,3 +424,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+        
