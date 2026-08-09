@@ -44,7 +44,6 @@ HEADERS = {
 # 🧠 2. MEMORY VAULT MANAGEMENT
 # ==========================================
 def load_db(filepath):
-    """Loads a JSON memory matrix."""
     if os.path.exists(filepath):
         try:
             with open(filepath, 'r') as f:
@@ -54,14 +53,13 @@ def load_db(filepath):
     return {}
 
 def save_db(filepath, data):
-    """Locks data into the JSON memory matrix."""
     with open(filepath, 'w') as f:
         json.dump(data, f, indent=4)
 
 # ==========================================
 # 📡 3. DISCORD COMMUNICATION PROTOCOLS
 # ==========================================
-def send_discord_alert(webhook_url, title, description, color, thumbnail=None):
+def send_discord_alert(webhook_url, title, description, color, image_url=None):
     """Fires a customized embed directly to the command center."""
     if not webhook_url: return
     
@@ -71,12 +69,13 @@ def send_discord_alert(webhook_url, title, description, color, thumbnail=None):
         "color": color,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
-    if thumbnail:
-        embed["thumbnail"] = {"url": thumbnail}
+    
+    # 🛠️ PATCH: Changed from 'thumbnail' to 'image' for massive high-res posters
+    if image_url:
+        embed["image"] = {"url": image_url}
         
     payload = {"embeds": [embed]}
     
-    # Fire and capture Discord message ID for the Auto-Purge log
     response = requests.post(webhook_url + "?wait=true", json=payload)
     
     if response.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
@@ -85,7 +84,6 @@ def send_discord_alert(webhook_url, title, description, color, thumbnail=None):
             if msg_id:
                 messages_db = load_db(DB_MESSAGES)
                 
-                # Bulletproof memory format check just in case
                 if isinstance(messages_db, list):
                     messages_db = {}
                     
@@ -98,15 +96,12 @@ def send_discord_alert(webhook_url, title, description, color, thumbnail=None):
             pass
 
 def execute_48hr_purge():
-    """Wipes logs older than 48 hours (172800 seconds) from the grid."""
     print("[SYSTEM] Executing 48-Hour Log Purge...")
     messages_db = load_db(DB_MESSAGES)
     
-    # --- BULLETPROOF AMNESIA PATCH ---
     if isinstance(messages_db, list):
         print("[SYSTEM] Legacy List format detected. Reformatting memory matrix...")
         messages_db = {}
-    # ---------------------------------
         
     current_time = time.time()
     keys_to_delete = []
@@ -116,7 +111,7 @@ def execute_48hr_purge():
             del_response = requests.delete(data["delete_url"])
             if del_response.status_code == 204:
                 keys_to_delete.append(msg_id)
-            time.sleep(1) # Tactical delay to prevent Discord rate limits
+            time.sleep(1) 
             
     for key in keys_to_delete:
         del messages_db[key]
@@ -126,9 +121,9 @@ def execute_48hr_purge():
 # 🔎 4. ANILIST GRAPHQL CORE (THE FETCH)
 # ==========================================
 def fetch_anilist_inventory(username):
-    """Executes a massive paginated GraphQL sweep of the source AniList account."""
     print(f"[ENGINE] Fetching Full Inventory for Source: {username}...")
     
+    # 🛠️ PATCH: Requested 'extraLarge' for maximum download quality
     query = '''
     query ($userName: String, $page: Int) {
       Page(page: $page, perPage: 50) {
@@ -143,7 +138,7 @@ def fetch_anilist_inventory(username):
           media {
             title { romaji english }
             type
-            coverImage { large }
+            coverImage { extraLarge } 
             nextAiringEpisode { airingAt episode }
           }
         }
@@ -161,7 +156,6 @@ def fetch_anilist_inventory(username):
         
         if response.status_code != 200:
             print(f"[ERROR] Failed to fetch AniList data. Status: {response.status_code}")
-            print(f"[DEBUG] API Response: {response.text}") 
             break
             
         data = response.json().get('data', {}).get('Page', {})
@@ -173,7 +167,6 @@ def fetch_anilist_inventory(username):
             romaji_title = media['title'].get('romaji')
             eng_title = media['title'].get('english')
             
-            # Use English as the primary key if available, else Romaji
             primary_title = eng_title or romaji_title
             
             inventory[primary_title] = {
@@ -181,14 +174,15 @@ def fetch_anilist_inventory(username):
                 "progress": item['progress'],
                 "scoreRaw": item.get('score', 0), 
                 "type": media['type'],
-                "cover": media['coverImage']['large'] if media.get('coverImage') else None,
+                # 🛠️ PATCH: Mapping the extraLarge high-res cover
+                "cover": media['coverImage']['extraLarge'] if media.get('coverImage') else None,
                 "nextAiring": media.get('nextAiringEpisode'),
                 "romaji": romaji_title,
                 "english": eng_title
             }
         
         page += 1
-        time.sleep(1) # Prevent AniList IP ban
+        time.sleep(1) 
         
     print(f"[ENGINE] Inventory Sweep Complete. Tracked {len(inventory)} total entries.")
     return inventory
@@ -197,7 +191,6 @@ def fetch_anilist_inventory(username):
 # ⏰ 5. AIRING INTELLIGENCE PROTOCOL
 # ==========================================
 def process_airing_countdowns(inventory):
-    """Scans for episodes dropping within the next 90 minutes."""
     airing_db = load_db(DB_AIRING)
     
     if isinstance(airing_db, list):
@@ -216,7 +209,6 @@ def process_airing_countdowns(inventory):
         
         db_key = f"{data['mediaId']}_ep{ep_number}"
         
-        # If dropping within 90 mins (5400s) and we haven't alerted yet
         if 0 < time_until <= 5400 and db_key not in airing_db:
             mins_left = time_until // 60
             print(f"[RADAR] Live Airing Alert: {title} Ep {ep_number} in {mins_left} mins!")
@@ -236,7 +228,6 @@ def process_airing_countdowns(inventory):
 # 👻 6. MAL GHOST RADAR PROTOCOLS
 # ==========================================
 def sweep_mal_xml(known_titles_pool):
-    """Parses MAL XML (if present) and isolates missing data."""
     ghosts = load_db(DB_GHOSTS)
     
     if isinstance(ghosts, list):
@@ -254,7 +245,6 @@ def sweep_mal_xml(known_titles_pool):
         for manga in root.findall('manga'):
             mal_title = manga.find('manga_title').text
             
-            # Check the lowercase MAL title against the lowercase pool
             if mal_title.lower() not in known_titles_pool and mal_title not in ghosts:
                 chaps = manga.find('my_read_chapters').text
                 score = manga.find('my_score').text
@@ -271,7 +261,6 @@ def sweep_mal_xml(known_titles_pool):
     return ghosts
 
 def execute_ghost_radar(ghost_db):
-    """Hunts the AniList API for missing ghosts and auto-assimilates."""
     if not ghost_db: return ghost_db
     print(f"[GHOST RADAR] Hunting AniList Database for {len(ghost_db)} ghost targets...")
     
@@ -280,7 +269,6 @@ def execute_ghost_radar(ghost_db):
     
     assimilated = []
     for title, data in list(ghost_db.items()):
-        # Attempt to find the ghost
         res = requests.post('https://graphql.anilist.co', json={'query': search_query, 'variables': {"search": title}}, headers=HEADERS)
         
         if res.status_code == 200:
@@ -288,7 +276,6 @@ def execute_ghost_radar(ghost_db):
             if result:
                 media_id = result['id']
                 
-                # Assimilate into Target Account
                 if TARGET_TOKEN:
                     mut_vars = {"id": media_id, "prog": data["chapters"], "score": data["score"] * 10}
                     requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': mut_vars}, headers=HEADERS)
@@ -296,9 +283,8 @@ def execute_ghost_radar(ghost_db):
                 send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** was successfully added to AniList and injected into your account.\n\n**Restored Chapters:** {data['chapters']}", 3066993)
                 assimilated.append(title)
                 
-        time.sleep(1.5) # Anti-rate limit
+        time.sleep(1.5) 
         
-    # Clear found ghosts from the database
     for title in assimilated:
         del ghost_db[title]
     return ghost_db
@@ -307,7 +293,6 @@ def execute_ghost_radar(ghost_db):
 # ⚡ 7. THE MASTER SYNC ENGINE (CORE DELTA)
 # ==========================================
 def execute_master_sync(inventory):
-    """Compares live API data to saved memory and executes mutations/webhooks."""
     sync_db = load_db(DB_SYNC)
     
     if isinstance(sync_db, list):
@@ -323,28 +308,23 @@ def execute_master_sync(inventory):
         media_type = data["type"]
         score_raw = data["scoreRaw"]
         
-        # Check Delta (Has the progress changed since the last hourly run?)
         if str(sync_db.get(media_id)) != str(current_progress):
             print(f"[SYNC DELTA] Update Detected: {title} -> {current_progress}")
             updates_made += 1
             
-            # Fire Standard Webhook
             webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
             color = 3447003 if media_type == "ANIME" else 15105570
             send_discord_alert(webhook, f"📺 UPDATE: {title}", f"Progress locked in at: **{current_progress}**", color, data.get('cover'))
             
-            # Fire VIP Priority Alert
             if title in PRIORITY_FAVORITES:
                 send_discord_alert(WEBHOOK_VIP, f"🔥 S-TIER VIP UPDATE: {title}", f"Target reached progress count: **{current_progress}**!", 15158332, data.get('cover'))
                 
-            # Execute Target Account Mutation
             if TARGET_TOKEN:
                 mut_vars = {"id": data["mediaId"], "prog": current_progress, "score": score_raw}
                 mut_res = requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': mut_vars}, headers=HEADERS)
                 if mut_res.status_code != 200:
                     print(f"[ERROR] Failed to mutate target account for {title}")
             
-            # Lock the new progress into local memory
             sync_db[media_id] = current_progress
             
     save_db(DB_SYNC, sync_db)
@@ -360,28 +340,19 @@ def execute_master_sync(inventory):
 if __name__ == '__main__':
     print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
     
-    # 1. Self-Cleaning Protocol
     execute_48hr_purge()
     
-    # 2. Extract massive AniList database chunk
     live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
     
-    # 3. Build a bilingual, lowercase title pool for the Ghost Radar
     known_titles_pool = set()
     for data in live_inventory.values():
         if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
         if data.get('english'): known_titles_pool.add(data['english'].lower())
     
-    # 4. Detect incoming 90-minute anime drops
     process_airing_countdowns(live_inventory)
-    
-    # 5. Process core Source-to-Target Sync & standard Webhooks
     execute_master_sync(live_inventory)
     
-    # 6. Drop & Forget MAL Ghost XML Sweep
     ghost_db = sweep_mal_xml(known_titles_pool)
-    
-    # 7. Actively hunt the AniList database for missing entries
     updated_ghost_db = execute_ghost_radar(ghost_db)
     save_db(DB_GHOSTS, updated_ghost_db)
     
