@@ -2,8 +2,9 @@ import os
 import json
 import time
 import requests
+import random
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 # ==========================================
 # ⚙️ 1. SYSTEM CONFIGURATION & SECRETS
@@ -22,6 +23,7 @@ DB_SYNC = 'db_sync.json'
 DB_MESSAGES = 'db_messages.json'
 DB_GHOSTS = 'db_ghosts.json'
 DB_AIRING = 'db_airing.json'
+DB_ACHIEVEMENTS = 'db_achievements.json' 
 XML_FILE_PATH = 'mal_export.xml'
 
 PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
@@ -43,10 +45,24 @@ def save_db(filepath, data):
     with open(filepath, 'w') as f: json.dump(data, f, indent=4)
 
 # ==========================================
+# 🛡️ 2. TITANIUM ARMOR (API RETRY LOGIC)
+# ==========================================
+def fetch_with_armor(url, payload, headers, retries=3):
+    for attempt in range(retries):
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=15)
+            if res.status_code == 200:
+                return res
+            print(f"[SYSTEM] API Strike {attempt+1} failed (Status: {res.status_code}).")
+        except Exception as e:
+            print(f"[SYSTEM] Network error: {e}")
+        time.sleep((attempt + 1) * 3) 
+    return None
+
+# ==========================================
 # 📡 3. DISCORD COMMUNICATION PROTOCOLS
 # ==========================================
-def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None):
-    """Fires a highly structured embed directly to the command center."""
+def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None):
     if not webhook_url: return
     
     embed = {
@@ -58,11 +74,14 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
     
     if image_url: embed["image"] = {"url": image_url}
     if fields: embed["fields"] = fields
+    if author: embed["author"] = author
         
     payload = {"embeds": [embed]}
+    if override_name: payload["username"] = override_name
+    
     response = requests.post(webhook_url + "?wait=true", json=payload)
     
-    if response.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
+    if response and response.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
         try:
             msg_id = response.json().get("id")
             if msg_id:
@@ -76,41 +95,75 @@ def execute_48hr_purge():
     messages_db = load_db(DB_MESSAGES)
     if isinstance(messages_db, list): messages_db = {}
     current_time = time.time()
-    keys_to_delete = []
-    for msg_id, data in messages_db.items():
-        if current_time - data["timestamp"] > 172800:
-            del_response = requests.delete(data["delete_url"])
-            if del_response.status_code == 204: keys_to_delete.append(msg_id)
-            time.sleep(1) 
-    for key in keys_to_delete: del messages_db[key]
+    keys_to_delete = [msg_id for msg_id, data in messages_db.items() if current_time - data["timestamp"] > 172800]
+    for key in keys_to_delete:
+        requests.delete(messages_db[key]["delete_url"])
+        del messages_db[key]
+        time.sleep(1)
     save_db(DB_MESSAGES, messages_db)
 
 # ==========================================
-# 🔎 4. ANILIST GRAPHQL CORE (DATA RICH FETCH)
+# 🏆 4. THE RPG ENGINE (ACHIEVEMENTS)
+# ==========================================
+def hex_to_int(hex_color):
+    if not hex_color: return 3447003 
+    return int(hex_color.lstrip('#'), 16)
+
+def manage_achievements_and_weekly(points_earned):
+    ach_db = load_db(DB_ACHIEVEMENTS)
+    if not ach_db: ach_db = {"lifetime_g": 0, "weekly_g": 0, "current_week": datetime.now(timezone.utc).isocalendar()[1]}
+    
+    today = datetime.now(timezone.utc).date()
+    start_date = date(2026, 8, 10)
+    
+    if today < start_date:
+        return ach_db, False, False, False 
+        
+    current_week = datetime.now(timezone.utc).isocalendar()[1]
+    
+    if current_week != ach_db["current_week"]:
+        final_weekly = ach_db["weekly_g"]
+        ach_db["weekly_g"] = 0
+        ach_db["current_week"] = current_week
+        random_color = random.randint(0, 16777215)
+        send_discord_alert(
+            WEBHOOK_LOG, "🔄 WEEKLY CYCLE COMPLETE", 
+            f"The grid has been wiped. You secured **{final_weekly} G** last week.\nTotal Lifetime Score: **{ach_db['lifetime_g']} G**.\n\nA new cycle begins now.", 
+            random_color, None, None, None, override_name="System Oracle"
+        )
+
+    old_weekly = ach_db["weekly_g"]
+    ach_db["weekly_g"] += points_earned
+    ach_db["lifetime_g"] += points_earned
+    
+    hit_1k = old_weekly < 1000 and ach_db["weekly_g"] >= 1000
+    hit_5k = old_weekly < 5000 and ach_db["weekly_g"] >= 5000
+    is_prestige = ach_db["lifetime_g"] >= 10000
+    
+    save_db(DB_ACHIEVEMENTS, ach_db)
+    return ach_db, hit_1k, hit_5k, is_prestige
+
+def drop_classified_ui(webhook, tier):
+    if tier == 1000:
+        send_discord_alert(webhook, "💠 1,000 G REACHED", ">> CLASS-A MILESTONE CLEARED <<", 16776960, "https://i.imgur.com/QzXoX1j.gif")
+    elif tier == 5000:
+        send_discord_alert(webhook, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
+
+# ==========================================
+# 🔎 5. ANILIST GRAPHQL CORE
 # ==========================================
 def fetch_anilist_inventory(username):
     print(f"[ENGINE] Fetching High-Density Inventory for Source: {username}...")
-    
-    # 🛠️ PATCH: Massive query expansion for Deep Tracking (Episodes, Chapters, Seasons)
     query = '''
     query ($userName: String, $page: Int) {
       Page(page: $page, perPage: 50) {
         pageInfo { hasNextPage }
         mediaList(userName: $userName) {
-          mediaId
-          progress
-          progressVolumes
-          score
-          status
+          mediaId progress progressVolumes score status
           media {
             title { romaji english }
-            type
-            episodes
-            chapters
-            volumes
-            season
-            seasonYear
-            coverImage { extraLarge } 
+            type episodes chapters volumes season seasonYear
+            coverImage { extraLarge color } 
             nextAiringEpisode { airingAt episode }
           }
         }
@@ -123,10 +176,10 @@ def fetch_anilist_inventory(username):
     has_next_page = True
     
     while has_next_page:
-        variables = {"userName": username, "page": page}
-        response = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': variables}, headers=HEADERS)
+        payload = {'query': query, 'variables': {"userName": username, "page": page}}
+        response = fetch_with_armor('https://graphql.anilist.co', payload, HEADERS)
         
-        if response.status_code != 200: break
+        if not response: break
             
         data = response.json().get('data', {}).get('Page', {})
         media_list = data.get('mediaList', [])
@@ -134,9 +187,7 @@ def fetch_anilist_inventory(username):
         
         for item in media_list:
             media = item['media']
-            romaji_title = media['title'].get('romaji')
-            eng_title = media['title'].get('english')
-            primary_title = eng_title or romaji_title
+            primary_title = media['title'].get('english') or media['title'].get('romaji')
             
             inventory[primary_title] = {
                 "mediaId": item['mediaId'],
@@ -146,23 +197,19 @@ def fetch_anilist_inventory(username):
                 "scoreRaw": item.get('score', 0), 
                 "type": media['type'],
                 "cover": media['coverImage']['extraLarge'] if media.get('coverImage') else None,
+                "color": media['coverImage'].get('color'), 
                 "nextAiring": media.get('nextAiringEpisode'),
-                "romaji": romaji_title,
-                "english": eng_title,
+                "romaji": media['title'].get('romaji'),
+                "english": media['title'].get('english'),
                 "total_episodes": media.get('episodes'),
-                "total_chapters": media.get('chapters'),
-                "total_volumes": media.get('volumes'),
-                "season": media.get('season'),
-                "seasonYear": media.get('seasonYear')
+                "total_chapters": media.get('chapters')
             }
-        
         page += 1
         time.sleep(1) 
-        
     return inventory
 
 # ==========================================
-# ⏰ 5. AIRING INTELLIGENCE PROTOCOL (LIVE CLOCK)
+# ⏰ 6. AIRING INTELLIGENCE (LIVE CLOCK)
 # ==========================================
 def process_airing_countdowns(inventory):
     airing_db = load_db(DB_AIRING)
@@ -179,21 +226,20 @@ def process_airing_countdowns(inventory):
         db_key = f"{data['mediaId']}_ep{ep_number}"
         
         if 0 < time_until <= 5400 and db_key not in airing_db:
-            # 🛠️ PATCH: Live Discord Countdown Clocks
             fields = [
                 {"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False},
                 {"name": "🇺🇸 English", "value": data['english'] or "N/A", "inline": False},
-                {"name": "📺 Telecast Time", "value": f"<t:{airing_at}:F>", "inline": False}, # Absolute Time
-                {"name": "⏳ Live Countdown", "value": f"<t:{airing_at}:R>", "inline": False}, # Ticking Clock
+                {"name": "📺 Telecast Time", "value": f"<t:{airing_at}:F>", "inline": False}, 
+                {"name": "⏳ Live Countdown", "value": f"<t:{airing_at}:R>", "inline": False}, 
             ]
             
-            send_discord_alert(WEBHOOK_AIRING, f"🚨 AIRING ALERT: Episode {ep_number}", "", 15548997, data.get('cover'), fields)
+            send_discord_alert(WEBHOOK_AIRING, f"🚨 AIRING ALERT: Episode {ep_number}", "", hex_to_int(data["color"]), data.get('cover'), fields)
             airing_db[db_key] = True
             
     save_db(DB_AIRING, airing_db)
 
 # ==========================================
-# 👻 6. MAL GHOST RADAR PROTOCOLS (BIMODAL)
+# 👻 7. MAL GHOST RADAR (BIMODAL)
 # ==========================================
 def sweep_mal_xml(known_titles_pool):
     ghosts = load_db(DB_GHOSTS)
@@ -239,7 +285,7 @@ def execute_ghost_radar(ghost_db):
         
         res = requests.post('https://graphql.anilist.co', json={'query': search_query, 'variables': {"search": title, "type": media_type}}, headers=HEADERS)
         
-        if res.status_code == 200:
+        if res and res.status_code == 200:
             result = res.json().get('data', {}).get('Media')
             if result:
                 if TARGET_TOKEN:
@@ -252,15 +298,12 @@ def execute_ghost_radar(ghost_db):
     return ghost_db
 
 # ==========================================
-# ⚡ 7. THE MASTER SYNC ENGINE (HIGH-DENSITY EMBEDS)
+# ⚡ 8. THE MASTER SYNC ENGINE 
 # ==========================================
 def execute_master_sync(inventory):
     sync_db = load_db(DB_SYNC)
     if isinstance(sync_db, list): sync_db = {}
     mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
-    updates_made = 0
-    
-    status_map = {"CURRENT": "Currently Active", "PLANNING": "Planning", "COMPLETED": "Completed", "DROPPED": "Dropped", "PAUSED": "Paused"}
     
     for title, data in inventory.items():
         media_id = str(data["mediaId"])
@@ -268,73 +311,78 @@ def execute_master_sync(inventory):
         media_type = data["type"]
         
         if str(sync_db.get(media_id)) != str(progress):
-            updates_made += 1
-            user_status = status_map.get(data["status"], data["status"])
             
-            # 🛠️ PATCH: Structuring the precise data matrix per your specs
+            delta = progress - int(sync_db.get(media_id, 0))
+            if delta < 0: delta = 0 
+            g_earned = (delta * 10) if media_type == "ANIME" else (delta * 2)
+            if data["status"] == "COMPLETED": g_earned += 100 
+            
+            ach_db, hit_1k, hit_5k, is_prestige = manage_achievements_and_weekly(g_earned)
+            override_tag = "Orewatokyo" if is_prestige else None
+            
+            color = hex_to_int(data["color"])
+            
             fields = [
                 {"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False},
                 {"name": "🇺🇸 English", "value": data['english'] or "N/A", "inline": False},
-                {"name": "📊 Status", "value": user_status, "inline": False}
+                {"name": "📊 Status", "value": data["status"], "inline": False}
             ]
+            
+            author_block = None
+            if data["status"] == "COMPLETED":
+                author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"}
+            else:
+                author_block = {"name": f"🎮 +{g_earned}G | Weekly: {ach_db['weekly_g']}G"}
+
+            webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
             
             if media_type == "ANIME":
                 total = data['total_episodes']
                 eps_left = (total - progress) if total else "?"
-                season_info = f"{data['season'].capitalize()} {data['seasonYear']}" if data['season'] else "Unknown"
-                
                 fields.extend([
                     {"name": "✅ Watched", "value": f"{progress}", "inline": True},
-                    {"name": "⏳ Left", "value": f"{eps_left}", "inline": True},
-                    {"name": "🗓️ Season", "value": season_info, "inline": True}
+                    {"name": "⏳ Left", "value": f"{eps_left}", "inline": True}
                 ])
-                webhook = WEBHOOK_ANIME
-                color = 3447003
-                
             elif media_type == "MANGA":
-                total_chaps = data['total_chapters']
-                chaps_left = (total_chaps - progress) if total_chaps else "?"
-                vol_prog = data.get('progressVolumes', 0)
-                
+                total = data['total_chapters']
+                chaps_left = (total - progress) if total else "?"
                 fields.extend([
                     {"name": "📖 Read", "value": f"{progress}", "inline": True},
-                    {"name": "⏳ Left", "value": f"{chaps_left}", "inline": True},
-                    {"name": "📚 Volume", "value": f"{vol_prog}", "inline": True}
+                    {"name": "⏳ Left", "value": f"{chaps_left}", "inline": True}
                 ])
-                webhook = WEBHOOK_MANGA
-                color = 15105570
 
-            # Fire the high-density payload
-            send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields)
+            send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag)
             
-            if title in PRIORITY_FAVORITES:
-                send_discord_alert(WEBHOOK_VIP, f"🔥 VIP TARGET UPDATED", f"**{title}** has reached progress {progress}!", 15158332, data.get('cover'))
+            if hit_1k: drop_classified_ui(webhook, 1000)
+            if hit_5k: drop_classified_ui(webhook, 5000)
                 
             if TARGET_TOKEN:
-                requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}, headers=HEADERS)
+                payload = {'query': mutation_query, 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}
+                fetch_with_armor('https://graphql.anilist.co', payload, HEADERS)
             
             sync_db[media_id] = progress
             
     save_db(DB_SYNC, sync_db)
 
 # ==========================================
-# 🚀 8. INITIATION SEQUENCE
+# 🚀 9. INITIATION SEQUENCE
 # ==========================================
 if __name__ == '__main__':
     print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
     execute_48hr_purge()
+    
     live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
     
     known_titles_pool = set()
     for data in live_inventory.values():
         if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
         if data.get('english'): known_titles_pool.add(data['english'].lower())
-    
+        
     process_airing_countdowns(live_inventory)
     execute_master_sync(live_inventory)
     
     ghost_db = sweep_mal_xml(known_titles_pool)
     updated_ghost_db = execute_ghost_radar(ghost_db)
     save_db(DB_GHOSTS, updated_ghost_db)
-    print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
     
+    print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
