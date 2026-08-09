@@ -1530,5 +1530,17 @@
     {
         "delete_url": "https://discord.com/api/webhooks/1535593514568519770/sVkhUwHWTx0nv8Ekiw3hZ34Yryr80RSk47r38z0EqdGlY2qoxC9dKgjzag-wECX-ijny/messages/1535819218816208987",
         "timestamp": 1786238235
+    },
+    {
+        "delete_url": "https://discord.com/api/webhooks/1535592145719660645/Xi2YUX49c8szt5tmCXmHlBreH8oS5pY_e52uoZq__Y0V7xAE8u4EK3GcWYutXk_g1hUI/messages/1535821020714508289",
+        "timestamp": 1786238665
+    },
+    {
+        "delete_url": "https://discord.com/api/webhooks/1535592145719660645/Xi2YUX49c8szt5tmCXmHlBreH8oS5pY_e52uoZq__Y0V7xAE8u4EK3GcWYutXk_g1hUI/messages/1535821031304863765",
+        "timestamp": 1786238668
+    },
+    {
+        "delete_url": "https://discord.com/api/webhooks/1535593514568519770/sVkhUwHWTx0nv8Ekiw3hZ34Yryr80RSk47r38z0EqdGlY2qoxC9dKgjzag-wECX-ijny/messages/1535821042717564929",
+        "timestamp": 1786238670
     }
 ]
