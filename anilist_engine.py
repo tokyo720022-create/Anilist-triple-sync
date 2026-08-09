@@ -225,51 +225,78 @@ def process_airing_countdowns(inventory):
     save_db(DB_AIRING, airing_db)
 
 # ==========================================
-# 👻 6. MAL GHOST RADAR PROTOCOLS
+# 👻 6. MAL GHOST RADAR PROTOCOLS (BIMODAL)
 # ==========================================
 def sweep_mal_xml(known_titles_pool):
+    """Parses MAL XMLs for both Anime and Manga and isolates missing data."""
     ghosts = load_db(DB_GHOSTS)
     
     if isinstance(ghosts, list):
         ghosts = {}
+        
+    new_count = 0
+    print("[GHOST RADAR] Sweeping MAL XMLs for unregistered anomalies...")
     
-    if not os.path.exists(XML_FILE_PATH):
-        return ghosts
-        
-    print("[GHOST RADAR] Sweeping MAL XML for unregistered anomalies...")
-    try:
-        tree = ET.parse(XML_FILE_PATH)
-        root = tree.getroot()
-        
-        new_count = 0
-        for manga in root.findall('manga'):
-            mal_title = manga.find('manga_title').text
+    # --- MANGA SWEEP ---
+    if os.path.exists(XML_FILE_PATH):
+        try:
+            tree = ET.parse(XML_FILE_PATH)
+            for manga in tree.getroot().findall('manga'):
+                mal_title = manga.find('manga_title').text
+                if mal_title.lower() not in known_titles_pool and mal_title not in ghosts:
+                    chaps = manga.find('my_read_chapters').text
+                    score = manga.find('my_score').text
+                    ghosts[mal_title] = {
+                        "progress": int(chaps) if chaps else 0,
+                        "score": int(score) if score else 0,
+                        "type": "MANGA"
+                    }
+                    new_count += 1
+        except Exception as e:
+            print(f"[GHOST RADAR] Manga XML Parse Error: {e}")
+
+    # --- ANIME SWEEP ---
+    if os.path.exists('mal_anime.xml'):
+        try:
+            tree = ET.parse('mal_anime.xml')
+            for anime in tree.getroot().findall('anime'):
+                mal_title = anime.find('series_title').text
+                if mal_title.lower() not in known_titles_pool and mal_title not in ghosts:
+                    eps = anime.find('my_watched_episodes').text
+                    score = anime.find('my_score').text
+                    ghosts[mal_title] = {
+                        "progress": int(eps) if eps else 0,
+                        "score": int(score) if score else 0,
+                        "type": "ANIME"
+                    }
+                    new_count += 1
+        except Exception as e:
+            print(f"[GHOST RADAR] Anime XML Parse Error: {e}")
             
-            if mal_title.lower() not in known_titles_pool and mal_title not in ghosts:
-                chaps = manga.find('my_read_chapters').text
-                score = manga.find('my_score').text
-                ghosts[mal_title] = {
-                    "chapters": int(chaps) if chaps else 0,
-                    "score": int(score) if score else 0
-                }
-                new_count += 1
-                
-        if new_count > 0: print(f"[GHOST RADAR] Isolated {new_count} NEW missing entries.")
-    except Exception as e:
-        print(f"[GHOST RADAR] XML Parse Error: {e}")
+    if new_count > 0: 
+        print(f"[GHOST RADAR] Isolated {new_count} NEW missing entries.")
         
     return ghosts
 
 def execute_ghost_radar(ghost_db):
+    """Hunts the AniList API for missing ghosts and auto-assimilates."""
     if not ghost_db: return ghost_db
     print(f"[GHOST RADAR] Hunting AniList Database for {len(ghost_db)} ghost targets...")
     
-    search_query = '''query ($search: String) { Media (search: $search, type: MANGA) { id title { romaji english } } }'''
+    # 🛠️ PATCH: The query now accepts a dynamic $type (ANIME or MANGA)
+    search_query = '''query ($search: String, $type: MediaType) { Media (search: $search, type: $type) { id title { romaji english } } }'''
     mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
     
     assimilated = []
     for title, data in list(ghost_db.items()):
-        res = requests.post('https://graphql.anilist.co', json={'query': search_query, 'variables': {"search": title}}, headers=HEADERS)
+        
+        # Fallback to support older ghosts already in the DB
+        media_type = data.get("type", "MANGA")
+        progress = data.get("progress", data.get("chapters", 0))
+        
+        # Fire search with specific media type
+        variables = {"search": title, "type": media_type}
+        res = requests.post('https://graphql.anilist.co', json={'query': search_query, 'variables': variables}, headers=HEADERS)
         
         if res.status_code == 200:
             result = res.json().get('data', {}).get('Media')
@@ -277,10 +304,10 @@ def execute_ghost_radar(ghost_db):
                 media_id = result['id']
                 
                 if TARGET_TOKEN:
-                    mut_vars = {"id": media_id, "prog": data["chapters"], "score": data["score"] * 10}
+                    mut_vars = {"id": media_id, "prog": progress, "score": data["score"] * 10}
                     requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': mut_vars}, headers=HEADERS)
                 
-                send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** was successfully added to AniList and injected into your account.\n\n**Restored Chapters:** {data['chapters']}", 3066993)
+                send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** was successfully added to AniList and injected into your account.\n\n**Restored Progress:** {progress}\n**Type:** {media_type}", 3066993)
                 assimilated.append(title)
                 
         time.sleep(1.5) 
@@ -288,6 +315,7 @@ def execute_ghost_radar(ghost_db):
     for title in assimilated:
         del ghost_db[title]
     return ghost_db
+    
 
 # ==========================================
 # ⚡ 7. THE MASTER SYNC ENGINE (CORE DELTA)
