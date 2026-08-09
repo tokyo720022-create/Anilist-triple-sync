@@ -111,11 +111,6 @@
         "chapters": 0,
         "score": 0
     },
-    "The Max Level Hero Strikes Back": {
-        "progress": 11,
-        "score": 0,
-        "type": "MANGA"
-    },
     "Gal na Imouto wa Saimin Play de Ikimakuru!": {
         "progress": 6,
         "score": 8,
@@ -204,6 +199,26 @@
     "Tensei Shoujo wa Mazu Ippo kara Hajimetai": {
         "progress": 0,
         "score": 0,
+        "type": "MANGA"
+    },
+    "Doukutsuou kara Hajimeru Rakuen Life: Bannou no Saikutsu Skill de Saikyou ni!?": {
+        "progress": 5,
+        "score": 9,
+        "type": "MANGA"
+    },
+    "Lout of Count's Family": {
+        "progress": 13,
+        "score": 9,
+        "type": "MANGA"
+    },
+    "Okiraku Ryoushu no Tanoshii Ryouchi Bouei": {
+        "progress": 44,
+        "score": 0,
+        "type": "MANGA"
+    },
+    "Tensai Shoujo demo Baka Mitai ni Ecchi ni Narimasu.": {
+        "progress": 1,
+        "score": 10,
         "type": "MANGA"
     }
 }
