@@ -2,8 +2,8 @@ name: AniList Maximum Overdrive
 
 on:
   schedule:
-    # Runs every 5 minutes from 6:30 AM to 11:25 PM IST (1:00 to 17:55 UTC)
-    - cron: '*/5 1-17 * * *' 
+    # 30 2-17 UTC exactly translates to 8:00 AM through 11:00 PM IST
+    - cron: '30 2-17 * * *' 
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,8 @@ jobs:
     
     concurrency:
       group: anilist-engine
-      cancel-in-progress: false 
+      # THE BUG KILLER: Prevents stale ghost queues from stacking up
+      cancel-in-progress: true 
 
     steps:
       - name: Checkout Repository
@@ -36,7 +37,7 @@ jobs:
           DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
           DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
-          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} # <--- VIP FAVORITES WEBHOOK
+          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
           ERROR_REPORT_WEBHOOK: ${{ secrets.ANILIST_ERROR_REPORT_WEBHOOK }}
         run: python anilist_engine.py
 
@@ -44,7 +45,12 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Force syncs the latest database before saving to prevent conflicts
+          git pull origin main --rebase || true 
+          
           git add *.json || true 
           git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
           git push
           
+  
