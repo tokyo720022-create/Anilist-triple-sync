@@ -6,7 +6,7 @@ import random
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, date
-from simkl_interceptor import inject_into_buffer, execute_simkl_radar
+
 
 # ==========================================
 # ⚙️ 1. SYSTEM CONFIGURATION & SECRETS
