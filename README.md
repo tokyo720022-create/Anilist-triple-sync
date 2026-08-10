@@ -1,5 +1,11 @@
 # ⚡ ANILIST MAXIMUM OVERDRIVE ⚡
 
+<!-- BADGES_START -->
+<!-- BADGES_END -->
+
+
+
+
 **Version:** 4.0.0 (Apex Build)  
 
 **Author:** Orewatokyo
