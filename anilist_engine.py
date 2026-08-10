@@ -6,7 +6,7 @@ import random
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, date
-from simkl_engine import inject_into_buffer
+
 
 # ==========================================
 # ⚙️ 1. SYSTEM CONFIGURATION & SECRETS
