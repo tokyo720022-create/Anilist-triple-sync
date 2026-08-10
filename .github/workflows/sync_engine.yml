@@ -37,15 +37,23 @@ jobs:
           DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
           DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
-          DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }} # 🛠️ NEW
+          DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
         run: python anilist_engine.py
+
+      # 🛠️ THE ARTIFACT VAULT (NEW)
+      - name: Secure JSON Vault Backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-vault-backup
+          path: '*.json'
+          retention-days: 30
 
       - name: Save Engine Memory
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git pull origin main --rebase || true 
-          git add *.json || true 
+          git add *.json README.md || true 
           git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
           git push
           
