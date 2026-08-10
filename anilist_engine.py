@@ -17,7 +17,7 @@ WEBHOOK_ANIME = os.environ.get('DISCORD_ANIME_WEBHOOK')
 WEBHOOK_MANGA = os.environ.get('DISCORD_MANGA_WEBHOOK')
 WEBHOOK_AIRING = os.environ.get('DISCORD_AIRING_WEBHOOK')
 WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
-WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
+WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK') # 🛠️ THE VIP CHANNEL
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
 WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') 
 
@@ -32,6 +32,7 @@ DB_AIRING = 'db_airing.json'
 DB_ACHIEVEMENTS = 'db_achievements.json' 
 XML_FILE_PATH = 'mal_export.xml'
 
+# 🛠️ S-TIER FRANCHISES
 PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
 
 HEADERS = {
@@ -97,13 +98,31 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
                 save_db(DB_MESSAGES, messages_db)
         except Exception: pass
 
-def send_telegram_alert(message):
-    """Pushes a high-priority vibrating alert straight to your phone."""
+def send_telegram_alert(message, image_url=None):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: return
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    
+    if image_url:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID, 
+            "photo": image_url, 
+            "caption": message, 
+            "parse_mode": "Markdown"
+        }
+    else:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": TELEGRAM_CHAT_ID, 
+            "text": message, 
+            "parse_mode": "Markdown"
+        }
+        
     try:
-        requests.post(url, json=payload, timeout=10)
+        res = requests.post(url, json=payload, timeout=10)
+        if res.status_code != 200 and image_url:
+            fallback_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+            fallback_payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
+            requests.post(fallback_url, json=fallback_payload, timeout=10)
     except Exception as e:
         print(f"[SYSTEM] Telegram strike failed: {e}")
 
@@ -253,10 +272,10 @@ def process_airing_countdowns(inventory):
                 alert_type = "1h"
                 msg_title = f"🚨 FINAL 1-HOUR WARNING: Episode {ep_number}"
                 
-                # 🛠️ MOBILE PUSH INITIATED
                 title_clean = data['english'] or data['romaji']
+                cover_art = data.get('cover')
                 tg_payload = f"🚨 *FINAL 1-HOUR WARNING*\n\n📺 *{title_clean}*\nEpisode {ep_number} is dropping in under 60 minutes."
-                send_telegram_alert(tg_payload)
+                send_telegram_alert(tg_payload, cover_art)
 
             if alert_type:
                 fields = [
@@ -384,6 +403,12 @@ def execute_master_sync(inventory):
 
             send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag)
             
+            # 🛠️ PATCH: VIP ROUTING ACTIVATED
+            # This scans both the English and Romaji titles. If it hits one of your S-Tier Priority franchises, it fires a copy straight to the VIP room.
+            is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
+            if is_vip and WEBHOOK_VIP:
+                send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update Logged.", color, data.get('cover'), fields, author_block, override_tag)
+            
             if hit_1k: drop_classified_ui(1000)
             if hit_5k: drop_classified_ui(5000)
             
@@ -434,21 +459,4 @@ if __name__ == '__main__':
     print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
     execute_48hr_purge()
     
-    live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
-    
-    known_titles_pool = set()
-    for data in live_inventory.values():
-        if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
-        if data.get('english'): known_titles_pool.add(data['english'].lower())
-        
-    process_airing_countdowns(live_inventory)
-    execute_master_sync(live_inventory)
-    
-    ghost_db = sweep_mal_xml(known_titles_pool)
-    updated_ghost_db = execute_ghost_radar(ghost_db)
-    save_db(DB_GHOSTS, updated_ghost_db)
-    
-    update_readme_badges()
-    
-    print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
-                  
+    live_inven
