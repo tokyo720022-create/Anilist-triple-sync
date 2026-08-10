@@ -21,6 +21,10 @@ WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
 WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') 
 
+# 🛠️ TELEGRAM PIPELINE
+TELEGRAM_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
+
 DB_SYNC = 'db_sync.json'
 DB_MESSAGES = 'db_messages.json'
 DB_GHOSTS = 'db_ghosts.json'
@@ -62,7 +66,7 @@ def fetch_with_armor(url, payload, headers, retries=3):
     return None
 
 # ==========================================
-# 📡 3. DISCORD COMMUNICATION PROTOCOLS
+# 📡 3. COMMUNICATION PROTOCOLS
 # ==========================================
 def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None):
     if not webhook_url: return
@@ -92,6 +96,16 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
                 messages_db[msg_id] = {"timestamp": time.time(), "delete_url": f"{webhook_url}/messages/{msg_id}"}
                 save_db(DB_MESSAGES, messages_db)
         except Exception: pass
+
+def send_telegram_alert(message):
+    """Pushes a high-priority vibrating alert straight to your phone."""
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: return
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    try:
+        requests.post(url, json=payload, timeout=10)
+    except Exception as e:
+        print(f"[SYSTEM] Telegram strike failed: {e}")
 
 def execute_48hr_purge():
     messages_db = load_db(DB_MESSAGES)
@@ -238,6 +252,11 @@ def process_airing_countdowns(inventory):
             elif 0 < time_until <= 3600 and current_status in ["none", "3h"]:
                 alert_type = "1h"
                 msg_title = f"🚨 FINAL 1-HOUR WARNING: Episode {ep_number}"
+                
+                # 🛠️ MOBILE PUSH INITIATED
+                title_clean = data['english'] or data['romaji']
+                tg_payload = f"🚨 *FINAL 1-HOUR WARNING*\n\n📺 *{title_clean}*\nEpisode {ep_number} is dropping in under 60 minutes."
+                send_telegram_alert(tg_payload)
 
             if alert_type:
                 fields = [
@@ -387,14 +406,13 @@ def execute_master_sync(inventory):
     save_db(DB_SYNC, sync_db)
 
 # ==========================================
-# 🔮 9. LIVE DASHBOARD INJECTOR (NEW)
+# 🔮 9. LIVE DASHBOARD INJECTOR
 # ==========================================
 def update_readme_badges():
     ach_db = load_db(DB_ACHIEVEMENTS)
     lifetime = ach_db.get('lifetime_g', 0)
     weekly = ach_db.get('weekly_g', 0)
     
-    # Golden aesthetic for Lifetime, Neon Orange for the Weekly Grind
     badge_md = f"<!-- BADGES_START -->\n![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-{lifetime}%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)\n![Weekly](https://img.shields.io/badge/Weekly_Grind-{weekly}%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)\n<!-- BADGES_END -->"
     
     try:
@@ -430,8 +448,7 @@ if __name__ == '__main__':
     updated_ghost_db = execute_ghost_radar(ghost_db)
     save_db(DB_GHOSTS, updated_ghost_db)
     
-    # Trigger the aesthetic repo dashboard update before shutdown
     update_readme_badges()
     
     print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
-    
+                  
