@@ -38,9 +38,10 @@ jobs:
           DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
           DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
           DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }} # 🛠️ MOBILE PIPELINE
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }} # 🛠️ MOBILE PIPELINE
         run: python anilist_engine.py
 
-      # 🛠️ THE ARTIFACT VAULT (NEW)
       - name: Secure JSON Vault Backup
         uses: actions/upload-artifact@v4
         with:
