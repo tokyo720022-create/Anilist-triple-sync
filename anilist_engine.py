@@ -3,6 +3,7 @@ import json
 import time
 import requests
 import random
+import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, date
 
@@ -18,7 +19,7 @@ WEBHOOK_AIRING = os.environ.get('DISCORD_AIRING_WEBHOOK')
 WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
 WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
-WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') # 🛠️ NEW: Dedicated Trophy Room
+WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') 
 
 DB_SYNC = 'db_sync.json'
 DB_MESSAGES = 'db_messages.json'
@@ -123,7 +124,6 @@ def manage_achievements_and_weekly(points_earned):
         ach_db["current_week"] = current_week
         random_color = random.randint(0, 16777215)
         
-        # 🛠️ PATCH: Routed Weekly Report to Achievement Channel
         send_discord_alert(
             WEBHOOK_ACHIEVEMENTS, "🔄 WEEKLY CYCLE COMPLETE", 
             f"The grid has been wiped. You secured **{final_weekly} G** last week.\nTotal Lifetime Score: **{ach_db.get('lifetime_g', 0)} G**.\n\nA new cycle begins now.", 
@@ -143,7 +143,6 @@ def manage_achievements_and_weekly(points_earned):
     return ach_db, hit_1k, hit_5k, is_prestige
 
 def drop_classified_ui(tier):
-    """Fires directly into the dedicated Trophy Room."""
     if not WEBHOOK_ACHIEVEMENTS: return
     if tier == 1000:
         send_discord_alert(WEBHOOK_ACHIEVEMENTS, "💠 1,000 G REACHED", ">> CLASS-A MILESTONE CLEARED <<", 16776960, "https://i.imgur.com/QzXoX1j.gif")
@@ -341,7 +340,6 @@ def execute_master_sync(inventory):
                 {"name": "📊 Status", "value": data["status"], "inline": False}
             ]
             
-            # 🛠️ PATCH: Keep the inline tracker for the main channels
             author_block = None
             if data["status"] == "COMPLETED":
                 author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"}
@@ -365,14 +363,11 @@ def execute_master_sync(inventory):
                     {"name": "⏳ Left", "value": f"{chaps_left}", "inline": True}
                 ])
 
-            # Fire standard update to Anime/Manga Channel
             send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag)
             
-            # 🛠️ PATCH: Route massive milestones directly to Achievement Channel
             if hit_1k: drop_classified_ui(1000)
             if hit_5k: drop_classified_ui(5000)
             
-            # 🛠️ PATCH: Drop a dedicated Trophy into the Achievement Channel if completed
             if data["status"] == "COMPLETED" and WEBHOOK_ACHIEVEMENTS:
                 send_discord_alert(
                     WEBHOOK_ACHIEVEMENTS, 
@@ -392,7 +387,30 @@ def execute_master_sync(inventory):
     save_db(DB_SYNC, sync_db)
 
 # ==========================================
-# 🚀 9. INITIATION SEQUENCE
+# 🔮 9. LIVE DASHBOARD INJECTOR (NEW)
+# ==========================================
+def update_readme_badges():
+    ach_db = load_db(DB_ACHIEVEMENTS)
+    lifetime = ach_db.get('lifetime_g', 0)
+    weekly = ach_db.get('weekly_g', 0)
+    
+    # Golden aesthetic for Lifetime, Neon Orange for the Weekly Grind
+    badge_md = f"<!-- BADGES_START -->\n![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-{lifetime}%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)\n![Weekly](https://img.shields.io/badge/Weekly_Grind-{weekly}%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)\n<!-- BADGES_END -->"
+    
+    try:
+        with open('README.md', 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        new_content = re.sub(r'<!-- BADGES_START -->.*?<!-- BADGES_END -->', badge_md, content, flags=re.DOTALL)
+        
+        with open('README.md', 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        print("[SYSTEM] GitHub README Badges updated successfully.")
+    except Exception as e:
+        print(f"[SYSTEM] Badge Injection Failed: {e}")
+
+# ==========================================
+# 🚀 10. INITIATION SEQUENCE
 # ==========================================
 if __name__ == '__main__':
     print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
@@ -412,4 +430,8 @@ if __name__ == '__main__':
     updated_ghost_db = execute_ghost_radar(ghost_db)
     save_db(DB_GHOSTS, updated_ghost_db)
     
+    # Trigger the aesthetic repo dashboard update before shutdown
+    update_readme_badges()
+    
     print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
+    
