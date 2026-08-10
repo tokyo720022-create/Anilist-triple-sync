@@ -1,8 +1,8 @@
 # ⚡ ANILIST MAXIMUM OVERDRIVE ⚡
 
 <!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-1624%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/Weekly_Grind-502%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
+![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-1632%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/Weekly_Grind-510%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 <!-- BADGES_END -->
 
 
