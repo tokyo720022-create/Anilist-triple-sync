@@ -451,7 +451,6 @@ def update_readme_badges():
         print("[SYSTEM] GitHub README Badges updated successfully.")
     except Exception as e:
         print(f"[SYSTEM] Badge Injection Failed: {e}")
-
 # ==========================================
 # 🚀 10. INITIATION SEQUENCE
 # ==========================================
@@ -459,4 +458,21 @@ if __name__ == '__main__':
     print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
     execute_48hr_purge()
     
-    live_inven
+    live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
+    
+    known_titles_pool = set()
+    for data in live_inventory.values():
+        if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
+        if data.get('english'): known_titles_pool.add(data['english'].lower())
+        
+    process_airing_countdowns(live_inventory)
+    execute_master_sync(live_inventory)
+    
+    ghost_db = sweep_mal_xml(known_titles_pool)
+    updated_ghost_db = execute_ghost_radar(ghost_db)
+    save_db(DB_GHOSTS, updated_ghost_db)
+    
+    update_readme_badges()
+    
+    print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
+
