@@ -1,12 +1,8 @@
 # ⚡ ANILIST MAXIMUM OVERDRIVE ⚡
 
 <!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-1762%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/Weekly_Grind-640%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![GraphQL](https://img.shields.io/badge/AniList-GraphQL-18A8C9?style=for-the-badge&logo=graphql&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
-![Discord](https://img.shields.io/badge/Discord-Webhooks-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-1772%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/Weekly_Grind-650%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 <!-- BADGES_END -->
 
 ---
