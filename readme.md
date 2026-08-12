@@ -22,7 +22,7 @@
 
 ---
 
-# ⚡ 0. PROJECT OVERVIEW
+# ⚡  PROJECT OVERVIEW
 
 **AniList Maximum Overdrive Sync** is an automated AniList tracking, synchronization,
 gamification, performance-analysis, notification, and archival engine.
