@@ -332,7 +332,6 @@ Manga: Multiplies chapter progression by a flat 5 minutes per chapter.
 
 Instead of clumping all data into one file, the system dynamically constructs a localized ledger tree directly in the repository:
 
-Plaintext
 📁 performance
  ┣ 📂 daily
  ┃ ┗ 📜 2026-08-12.json
