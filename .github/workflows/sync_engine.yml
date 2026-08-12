@@ -1,36 +1,11 @@
-name: AniList Maximum Overdrive Sync
-
-on:
-  schedule:
-    # Set to your preferred schedule (e.g., 10 AM and 7 PM). Remember this uses UTC time!
-    - cron: '0 4,13 * * *' 
-  workflow_dispatch: # This is your manual Mobile Detonator button
-
-jobs:
-  matrix_sync:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-
-      - name: Execute Maximum Overdrive Engine
+- name: Execute Maximum Overdrive Engine
         env:
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
-          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANIME_WEBHOOK }}
-          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_MANGA_WEBHOOK }}
+          # 🚨 UPDATED TO MATCH YOUR EXACT SECRET NAMES
+          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }}
+          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }}
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
-          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_LOG_WEBHOOK }}
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }}
           DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
           DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
@@ -41,12 +16,3 @@ jobs:
           ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
           ZULIP_SERVER_URL: ${{ secrets.ZULIP_SERVER_URL }}
         run: python anilist_engine.py
-
-      - name: Commit Matrix Databases and Dashboard
-        run: |
-          git config --global user.name "Matrix Auto-Bot"
-          git config --global user.email "action@github.com"
-          git add db_*.json README.md || true
-          git commit -m "Auto-update matrix databases & UI [skip ci]" || true
-          git push
-          
