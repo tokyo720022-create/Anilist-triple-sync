@@ -42,6 +42,7 @@ jobs:
           DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
           DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
           DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
+          DISCORD_PERFORMANCE_WEBHOOK: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK }}
           
           # 🛠️ MOBILE PIPELINE
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }} 
@@ -57,7 +58,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: memory-vault-backup
-          path: '*.json'
+          path: |
+            *.json
+            performance/**/*.json
           retention-days: 30
 
       - name: Save Engine Memory
@@ -65,7 +68,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git pull origin main --rebase || true 
-          git add *.json README.md || true 
-          git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
+          git add *.json performance/ README.md || true 
+          git diff --staged --quiet || git commit -m "chore: performance & state memory update [skip ci]"
           git push
-          
