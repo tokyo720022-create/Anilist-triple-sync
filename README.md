@@ -269,6 +269,8 @@ The Discord message can therefore visually match the artwork associated with the
 This provides dynamic presentation without requiring manually selected colors.
 
 2. RPG GAMERSCORE SYSTEM
+
+3. 
 Maximum Overdrive includes a custom RPG-style scoring layer.
 
 Every tracked action can contribute Gamerscore.
@@ -309,6 +311,91 @@ The configured threshold is:
 
 Plaintext
 10,000 Lifetime G
+
 After crossing the threshold, the webhook identity is configured to use the:
+
+Plaintext
+Orewatokyo
+identity for future alerts.
+
+3. LIVE PERFORMANCE HOLOGRAM & VAULT
+The engine converts media progress into precise temporal analytics using a dynamic File System Vault and a self-refreshing Discord Hologram.
+
+🧮 TEMPORAL MATH PROTOCOL
+When the engine detects a progress delta, it calculates the exact time consumed:
+
+Anime: Pulls the exact duration dynamically from the AniList GraphQL API and subtracts 2 minutes (to precisely account for standard OP/ED skips). (e.g., 24m becomes 22m, 120m movie becomes 118m).
+
+Manga: Multiplies chapter progression by a flat 5 minutes per chapter.
+
+📂 LOCAL FILE VAULT
+
+Instead of clumping all data into one file, the system dynamically constructs a localized ledger tree directly in the repository:
+
+Plaintext
+📁 performance
+ ┣ 📂 daily
+ ┃ ┗ 📜 2026-08-12.json
+ ┣ 📂 weekly
+ ┃ ┗ 📜 2026-W33.json
+ ┣ 📂 monthly
+ ┃ ┗ 📜 2026-08.json
+ ┗ 📂 yearly
+   ┗ 📜 2026.json
+
+
+   ⚡ DISCORD HOLOGRAM
+   
+To prevent UI clutter, the engine uses Discord's message_id deletion mechanic to create a "live" dashboard.
+When progress is detected, the engine sends a silent DELETE strike to wipe the old dashboard, instantly dropping a newly calculated, live-refreshing performance UI at the bottom of the #performance-monitor channel.
+
+4. DUAL-STAGE AIRING INTELLIGENCE
+
+   Maximum Overdrive monitors anime entries containing upcoming airing information.
+
+The system is designed around two warning stages.
+
+🕒 PHASE 1 — THREE-HOUR WARNING
+When an episode reaches the configured three-hour threshold:
+
+Plaintext
+10,800 seconds
+the engine produces a:
+
+Plaintext
+🕒 3-HOUR WARNING
+alert.
+
+🚨 PHASE 2 — ONE-HOUR WARNING
+When the remaining time falls below:
+
+Plaintext
+3,600 seconds
+the engine produces a:
+
+Plaintext
+🚨 FINAL 1-HOUR WARNING
+alert.
+
+⏱️ DYNAMIC DISCORD TIMESTAMPS
+Discord supports UNIX-based timestamp tags.
+
+Maximum Overdrive uses:
+
+Plaintext
+<t:TIME:R>
+to create relative timestamps.
+
+5. BIMODAL GHOST RADAR
+Ghost Radar exists to handle media that appears in MAL exports but cannot currently be matched against the AniList title inventory.
+
+The system is designed around a local recovery workflow.
+
+👻 WHY GHOSTS EXIST
+
+MyAnimeList and AniList do not always contain perfectly identical databases.
+
+When the engine cannot confidently resolve an imported entry, it stores the item instead of discarding it.
+
 completionist reward.
 
