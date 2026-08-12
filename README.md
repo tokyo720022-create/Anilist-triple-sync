@@ -220,3 +220,96 @@ GitHub Actions execution ends
 | Ghost Radar | Resolves missing MAL entries |
 | Titanium Armor | Handles temporary API/network failures |
 | Auto-Purge | Removes old Discord engine logs |
+
+
+Each subsystem has a focused responsibility.
+
+The systems are designed to operate together without requiring a separate database server.
+
+1. HIGH-DENSITY MASTER SYNC
+The Master Sync is the core synchronization layer.
+
+It executes a paginated GraphQL sweep against the AniList media-list API.
+
+The engine retrieves the tracked inventory and extracts information required by the downstream systems.
+
+The synchronization layer is responsible for:
+
+Anime progress.
+
+Manga progress.
+
+Episode counts.
+
+Chapter counts.
+
+Volume counts.
+
+Media status.
+
+Exact media runtime (duration).
+
+Romaji titles.
+
+English titles.
+
+Season information.
+
+Season year.
+
+Cover artwork.
+
+Cover artwork color.
+
+Upcoming airing information.
+
+The inventory is then compared against the locally stored synchronization matrix.
+
+🎨 CHAMELEON UI
+The Chameleon UI uses the color returned by AniList's media cover information.
+
+The engine reads:
+
+Plaintext
+coverImage.color
+The returned color is converted into the format required by Discord embeds.
+
+The Discord message can therefore visually match the artwork associated with the media entry.
+
+This provides dynamic presentation without requiring manually selected colors.
+
+2. RPG GAMERSCORE SYSTEM
+Maximum Overdrive includes a custom RPG-style scoring layer.
+
+Every tracked action can contribute Gamerscore.
+
+The current scoring model is:
+
+| Activity | Reward |
+|---|---:|
+| Anime episode watched | +10 G |
+| Manga chapter read | +2 G |
+| Fully completed series | +100 G |
+
+The system separates weekly activity from lifetime progress.
+
+🎮 LIFETIME GAMERSCORE
+Lifetime Gamerscore represents the permanently accumulated score.
+
+Once weekly Gamerscore is transferred into the lifetime vault, it becomes part of the persistent total.
+
+📆 WEEKLY GAMERSCORE
+Weekly Gamerscore tracks activity during the current calendar week.
+
+The engine determines the current ISO calendar week using UTC time.
+
+🧹 WEEKLY WIPE
+At the beginning of a new weekly cycle, the engine performs the weekly rollover.
+
+🏆 COMPLETIONIST BONUS
+A completed series can trigger an additional:
+
+Plaintext
++100 G
+completionist reward.
+
