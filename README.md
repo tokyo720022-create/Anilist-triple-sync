@@ -11,11 +11,11 @@
 ```
 
 <!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5028%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-662%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
+![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5064%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-698%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 
 ![Daily Eps](https://img.shields.io/badge/DAILY_EPS-0-007EC6?style=for-the-badge&logo=youtube&logoColor=white)
-![Daily Chp](https://img.shields.io/badge/DAILY_CHP-3-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
+![Daily Chp](https://img.shields.io/badge/DAILY_CHP-21-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
 <!-- BADGES_END -->
 
 
@@ -1137,11 +1137,11 @@ Two main badge groups are maintained.
 
 ```text
 <!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5028%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-662%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
+![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5064%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-698%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 
 ![Daily Eps](https://img.shields.io/badge/DAILY_EPS-0-007EC6?style=for-the-badge&logo=youtube&logoColor=white)
-![Daily Chp](https://img.shields.io/badge/DAILY_CHP-3-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
+![Daily Chp](https://img.shields.io/badge/DAILY_CHP-21-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
 <!-- BADGES_END -->
 ```
 
@@ -1585,11 +1585,11 @@ Verify that these markers remain intact:
 
 ```text
 <!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5028%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-662%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
+![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5064%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-698%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 
 ![Daily Eps](https://img.shields.io/badge/DAILY_EPS-0-007EC6?style=for-the-badge&logo=youtube&logoColor=white)
-![Daily Chp](https://img.shields.io/badge/DAILY_CHP-3-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
+![Daily Chp](https://img.shields.io/badge/DAILY_CHP-21-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
 <!-- BADGES_END -->
 
 <!-- PERFORMANCE_START -->
@@ -2289,11 +2289,11 @@ Do not remove:
 
 ```text
 <!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5028%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-662%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
+![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-5064%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-698%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 
 ![Daily Eps](https://img.shields.io/badge/DAILY_EPS-0-007EC6?style=for-the-badge&logo=youtube&logoColor=white)
-![Daily Chp](https://img.shields.io/badge/DAILY_CHP-3-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
+![Daily Chp](https://img.shields.io/badge/DAILY_CHP-21-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
 <!-- BADGES_END -->
 ```
 
