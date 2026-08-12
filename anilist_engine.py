@@ -464,5 +464,13 @@ def execute_master_sync(inventory):
                     None, None, override_tag
                 )
                 
-            if TARGET_TOKEN:
-                payload = {'query': mutation_qu
+                        if TARGET_TOKEN:
+                payload = {
+                    'query': mutation_query, 
+                    'variables': {
+                        "id": data["mediaId"], 
+                        "prog": progress, 
+                        "score": data["scoreRaw"]
+                    }
+                }
+                fetch_with_armor('https://graphql.anilist.co', payload, HEADERS)
