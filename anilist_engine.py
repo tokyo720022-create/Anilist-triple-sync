@@ -21,6 +21,7 @@ WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
 WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
 WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') 
+WEBHOOK_PERFORMANCE = os.environ.get('DISCORD_PERFORMANCE_WEBHOOK') # 🛠️ THE HOLOGRAM DASHBOARD
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
@@ -34,6 +35,7 @@ DB_MESSAGES = 'db_messages.json'
 DB_GHOSTS = 'db_ghosts.json'
 DB_AIRING = 'db_airing.json'
 DB_ACHIEVEMENTS = 'db_achievements.json' 
+DB_PERFORMANCE_MSG = 'db_performance_msg.json'
 XML_FILE_PATH = 'mal_export.xml'
 
 PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
@@ -55,7 +57,97 @@ def save_db(filepath, data):
     with open(filepath, 'w') as f: json.dump(data, f, indent=4)
 
 # ==========================================
-# 🛡️ 2. TITANIUM ARMOR (API RETRY LOGIC)
+# 📊 2. THE PERFORMANCE VAULT (FILE SYSTEM)
+# ==========================================
+def update_performance_vault(media_type, delta, duration):
+    now = datetime.now(timezone.utc)
+    day_str = now.strftime("%Y-%m-%d")
+    week_str = f"{now.isocalendar()[0]}-W{now.isocalendar()[1]:02d}"
+    month_str = now.strftime("%Y-%m")
+    year_str = now.strftime("%Y")
+    
+    paths = {
+        "daily": f"performance/daily/{day_str}.json",
+        "weekly": f"performance/weekly/{week_str}.json",
+        "monthly": f"performance/monthly/{month_str}.json",
+        "yearly": f"performance/yearly/{year_str}.json"
+    }
+    
+    for folder in paths.keys():
+        os.makedirs(f"performance/{folder}", exist_ok=True)
+        
+    ep_add = delta if media_type == "ANIME" else 0
+    ch_add = delta if media_type == "MANGA" else 0
+    
+    anime_time = ep_add * max(1, (duration - 2)) if media_type == "ANIME" else 0
+    manga_time = ch_add * 5 if media_type == "MANGA" else 0
+    
+    for key, path in paths.items():
+        data = load_db(path)
+        data["episodes"] = data.get("episodes", 0) + ep_add
+        data["chapters"] = data.get("chapters", 0) + ch_add
+        data["anime_minutes"] = data.get("anime_minutes", 0) + anime_time
+        data["manga_minutes"] = data.get("manga_minutes", 0) + manga_time
+        save_db(path, data)
+
+def get_performance_stats():
+    now = datetime.now(timezone.utc)
+    day_str = now.strftime("%Y-%m-%d")
+    week_str = f"{now.isocalendar()[0]}-W{now.isocalendar()[1]:02d}"
+    month_str = now.strftime("%Y-%m")
+    year_str = now.strftime("%Y")
+    
+    return {
+        "daily": load_db(f"performance/daily/{day_str}.json"),
+        "weekly": load_db(f"performance/weekly/{week_str}.json"),
+        "monthly": load_db(f"performance/monthly/{month_str}.json"),
+        "yearly": load_db(f"performance/yearly/{year_str}.json")
+    }
+
+def refresh_performance_hologram():
+    if not WEBHOOK_PERFORMANCE: return
+    
+    msg_db = load_db(DB_PERFORMANCE_MSG)
+    last_msg_id = msg_db.get("message_id")
+    
+    if last_msg_id:
+        try:
+            requests.delete(f"{WEBHOOK_PERFORMANCE}/messages/{last_msg_id}")
+        except Exception: pass
+        
+    stats = get_performance_stats()
+    
+    def format_block(data, title):
+        eps = data.get('episodes', 0)
+        chp = data.get('chapters', 0)
+        a_mins = data.get('anime_minutes', 0)
+        m_mins = data.get('manga_minutes', 0)
+        return f"**{title}**\n📺 {eps} Eps ({a_mins}m) | 📖 {chp} Chp ({m_mins}m)"
+
+    desc = f"{format_block(stats['daily'], '📅 TODAY')}\n\n" \
+           f"{format_block(stats['weekly'], '📆 THIS WEEK')}\n\n" \
+           f"{format_block(stats['monthly'], '📊 THIS MONTH')}\n\n" \
+           f"{format_block(stats['yearly'], '🏆 THIS YEAR')}"
+
+    embed = {
+        "title": "⚡ LIVE PERFORMANCE MONITOR",
+        "description": desc,
+        "color": 3447003,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "footer": {"text": "Engine Synced & Refreshed"}
+    }
+    
+    try:
+        res = requests.post(WEBHOOK_PERFORMANCE + "?wait=true", json={"embeds": [embed]}, timeout=10)
+        if res and res.status_code in [200, 204]:
+            msg_id = res.json().get("id")
+            if msg_id:
+                save_db(DB_PERFORMANCE_MSG, {"message_id": msg_id})
+    except Exception as e:
+        print(f"[SYSTEM] Hologram refresh failed: {e}")
+
+# ==========================================
+# 🛡️ 3. TITANIUM ARMOR (API RETRY LOGIC)
 # ==========================================
 def fetch_with_armor(url, payload, headers, retries=3):
     for attempt in range(retries):
@@ -70,7 +162,7 @@ def fetch_with_armor(url, payload, headers, retries=3):
     return None
 
 # ==========================================
-# 📡 3. COMMUNICATION PROTOCOLS (NOW WITH DIAGNOSTICS)
+# 📡 4. COMMUNICATION PROTOCOLS
 # ==========================================
 def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None):
     if not webhook_url:
@@ -111,7 +203,7 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
 
 def fire_zulip_archive(media_type, title, progress, total_episodes, score):
     if not ZULIP_URL or not ZULIP_EMAIL or not ZULIP_API_KEY:
-        print(f"[DIAGNOSTICS] ⚠️ Zulip Secrets Missing! URL: {bool(ZULIP_URL)} | Email: {bool(ZULIP_EMAIL)} | Key: {bool(ZULIP_API_KEY)}")
+        print(f"[DIAGNOSTICS] ⚠️ Zulip Secrets Missing!")
         return
         
     stream_name = "Anime-Vault" if media_type == "ANIME" else "Manga-Vault"
@@ -127,9 +219,7 @@ def fire_zulip_archive(media_type, title, progress, total_episodes, score):
     }
     
     try:
-        print(f"🗄️ [ZULIP] Firing {title} to {stream_name}...")
         res = requests.post(ZULIP_URL, auth=HTTPBasicAuth(ZULIP_EMAIL, ZULIP_API_KEY), data=payload, timeout=10)
-        print(f"[DIAGNOSTICS] Zulip Status [{res.status_code}]")
         if res.status_code >= 400:
             print(f"[DIAGNOSTICS] ❌ Zulip Error Details: {res.text}")
     except Exception as e:
@@ -166,7 +256,7 @@ def execute_48hr_purge():
     save_db(DB_MESSAGES, messages_db)
 
 # ==========================================
-# 🏆 4. THE RPG ENGINE (ACHIEVEMENTS)
+# 🏆 5. THE RPG ENGINE (ACHIEVEMENTS)
 # ==========================================
 def hex_to_int(hex_color):
     if not hex_color: return 3447003 
@@ -210,7 +300,7 @@ def drop_classified_ui(tier):
         send_discord_alert(WEBHOOK_ACHIEVEMENTS, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
 
 # ==========================================
-# 🔎 5. ANILIST GRAPHQL CORE
+# 🔎 6. ANILIST GRAPHQL CORE
 # ==========================================
 def fetch_anilist_inventory(username):
     print(f"[ENGINE] Fetching High-Density Inventory for Source: {username}...")
@@ -222,7 +312,7 @@ def fetch_anilist_inventory(username):
           mediaId progress progressVolumes score status
           media {
             title { romaji english }
-            type episodes chapters volumes season seasonYear
+            type episodes chapters volumes season seasonYear duration
             coverImage { extraLarge color } 
             nextAiringEpisode { airingAt episode }
           }
@@ -258,6 +348,7 @@ def fetch_anilist_inventory(username):
                 "type": media['type'],
                 "cover": media['coverImage']['extraLarge'] if media.get('coverImage') else None,
                 "color": media['coverImage'].get('color'), 
+                "duration": media.get('duration') or 24,
                 "nextAiring": media.get('nextAiringEpisode'),
                 "romaji": media['title'].get('romaji'),
                 "english": media['title'].get('english'),
@@ -269,7 +360,7 @@ def fetch_anilist_inventory(username):
     return inventory
 
 # ==========================================
-# ⏰ 6. AIRING INTELLIGENCE
+# ⏰ 7. AIRING INTELLIGENCE
 # ==========================================
 def process_airing_countdowns(inventory):
     airing_db = load_db(DB_AIRING)
@@ -316,7 +407,7 @@ def process_airing_countdowns(inventory):
     save_db(DB_AIRING, airing_db)
 
 # ==========================================
-# 👻 7. MAL GHOST RADAR
+# 👻 8. MAL GHOST RADAR (WITH DIAGNOSTICS)
 # ==========================================
 def sweep_mal_xml(known_titles_pool):
     ghosts = load_db(DB_GHOSTS)
@@ -366,18 +457,22 @@ def execute_ghost_radar(ghost_db):
                     requests.post('https://graphql.anilist.co', json={'query': mutation_query, 'variables': {"id": result['id'], "prog": progress, "score": data["score"] * 10}}, headers=HEADERS)
                 send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** recovered.\nType: {media_type}\nProgress: {progress}", 3066993)
                 assimilated.append(title)
+            else:
+                # 🔴 Diagnostics for titles AniList rejects
+                send_discord_alert(WEBHOOK_LOG, "🔴 GHOST REJECTED / NOT FOUND", f"AniList database rejected or could not locate search query: **{title}** ({media_type})", 16711680)
         time.sleep(1.5) 
         
     for title in assimilated: del ghost_db[title]
     return ghost_db
 
 # ==========================================
-# ⚡ 8. THE MASTER SYNC ENGINE 
+# ⚡ 9. THE MASTER SYNC ENGINE 
 # ==========================================
 def execute_master_sync(inventory):
     sync_db = load_db(DB_SYNC)
     if isinstance(sync_db, list): sync_db = {}
     mutation_query = '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }'''
+    hologram_trigger = False
     
     for title, data in inventory.items():
         media_id = str(data["mediaId"])
@@ -389,6 +484,12 @@ def execute_master_sync(inventory):
             
             delta = progress - int(sync_db.get(media_id, 0))
             if delta < 0: delta = 0 
+            
+            # 📊 Update the Local Performance Vault
+            if delta > 0:
+                update_performance_vault(media_type, delta, data['duration'])
+                hologram_trigger = True
+            
             g_earned = (delta * 10) if media_type == "ANIME" else (delta * 2)
             if data["status"] == "COMPLETED": g_earned += 100 
             
@@ -463,9 +564,12 @@ def execute_master_sync(inventory):
             sync_db[media_id] = progress
             
     save_db(DB_SYNC, sync_db)
+    
+    if hologram_trigger:
+        refresh_performance_hologram()
 
 # ==========================================
-# 🔮 9. LIVE DASHBOARD INJECTOR
+# 🔮 10. LIVE DASHBOARD INJECTOR
 # ==========================================
 def update_readme_badges():
     ach_db = load_db(DB_ACHIEVEMENTS)
@@ -486,7 +590,7 @@ def update_readme_badges():
         print(f"[SYSTEM] Badge Injection Failed: {e}")
 
 # ==========================================
-# 🚀 10. INITIATION SEQUENCE
+# 🚀 11. INITIATION SEQUENCE
 # ==========================================
 if __name__ == '__main__':
     print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
