@@ -211,12 +211,12 @@ GitHub Actions execution ends
 
 🧩 CORE SYSTEMSMaximum Overdrive is divided into seven major operational systems.
 
-System,Purpose
-Master Sync,Synchronizes AniList media state
-Gamerscore,Converts media activity into RPG-style points
-Performance Vault,Tracks daily/weekly/monthly/yearly time consumption
-Airing Radar,Tracks upcoming episode releases
-Ghost Radar,Resolves missing MAL entries
-Titanium Armor,Handles temporary API/network failures
-Auto-Purge,Removes old Discord engine logs
-
+| System | Purpose |
+|---|---|
+| Master Sync | Synchronizes AniList media state |
+| Gamerscore | Converts media activity into RPG-style points |
+| Performance Vault | Tracks daily/weekly/monthly/yearly time consumption |
+| Airing Radar | Tracks upcoming episode releases |
+| Ghost Radar | Resolves missing MAL entries |
+| Titanium Armor | Handles temporary API/network failures |
+| Auto-Purge | Removes old Discord engine logs |
