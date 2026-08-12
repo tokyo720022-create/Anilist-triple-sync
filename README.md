@@ -1137,7 +1137,8 @@ Two main badge groups are maintained.
 
 ```text
 <!-- BADGES_START -->
-...
+![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-5024%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/Weekly_Grind-658%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 <!-- BADGES_END -->
 ```
 
@@ -1581,6 +1582,8 @@ Verify that these markers remain intact:
 
 ```text
 <!-- BADGES_START -->
+![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-5024%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/Weekly_Grind-658%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 <!-- BADGES_END -->
 
 <!-- PERFORMANCE_START -->
@@ -2280,6 +2283,8 @@ Do not remove:
 
 ```text
 <!-- BADGES_START -->
+![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-5024%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
+![Weekly](https://img.shields.io/badge/Weekly_Grind-658%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
 <!-- BADGES_END -->
 ```
 
