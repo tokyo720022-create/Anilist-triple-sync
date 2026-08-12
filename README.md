@@ -235,33 +235,23 @@ The engine retrieves the tracked inventory and extracts information required by 
 
 The synchronization layer is responsible for:
 
-Anime progress.
+The synchronization layer is responsible for:
 
-Manga progress.
+- Anime progress.
+- Manga progress.
+- Episode counts.
+- Chapter counts.
+- Volume counts.
+- Media status.
+- Exact media runtime (duration).
+- Romaji titles.
+- English titles.
+- Season information.
+- Season year.
+- Cover artwork.
+- Cover artwork color.
+- Upcoming airing information.
 
-Episode counts.
-
-Chapter counts.
-
-Volume counts.
-
-Media status.
-
-Exact media runtime (duration).
-
-Romaji titles.
-
-English titles.
-
-Season information.
-
-Season year.
-
-Cover artwork.
-
-Cover artwork color.
-
-Upcoming airing information.
 
 The inventory is then compared against the locally stored synchronization matrix.
 
@@ -311,5 +301,14 @@ A completed series can trigger an additional:
 
 Plaintext
 +100 G
+
+👑 PRESTIGE OVERRIDE
+The project includes a prestige system tied to lifetime Gamerscore.
+
+The configured threshold is:
+
+Plaintext
+10,000 Lifetime G
+After crossing the threshold, the webhook identity is configured to use the:
 completionist reward.
 
