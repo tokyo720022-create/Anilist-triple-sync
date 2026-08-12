@@ -463,15 +463,59 @@ def execute_master_sync(inventory):
                     data.get('cover'),
                     None, None, override_tag
                 )
-                
-                            if TARGET_TOKEN:
-                               payload = {
-                                 'query': mutation_query, 
-                                 'variables': {
-                                    "id": data["mediaId"], 
-                                    "prog": progress, 
-                                    "score": data["scoreRaw"]
-                    }
-                }
+
+           if TARGET_TOKEN:
+                payload = {'query': mutation_query, 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}
                 fetch_with_armor('https://graphql.anilist.co', payload, HEADERS)
+            
+            sync_db[media_id] = progress
+            
+    save_db(DB_SYNC, sync_db)
+
+# ==========================================
+# 🔮 9. LIVE DASHBOARD INJECTOR
+# ==========================================
+def update_readme_badges():
+    ach_db = load_db(DB_ACHIEVEMENTS)
+    lifetime = ach_db.get('lifetime_g', 0)
+    weekly = ach_db.get('weekly_g', 0)
+    
+    badge_md = f"<!-- BADGES_START -->\n![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-{lifetime}%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)\n![Weekly](https://img.shields.io/badge/Weekly_Grind-{weekly}%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)\n<!-- BADGES_END -->"
+    
+    try:
+        with open('README.md', 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        new_content = re.sub(r'<!-- BADGES_START -->.*?<!-- BADGES_END -->', badge_md, content, flags=re.DOTALL)
+        
+        with open('README.md', 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        print("[SYSTEM] GitHub README Badges updated successfully.")
+    except Exception as e:
+        print(f"[SYSTEM] Badge Injection Failed: {e}")
+
+# ==========================================
+# 🚀 10. INITIATION SEQUENCE
+# ==========================================
+if __name__ == '__main__':
+    print("=== MAXIMUM OVERDRIVE ENGINE: SPINNING UP ===")
+    execute_48hr_purge()
+    
+    live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
+    
+    known_titles_pool = set()
+    for data in live_inventory.values():
+        if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
+        if data.get('english'): known_titles_pool.add(data['english'].lower())
+        
+    process_airing_countdowns(live_inventory)
+    execute_master_sync(live_inventory)
+    
+    ghost_db = sweep_mal_xml(known_titles_pool)
+    updated_ghost_db = execute_ghost_radar(ghost_db)
+    save_db(DB_GHOSTS, updated_ghost_db)
+    
+    update_readme_badges()
+    
+    print("=== MAXIMUM OVERDRIVE ENGINE:
                 
