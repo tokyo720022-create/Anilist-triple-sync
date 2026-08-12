@@ -108,90 +108,7 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
 def send_telegram_alert(message, image_url=None):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: return
     
-    if image_url:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID, 
-            "photo": image_url, 
-            "caption": message, 
-            "parse_mode": "Markdown"
-        }
-    else:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID, 
-            "text": message, 
-            "parse_mode": "Markdown"
-        }
-        
-    try:
-        res = requests.post(url, json=payload, timeout=10)
-        if res.status_code != 200 and image_url:
-            fallback_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-            fallback_payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
-            requests.post(fallback_url, json=fallback_payload, timeout=10)
-    except Exception as e:
-        print(f"[SYSTEM] Telegram strike failed: {e}")
-
-def fire_zulip_archive(media_type, title, progress, total_episodes, score):
-    """Routes the log to the correct vault and threads it by Title."""
-    if not ZULIP_URL or not ZULIP_EMAIL or not ZULIP_API_KEY:
-        return
-        
-    stream_name = "Anime-Vault" if media_type == "ANIME" else "Manga-Vault"
-    action_text = "📺 Watched Episode" if media_type == "ANIME" else "📖 Read Chapter"
-    
-    content = f"✅ **Sync Log Executed**\n* **{action_text}:** {progress} / {total_episodes if total_episodes else '?'}\n* **Current Score:** {score if score else 'Unrated'}"
-    
-    payload = {
-        "type": "stream",
-        "to": stream_name,
-        "topic": title,
-        "content": content
-    }
-    
-    try:
-        print(f"🗄️ [ZULIP] Archiving {title} into {stream_name}...")
-        requests.post(ZULIP_URL, auth=HTTPBasicAuth(ZULIP_EMAIL, ZULIP_API_KEY), data=payload, timeout=10)
-    except Exception as e:
-        print(f"[SYSTEM] Zulip archive failed: {e}")
-
-def execute_48hr_purge():
-    messages_db = load_db(DB_MESSAGES)
-    if isinstance(messages_db, list): messages_db = {}
-    current_time = time.time()
-    keys_to_delete = [msg_id for msg_id, data in messages_db.items() if current_time - data["timestamp"] > 172800]
-    for key in keys_to_delete:
-        requests.delete(messages_db[key]["delete_url"])
-        del messages_db[key]
-        time.sleep(1)
-    save_db(DB_MESSAGES, messages_db)
-
-# ==========================================
-# 🏆 4. THE RPG ENGINE (ACHIEVEMENTS)
-# ==========================================
-def hex_to_int(hex_color):
-    if not hex_color: return 3447003 
-    return int(hex_color.lstrip('#'), 16)
-
-def manage_achievements_and_weekly(points_earned):
-    ach_db = load_db(DB_ACHIEVEMENTS)
-    if not ach_db or "current_week" not in ach_db: 
-        ach_db = {"lifetime_g": 0, "weekly_g": 0, "current_week": datetime.now(timezone.utc).isocalendar()[1]}
-        
-    current_week = datetime.now(timezone.utc).isocalendar()[1]
-    
-    if current_week != ach_db["current_week"]:
-        final_weekly = ach_db.get("weekly_g", 0)
-        ach_db["weekly_g"] = 0
-        ach_db["current_week"] = current_week
-        random_color = random.randint(0, 16777215)
-        
-        send_discord_alert(
-            WEBHOOK_ACHIEVEMENTS, "🔄 WEEKLY CYCLE COMPLETE", 
-            f"The grid has been wiped. You secured **{final_weekly} G** last week.\nTotal Lifetime Score: **{ach_db.get('lifetime_g', 0)} G**.\n\nA new cycle begins now.", 
-            random_color, None, None, None, override_name="System Oracle"
-        )
+            )
 
     old_weekly = ach_db.get("weekly_g", 0)
     
@@ -463,14 +380,15 @@ def execute_master_sync(inventory):
                     data.get('cover'),
                     None, None, override_tag
                 )
-
-           if TARGET_TOKEN:
+                
+            if TARGET_TOKEN:
                 payload = {'query': mutation_query, 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}
                 fetch_with_armor('https://graphql.anilist.co', payload, HEADERS)
             
             sync_db[media_id] = progress
             
     save_db(DB_SYNC, sync_db)
+
 
 # ==========================================
 # 🔮 9. LIVE DASHBOARD INJECTOR
@@ -517,5 +435,4 @@ if __name__ == '__main__':
     
     update_readme_badges()
     
-    print("=== MAXIMUM OVERDRIVE ENGINE:
-                
+    print("=== MAXIMUM OVERDRIVE ENGINE: CYCLE COMPLETE ===")
