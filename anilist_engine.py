@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, date
 from requests.auth import HTTPBasicAuth
 
-
 # ==========================================
 # ⚙️ 1. SYSTEM CONFIGURATION & SECRETS
 # ==========================================
@@ -19,15 +18,13 @@ WEBHOOK_ANIME = os.environ.get('DISCORD_ANIME_WEBHOOK')
 WEBHOOK_MANGA = os.environ.get('DISCORD_MANGA_WEBHOOK')
 WEBHOOK_AIRING = os.environ.get('DISCORD_AIRING_WEBHOOK')
 WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
-WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK') # 🛠️ THE VIP CHANNEL
+WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
 WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') 
 
-# 🛠️ TELEGRAM PIPELINE
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
-# 🗄️ ZULIP GRAND ARCHIVE PIPELINE
 ZULIP_URL = os.environ.get('ZULIP_SERVER_URL')
 ZULIP_EMAIL = os.environ.get('ZULIP_BOT_EMAIL')
 ZULIP_API_KEY = os.environ.get('ZULIP_API_KEY')
@@ -39,7 +36,6 @@ DB_AIRING = 'db_airing.json'
 DB_ACHIEVEMENTS = 'db_achievements.json' 
 XML_FILE_PATH = 'mal_export.xml'
 
-# 🛠️ S-TIER FRANCHISES
 PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
 
 HEADERS = {
@@ -74,68 +70,48 @@ def fetch_with_armor(url, payload, headers, retries=3):
     return None
 
 # ==========================================
-# 📡 3. COMMUNICATION PROTOCOLS
+# 📡 3. COMMUNICATION PROTOCOLS (NOW WITH DIAGNOSTICS)
 # ==========================================
 def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None):
-    if not webhook_url: return
+    if not webhook_url:
+        print(f"[DIAGNOSTICS] ⚠️ Discord Webhook missing for: {title}. Payload aborted.")
+        return
     
     embed = {
-        "title": title,
-        "description": description,
+        "title": title[:256],
+        "description": description[:4096] if description else "",
         "color": color,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
     if image_url: embed["image"] = {"url": image_url}
-    if fields: embed["fields"] = fields
+    if fields: embed["fields"] = fields[:25]
     if author: embed["author"] = author
         
     payload = {"embeds": [embed]}
-    if override_name: payload["username"] = override_name
+    if override_name: payload["username"] = override_name[:80]
     
-    response = requests.post(webhook_url + "?wait=true", json=payload)
-    
-    if response and response.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
-        try:
-            msg_id = response.json().get("id")
-            if msg_id:
-                messages_db = load_db(DB_MESSAGES)
-                if isinstance(messages_db, list): messages_db = {}
-                messages_db[msg_id] = {"timestamp": time.time(), "delete_url": f"{webhook_url}/messages/{msg_id}"}
-                save_db(DB_MESSAGES, messages_db)
-        except Exception: pass
-
-def send_telegram_alert(message, image_url=None):
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: return
-    
-    if image_url:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID, 
-            "photo": image_url, 
-            "caption": message, 
-            "parse_mode": "Markdown"
-        }
-    else:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        payload = {
-            "chat_id": TELEGRAM_CHAT_ID, 
-            "text": message, 
-            "parse_mode": "Markdown"
-        }
-        
     try:
-        res = requests.post(url, json=payload, timeout=10)
-        if res.status_code != 200 and image_url:
-            fallback_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-            fallback_payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
-            requests.post(fallback_url, json=fallback_payload, timeout=10)
+        response = requests.post(webhook_url + "?wait=true", json=payload, timeout=10)
+        print(f"[DIAGNOSTICS] Discord Status [{response.status_code}] for {title}")
+        if response.status_code >= 400:
+            print(f"[DIAGNOSTICS] ❌ Discord Error Details: {response.text}")
+            
+        if response.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
+            try:
+                msg_id = response.json().get("id")
+                if msg_id:
+                    messages_db = load_db(DB_MESSAGES)
+                    if isinstance(messages_db, list): messages_db = {}
+                    messages_db[msg_id] = {"timestamp": time.time(), "delete_url": f"{webhook_url}/messages/{msg_id}"}
+                    save_db(DB_MESSAGES, messages_db)
+            except Exception: pass
     except Exception as e:
-        print(f"[SYSTEM] Telegram strike failed: {e}")
+        print(f"[DIAGNOSTICS] ❌ Discord Network Crash: {e}")
 
 def fire_zulip_archive(media_type, title, progress, total_episodes, score):
-    """Routes the log to the correct vault and threads it by Title."""
     if not ZULIP_URL or not ZULIP_EMAIL or not ZULIP_API_KEY:
+        print(f"[DIAGNOSTICS] ⚠️ Zulip Secrets Missing! URL: {bool(ZULIP_URL)} | Email: {bool(ZULIP_EMAIL)} | Key: {bool(ZULIP_API_KEY)}")
         return
         
     stream_name = "Anime-Vault" if media_type == "ANIME" else "Manga-Vault"
@@ -151,10 +127,32 @@ def fire_zulip_archive(media_type, title, progress, total_episodes, score):
     }
     
     try:
-        print(f"🗄️ [ZULIP] Archiving {title} into {stream_name}...")
-        requests.post(ZULIP_URL, auth=HTTPBasicAuth(ZULIP_EMAIL, ZULIP_API_KEY), data=payload, timeout=10)
+        print(f"🗄️ [ZULIP] Firing {title} to {stream_name}...")
+        res = requests.post(ZULIP_URL, auth=HTTPBasicAuth(ZULIP_EMAIL, ZULIP_API_KEY), data=payload, timeout=10)
+        print(f"[DIAGNOSTICS] Zulip Status [{res.status_code}]")
+        if res.status_code >= 400:
+            print(f"[DIAGNOSTICS] ❌ Zulip Error Details: {res.text}")
     except Exception as e:
-        print(f"[SYSTEM] Zulip archive failed: {e}")
+        print(f"[DIAGNOSTICS] ❌ Zulip Network Crash: {e}")
+
+def send_telegram_alert(message, image_url=None):
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: return
+    
+    if image_url:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
+        payload = {"chat_id": TELEGRAM_CHAT_ID, "photo": image_url, "caption": message, "parse_mode": "Markdown"}
+    else:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
+        
+    try:
+        res = requests.post(url, json=payload, timeout=10)
+        if res.status_code != 200 and image_url:
+            fallback_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+            fallback_payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
+            requests.post(fallback_url, json=fallback_payload, timeout=10)
+    except Exception as e:
+        print(f"[SYSTEM] Telegram strike failed: {e}")
 
 def execute_48hr_purge():
     messages_db = load_db(DB_MESSAGES)
@@ -194,7 +192,6 @@ def manage_achievements_and_weekly(points_earned):
         )
 
     old_weekly = ach_db.get("weekly_g", 0)
-    
     ach_db["weekly_g"] = old_weekly + points_earned
     ach_db["lifetime_g"] = ach_db.get("lifetime_g", 0) + points_earned
     
@@ -272,7 +269,7 @@ def fetch_anilist_inventory(username):
     return inventory
 
 # ==========================================
-# ⏰ 6. AIRING INTELLIGENCE (DUAL-STAGE RADAR)
+# ⏰ 6. AIRING INTELLIGENCE
 # ==========================================
 def process_airing_countdowns(inventory):
     airing_db = load_db(DB_AIRING)
@@ -303,9 +300,8 @@ def process_airing_countdowns(inventory):
                 msg_title = f"🚨 FINAL 1-HOUR WARNING: Episode {ep_number}"
                 
                 title_clean = data['english'] or data['romaji']
-                cover_art = data.get('cover')
                 tg_payload = f"🚨 *FINAL 1-HOUR WARNING*\n\n📺 *{title_clean}*\nEpisode {ep_number} is dropping in under 60 minutes."
-                send_telegram_alert(tg_payload, cover_art)
+                send_telegram_alert(tg_payload, data.get('cover'))
 
             if alert_type:
                 fields = [
@@ -314,15 +310,13 @@ def process_airing_countdowns(inventory):
                     {"name": "📺 Telecast Time", "value": f"<t:{airing_at}:F>", "inline": False}, 
                     {"name": "⏳ Live Countdown", "value": f"<t:{airing_at}:R>", "inline": False}, 
                 ]
-                
-                poster_color = hex_to_int(data["color"])
-                send_discord_alert(WEBHOOK_AIRING, msg_title, "", poster_color, data.get('cover'), fields)
+                send_discord_alert(WEBHOOK_AIRING, msg_title, "", hex_to_int(data["color"]), data.get('cover'), fields)
                 airing_db[db_key] = alert_type
             
     save_db(DB_AIRING, airing_db)
 
 # ==========================================
-# 👻 7. MAL GHOST RADAR (BIMODAL)
+# 👻 7. MAL GHOST RADAR
 # ==========================================
 def sweep_mal_xml(known_titles_pool):
     ghosts = load_db(DB_GHOSTS)
@@ -391,6 +385,7 @@ def execute_master_sync(inventory):
         media_type = data["type"]
         
         if str(sync_db.get(media_id)) != str(progress):
+            print(f"\n[ENGINE] Activity Detected: {title} ({media_type}) -> Progress: {progress}")
             
             delta = progress - int(sync_db.get(media_id, 0))
             if delta < 0: delta = 0 
@@ -436,7 +431,6 @@ def execute_master_sync(inventory):
 
             send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag)
             
-            # 🗄️ ZULIP GRAND ARCHIVE STRIKE
             fire_zulip_archive(
                 media_type=media_type, 
                 title=title, 
@@ -445,8 +439,6 @@ def execute_master_sync(inventory):
                 score=data.get('scoreRaw')
             )
             
-            # 🛠️ PATCH: VIP ROUTING ACTIVATED
-            # This scans both the English and Romaji titles. If it hits one of your S-Tier Priority franchises, it fires a copy straight to the VIP room.
             is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
             if is_vip and WEBHOOK_VIP:
                 send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update Logged.", color, data.get('cover'), fields, author_block, override_tag)
@@ -490,7 +482,6 @@ def update_readme_badges():
         
         with open('README.md', 'w', encoding='utf-8') as f:
             f.write(new_content)
-        print("[SYSTEM] GitHub README Badges updated successfully.")
     except Exception as e:
         print(f"[SYSTEM] Badge Injection Failed: {e}")
 
