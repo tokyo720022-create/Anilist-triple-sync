@@ -1,20 +1,14 @@
-name: AniList Maximum Overdrive
+name: AniList Maximum Overdrive Sync
 
 on:
   schedule:
-    - cron: '30 2-17 * * *' 
-  workflow_dispatch:
-
-permissions:
-  contents: write
+    # Set to your preferred schedule (e.g., 10 AM and 7 PM). Remember this uses UTC time!
+    - cron: '0 4,13 * * *' 
+  workflow_dispatch: # This is your manual Mobile Detonator button
 
 jobs:
-  sync_engine:
+  matrix_sync:
     runs-on: ubuntu-latest
-    
-    concurrency:
-      group: anilist-engine
-      cancel-in-progress: true 
 
     steps:
       - name: Checkout Repository
@@ -26,35 +20,33 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: Run Master Engine
+      - name: Execute Maximum Overdrive Engine
         env:
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
-          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }} 
-          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }} 
+          DISCORD_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANIME_WEBHOOK }}
+          DISCORD_MANGA_WEBHOOK: ${{ secrets.DISCORD_MANGA_WEBHOOK }}
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
-          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
-          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }} 
+          DISCORD_LOG_WEBHOOK: ${{ secrets.DISCORD_LOG_WEBHOOK }}
+          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }}
           DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
           DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }} # 🛠️ MOBILE PIPELINE
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }} # 🛠️ MOBILE PIPELINE
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # 🗄️ ZULIP SECRETS
+          ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
+          ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
+          ZULIP_SERVER_URL: ${{ secrets.ZULIP_SERVER_URL }}
         run: python anilist_engine.py
 
-      - name: Secure JSON Vault Backup
-        uses: actions/upload-artifact@v4
-        with:
-          name: memory-vault-backup
-          path: '*.json'
-          retention-days: 30
-
-      - name: Save Engine Memory
+      - name: Commit Matrix Databases and Dashboard
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git pull origin main --rebase || true 
-          git add *.json README.md || true 
-          git diff --staged --quiet || git commit -m "chore: state memory update [skip ci]"
+          git config --global user.name "Matrix Auto-Bot"
+          git config --global user.email "action@github.com"
+          git add db_*.json README.md || true
+          git commit -m "Auto-update matrix databases & UI [skip ci]" || true
           git push
-
+          
