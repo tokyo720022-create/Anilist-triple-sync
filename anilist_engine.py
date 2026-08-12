@@ -576,7 +576,19 @@ def update_readme_badges():
     lifetime = ach_db.get('lifetime_g', 0)
     weekly = ach_db.get('weekly_g', 0)
     
-    badge_md = f"<!-- BADGES_START -->\n![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-{lifetime}%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)\n![Weekly](https://img.shields.io/badge/Weekly_Grind-{weekly}%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)\n<!-- BADGES_END -->"
+    # ⚡ PULL LIVE DAILY PERFORMANCE DATA
+    stats = get_performance_stats()
+    daily_eps = stats['daily'].get('episodes', 0)
+    daily_chp = stats['daily'].get('chapters', 0)
+    
+    badge_md = (
+        f"<!-- BADGES_START -->\n"
+        f"![Gamerscore](https://img.shields.io/badge/LIFETIME_GAMERSCORE-{lifetime}%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)\n"
+        f"![Weekly](https://img.shields.io/badge/WEEKLY_GRIND-{weekly}%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)\n\n"
+        f"![Daily Eps](https://img.shields.io/badge/DAILY_EPS-{daily_eps}-007EC6?style=for-the-badge&logo=youtube&logoColor=white)\n"
+        f"![Daily Chp](https://img.shields.io/badge/DAILY_CHP-{daily_chp}-73BA25?style=for-the-badge&logo=anilist&logoColor=white)\n"
+        f"<!-- BADGES_END -->"
+    )
     
     try:
         with open('README.md', 'r', encoding='utf-8') as f:
@@ -588,6 +600,7 @@ def update_readme_badges():
             f.write(new_content)
     except Exception as e:
         print(f"[SYSTEM] Badge Injection Failed: {e}")
+        
 
 # ==========================================
 # 🚀 11. INITIATION SEQUENCE
