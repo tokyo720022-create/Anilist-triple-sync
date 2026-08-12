@@ -107,8 +107,7 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
 
 def send_telegram_alert(message, image_url=None):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID: return
-    
-            )
+          )
 
     old_weekly = ach_db.get("weekly_g", 0)
     
