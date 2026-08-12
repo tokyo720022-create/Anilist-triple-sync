@@ -18,10 +18,7 @@
 ![Daily Chp](https://img.shields.io/badge/DAILY_CHP-3-73BA25?style=for-the-badge&logo=anilist&logoColor=white)
 <!-- BADGES_END -->
 
-<!-- PERFORMANCE_START -->
-![Daily Eps](https://img.shields.io/badge/Daily_Eps-0-blue?style=for-the-badge&logo=youtube&logoColor=white)
-![Daily Chp](https://img.shields.io/badge/Daily_Chp-0-green?style=for-the-badge&logo=bookmeter&logoColor=white)
-<!-- PERFORMANCE_END -->
+
 
 ---
 
