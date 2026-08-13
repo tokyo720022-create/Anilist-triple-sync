@@ -68,6 +68,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git pull origin main --rebase || true 
+          # The *.json wildcard automatically captures db_sync, db_void, db_ghosts, etc.
           git add *.json performance/ README.md || true 
-          git diff --staged --quiet || git commit -m "chore: performance & state memory update [skip ci]"
+          git diff --staged --quiet || git commit -m "chore: V2 telemetry & state memory update [skip ci]"
           git push
