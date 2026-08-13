@@ -1,15 +1,8 @@
 # ⚡ ANILIST MAXIMUM OVERDRIVE SYNC: V2 ⚡
 
-<!-- BADGES_START -->
-![Gamerscore](https://img.shields.io/badge/Lifetime_Gamerscore-5028%20G-FFD700?style=for-the-badge&logo=epic-games&logoColor=black)
-![Weekly](https://img.shields.io/badge/Weekly_Grind-662%20G-FF4500?style=for-the-badge&logo=graphql&logoColor=white)
-<!-- BADGES_END -->
-
-<!-- PERFORMANCE_START -->
-![Daily Eps](https://img.shields.io/badge/Daily_Eps-0-blue?style=for-the-badge&logo=youtube&logoColor=white)
-![Daily Chp](https://img.shields.io/badge/Daily_Chp-0-green?style=for-the-badge&logo=bookmeter&logoColor=white)
-<!-- PERFORMANCE_END -->
-
+<!-- TELEMETRY_START -->
+<!-- Telemetry Hub will inject live CLI data here -->
+<!-- TELEMETRY_END -->
 ---
 
 ```text
