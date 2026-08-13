@@ -1,7 +1,30 @@
 # ⚡ ANILIST MAXIMUM OVERDRIVE SYNC: V2 ⚡
 
 <!-- TELEMETRY_START -->
-<!-- Telemetry Hub will inject live CLI data here -->
+```text
+TODAY
+─────────────────────────
+Anime             1 eps
+Manga             3 ch
+Time             37 min
+Gamerscore       6 G
+
+THIS WEEK
+─────────────────────────
+Anime             1 eps
+Manga            24 ch
+Time            142 min
+Gamerscore       6 G
+
+ALL TIME
+─────────────────────────
+Episodes          0
+Chapters          3
+Minutes          15
+Gamerscore       6 G
+Completed         0
+
+```
 <!-- TELEMETRY_END -->
 ---
 
