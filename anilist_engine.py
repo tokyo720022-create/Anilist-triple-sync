@@ -77,21 +77,42 @@ def safe_int(val, default=0):
         
 
 # ==========================================
-# 🧵 1.5. DYNAMIC THREAD ROUTER
+# 🧵 1.5. SELECTIVE THREAD ROUTER
 # ==========================================
+# ⚡ THE FILTER: Only these exact categories get dedicated threads
+TARGET_LISTS = [
+    "anime movies", 
+    "iseki", 
+    "milf", 
+    "loli", 
+    "plan to continue", 
+    "hentai", 
+    "favourite", 
+    "fav", 
+    "planning"
+]
+
 def get_or_create_thread(list_name, media_type, base_webhook):
     if not base_webhook: return None
     threads = load_db(DB_THREADS)
     
-    thread_key = f"[{media_type}] {list_name}" 
+    # ⚡ THE ROUTING LOGIC: Funnel non-target lists to a Global feed
+    clean_name = list_name.lower().strip()
+    
+    if clean_name in TARGET_LISTS:
+        display_name = list_name.title()
+    else:
+        display_name = "Global Updates"
+        
+    thread_key = f"[{media_type}] {display_name}" 
     
     if thread_key in threads:
         return threads[thread_key]
         
-    print(f"[SYSTEM] Brand new category detected: '{thread_key}'. Constructing Discord thread...")
+    print(f"[SYSTEM] Forging new dedicated Forum thread: '{thread_key}'...")
     
     payload = {
-        "content": f"📡 **{list_name}** | {media_type} Telemetry Dashboard Initialized",
+        "content": f"📡 **{display_name}** | {media_type} Telemetry Dashboard Initialized",
         "thread_name": thread_key
     }
     
