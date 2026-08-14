@@ -25,7 +25,7 @@ jobs:
 
       - name: Run Dossier Engine
         env:
-          # ⚡ Now wired directly to your brand new secret
+          # ⚡ Wired directly to your new dedicated Discord channel secret
           DISCORD_DOSSIER_WEBHOOK: ${{ secrets.DISCORD_DOSSIER_WEBHOOK }} 
         run: python jikan_dossier.py
 
@@ -37,3 +37,4 @@ jobs:
           git add db_dossiers.json || true 
           git diff --staged --quiet || git commit -m "chore: Log processed Jikan dossiers [skip ci]"
           git push
+          
