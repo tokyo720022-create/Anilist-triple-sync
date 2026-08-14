@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 WEBHOOK_URL = os.environ.get('DISCORD_DOSSIER_WEBHOOK')
 
 DB_GHOSTS = 'db_ghosts.json'
-DB_DOSSIERS = 'db_dossiers.json' # Memory file to prevent duplicate spam
+DB_DOSSIERS = 'db_dossiers.json' 
 MAL_ANIME_XML = 'mal_anime.xml'
 MAL_MANGA_XML = 'mal_export.xml'
 
@@ -25,11 +25,30 @@ def save_db(filepath, data):
     with open(filepath, 'w') as f: json.dump(data, f, indent=4)
 
 # ==========================================
-# 🔍 2. XML ID EXTRACTION
+# 🛡️ 2. TITANIUM ARMOR (JIKAN RETRY LOGIC)
+# ==========================================
+def fetch_jikan(url, params=None, retries=3):
+    """Wraps Jikan requests in armor to survive 504 Gateway Timeouts."""
+    for attempt in range(retries):
+        try:
+            res = requests.get(url, params=params, timeout=15)
+            if res.status_code == 200:
+                return res
+            elif res.status_code in [500, 502, 503, 504]:
+                print(f"[SYSTEM] Jikan server struggling (Status {res.status_code}). Retrying in {5 * (attempt + 1)}s...")
+                time.sleep(5 * (attempt + 1))
+            else:
+                return res # Return 404s normally so they don't loop endlessly
+        except Exception as e:
+            print(f"[SYSTEM] Network timeout: {e}. Retrying...")
+            time.sleep(5 * (attempt + 1))
+    return None
+
+# ==========================================
+# 🔍 3. XML ID EXTRACTION
 # ==========================================
 def extract_mal_ids():
     title_to_id = {}
-    
     if os.path.exists(MAL_ANIME_XML):
         try:
             for anime in ET.parse(MAL_ANIME_XML).getroot().findall('anime'):
@@ -45,18 +64,17 @@ def extract_mal_ids():
                 mal_id = manga.find('manga_mangadb_id').text
                 title_to_id[title] = {"id": mal_id, "type": "manga"}
         except Exception: pass
-        
     return title_to_id
 
 # ==========================================
-# 📁 3. JIKAN DOSSIER GENERATION
+# 📁 4. JIKAN DOSSIER GENERATION
 # ==========================================
 def generate_dossier(mal_id, media_type, ghost_title):
     url = f"https://api.jikan.moe/v4/{media_type}/{mal_id}"
-    res = requests.get(url, timeout=15)
+    res = fetch_jikan(url)
     
-    if res.status_code != 200:
-        print(f"[ERROR] Jikan API Strike Failed for ID {mal_id} | Status: {res.status_code}")
+    if not res or res.status_code != 200:
+        print(f"[ERROR] Jikan API Strike Failed for ID {mal_id} | Status: {res.status_code if res else 'Timeout'}")
         return None
         
     data = res.json().get('data', {})
@@ -109,7 +127,7 @@ def generate_dossier(mal_id, media_type, ghost_title):
     return embed
 
 # ==========================================
-# 🚀 4. INITIATION SEQUENCE
+# 🚀 5. INITIATION SEQUENCE
 # ==========================================
 if __name__ == "__main__":
     print("=== JIKAN DOSSIER EXTRACTION PROTOCOL: ONLINE ===")
@@ -125,35 +143,33 @@ if __name__ == "__main__":
     
     for ghost_title, ghost_data in ghosts.items():
         if ghost_title in dossiers:
-            continue # Bypass previously extracted ghosts
+            continue 
             
         media_type = ghost_data.get("type", "MANGA").lower()
         mapping = title_to_id.get(ghost_title)
         mal_id = None
         
-        # ⚡ THE FALLBACK PROTOCOL
         if mapping:
             mal_id = mapping['id']
         else:
             print(f"[SYSTEM] No XML match for '{ghost_title}'. Engaging Jikan Search Protocol...")
-            search_url = f"https://api.jikan.moe/v4/{media_type}?q={ghost_title}&limit=1"
             
-            try:
-                res = requests.get(search_url, timeout=10)
-                time.sleep(2.5) # Jikan rate limit buffer
-                
-                if res.status_code == 200:
-                    results = res.json().get('data', [])
-                    if results:
-                        mal_id = results[0]['mal_id']
-                    else:
-                        print(f"[ERROR] Jikan Search found zero results for '{ghost_title}'. Skipping.")
-                        continue
+            # ⚡ FIX: Safely encoding the query using params dictionary instead of raw f-strings
+            search_url = f"https://api.jikan.moe/v4/{media_type}"
+            payload = {"q": ghost_title, "limit": 1}
+            
+            res = fetch_jikan(search_url, params=payload)
+            time.sleep(2.5) 
+            
+            if res and res.status_code == 200:
+                results = res.json().get('data', [])
+                if results:
+                    mal_id = results[0]['mal_id']
                 else:
-                    print(f"[ERROR] Jikan Search API failed for '{ghost_title}'. Status: {res.status_code}")
+                    print(f"[ERROR] Jikan Search found zero results for '{ghost_title}'. Skipping.")
                     continue
-            except Exception as e:
-                print(f"[ERROR] Network failure during search for '{ghost_title}': {e}")
+            else:
+                print(f"[ERROR] Jikan Search API completely failed for '{ghost_title}'. Skipping to next.")
                 continue
                 
         print(f"[ENGINE] Extracting heavy data for: {ghost_title} (MAL ID: {mal_id})")
@@ -166,8 +182,8 @@ if __name__ == "__main__":
                     dossiers[ghost_title] = {"mal_id": mal_id, "processed_at": time.time()}
             except Exception: pass
                 
-        time.sleep(2.5) # Jikan API enforces a strict rate limit. Do not lower this.
+        time.sleep(2.5) 
         
     save_db(DB_DOSSIERS, dossiers)
     print("=== DOSSIER EXTRACTION COMPLETE ===")
-            
+        
