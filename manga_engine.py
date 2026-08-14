@@ -468,7 +468,7 @@ def execute_master_sync(inventory):
             delta = progress - db_progress
             if delta < 0: delta = 0 
             
-            g_earned = (delta * 2) 
+            g_earned = (delta * 10) if media_type == "ANIME" else (delta * 2) 
             is_completed = data["status"] == "COMPLETED"
             if is_completed: g_earned += 100 
             
@@ -483,18 +483,17 @@ def execute_master_sync(inventory):
             fields = [{"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False}, {"name": "📊 Status", "value": data["status"], "inline": False}]
             author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"} if is_completed else {"name": f"🎮 +{g_earned}G | Weekly: {ach_db.get('weekly_g', 0)}G"}
             
-            total = data['total_chapters']
+            total = data['total_episodes'] if media_type == "ANIME" else data['total_chapters']
             left = (total - progress) if total else "?"
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
             
-            # ⚡ SELECTIVE THREAD ROUTER WITH FALLBACK
-            thread_id = get_or_create_thread(data["list_category"], media_type, WEBHOOK_MANGA)
-
-            if thread_id == "IGNORE":
-                thread_id = None
+            webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
+            
+            # ⚡ ROUTER ACTIVATED: Grabs specific thread or Catch-All thread
+            thread_id = get_or_create_thread(data["list_category"], media_type, webhook)
 
             send_discord_alert(
-                WEBHOOK_MANGA,
+                webhook,
                 f"UPDATE: {title}",
                 "",
                 color,
@@ -504,12 +503,14 @@ def execute_master_sync(inventory):
                 override_tag,
                 thread_id=thread_id
             )
+            time.sleep(2) # 🛡️ Anti-Rate Limit Shield
             
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
             
             is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
             if is_vip and WEBHOOK_VIP: 
                 send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update.", color, data.get('cover'), fields, author_block, override_tag)
+                time.sleep(2) # 🛡️ Anti-Rate Limit Shield
                 
             if hit_1k: drop_classified_ui(1000)
             if hit_5k: drop_classified_ui(5000)
@@ -520,7 +521,6 @@ def execute_master_sync(inventory):
             
     save_db(DB_SYNC, sync_db)
     if hologram_trigger: refresh_performance_hologram()
-
 # ==========================================
 # 🔮 11. LIVE TELEMETRY INJECTOR
 # ==========================================
