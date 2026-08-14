@@ -2733,24 +2733,24 @@ The source expects:
 ```text
 TODAY
 ─────────────────────────
-Anime             2 eps
+Anime             3 eps
 Manga             0 ch
-Time             44 min
-Gamerscore      20 G
+Time             65 min
+Gamerscore      30 G
 
 THIS WEEK
 ─────────────────────────
-Anime             5 eps
+Anime             6 eps
 Manga            39 ch
-Time            303 min
-Gamerscore     176 G
+Time            324 min
+Gamerscore     186 G
 
 ALL TIME
 ─────────────────────────
-Episodes          4
+Episodes          5
 Chapters         18
-Minutes         176
-Gamerscore     176 G
+Minutes         197
+Gamerscore     186 G
 Completed         1
 
 ```
@@ -2770,24 +2770,24 @@ The inserted block has this structure:
 ```text
 TODAY
 ─────────────────────────
-Anime             2 eps
+Anime             3 eps
 Manga             0 ch
-Time             44 min
-Gamerscore      20 G
+Time             65 min
+Gamerscore      30 G
 
 THIS WEEK
 ─────────────────────────
-Anime             5 eps
+Anime             6 eps
 Manga            39 ch
-Time            303 min
-Gamerscore     176 G
+Time            324 min
+Gamerscore     186 G
 
 ALL TIME
 ─────────────────────────
-Episodes          4
+Episodes          5
 Chapters         18
-Minutes         176
-Gamerscore     176 G
+Minutes         197
+Gamerscore     186 G
 Completed         1
 
 ```
@@ -2805,24 +2805,24 @@ The replacement uses a DOTALL regular expression:
 ```text
 TODAY
 ─────────────────────────
-Anime             2 eps
+Anime             3 eps
 Manga             0 ch
-Time             44 min
-Gamerscore      20 G
+Time             65 min
+Gamerscore      30 G
 
 THIS WEEK
 ─────────────────────────
-Anime             5 eps
+Anime             6 eps
 Manga            39 ch
-Time            303 min
-Gamerscore     176 G
+Time            324 min
+Gamerscore     186 G
 
 ALL TIME
 ─────────────────────────
-Episodes          4
+Episodes          5
 Chapters         18
-Minutes         176
-Gamerscore     176 G
+Minutes         197
+Gamerscore     186 G
 Completed         1
 
 ```
@@ -2900,24 +2900,24 @@ Therefore the README must contain:
 ```text
 TODAY
 ─────────────────────────
-Anime             2 eps
+Anime             3 eps
 Manga             0 ch
-Time             44 min
-Gamerscore      20 G
+Time             65 min
+Gamerscore      30 G
 
 THIS WEEK
 ─────────────────────────
-Anime             5 eps
+Anime             6 eps
 Manga            39 ch
-Time            303 min
-Gamerscore     176 G
+Time            324 min
+Gamerscore     186 G
 
 ALL TIME
 ─────────────────────────
-Episodes          4
+Episodes          5
 Chapters         18
-Minutes         176
-Gamerscore     176 G
+Minutes         197
+Gamerscore     186 G
 Completed         1
 
 ```
@@ -3434,24 +3434,24 @@ Before the engine can inject telemetry, include:
 ```text
 TODAY
 ─────────────────────────
-Anime             2 eps
+Anime             3 eps
 Manga             0 ch
-Time             44 min
-Gamerscore      20 G
+Time             65 min
+Gamerscore      30 G
 
 THIS WEEK
 ─────────────────────────
-Anime             5 eps
+Anime             6 eps
 Manga            39 ch
-Time            303 min
-Gamerscore     176 G
+Time            324 min
+Gamerscore     186 G
 
 ALL TIME
 ─────────────────────────
-Episodes          4
+Episodes          5
 Chapters         18
-Minutes         176
-Gamerscore     176 G
+Minutes         197
+Gamerscore     186 G
 Completed         1
 
 ```
