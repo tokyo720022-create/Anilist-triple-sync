@@ -246,13 +246,15 @@ def fetch_with_armor(url, payload, headers, retries=3):
         except Exception: pass
         time.sleep((attempt + 1) * 3) 
     return None
+    
 # ==========================================
 # 📡 4. COMMUNICATION PROTOCOLS
 # ==========================================
-def send_discord_alert(webhook_url, title, desc, color, image, fields, author, override_tag=None, thread_id=None):
+# ⚡ UPGRADE: image, fields, and author are now optional (defaulting to None)
+def send_discord_alert(webhook_url, title, desc, color, image=None, fields=None, author=None, override_tag=None, thread_id=None):
     if not webhook_url: return
     
-    # ⚡ Safely attaches the thread ID to the webhook URL without breaking query logic
+    # Safely attaches the thread ID to the webhook URL without breaking query logic
     target_url = webhook_url
     if thread_id and thread_id != "IGNORE":
         separator = "&" if "?" in target_url else "?"
@@ -261,9 +263,11 @@ def send_discord_alert(webhook_url, title, desc, color, image, fields, author, o
     embed = {
         "title": title[:256],
         "description": desc,
-        "color": color,
-        "fields": fields[:25]
+        "color": color
     }
+    
+    # ⚡ SHIELD: Only attaches these blocks if the module actually provides them
+    if fields: embed["fields"] = fields[:25]
     if image: embed["image"] = {"url": image}
     if author: embed["author"] = author
     
@@ -272,7 +276,7 @@ def send_discord_alert(webhook_url, title, desc, color, image, fields, author, o
     
     try:
         res = requests.post(target_url, json=payload, timeout=15)
-        # ⚡ THE ALARM: If Discord rejects it, the engine will yell instead of dying silently
+        # THE ALARM: If Discord rejects it, the engine will yell instead of dying silently
         if res.status_code not in [200, 201, 204]:
             print(f"\n[ERROR] Discord rejected payload for '{title}'.")
             print(f"Status: {res.status_code} | Reason: {res.text}\n")
@@ -306,6 +310,8 @@ def execute_48hr_purge():
         del messages_db[key]
         time.sleep(1)
     save_db(DB_MESSAGES, messages_db)
+
+
 
 # ==========================================
 # 🏆 5. THE RPG ENGINE (ACHIEVEMENTS)
