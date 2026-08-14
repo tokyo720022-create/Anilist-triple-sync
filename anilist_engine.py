@@ -14,10 +14,12 @@ from requests.auth import HTTPBasicAuth
 SOURCE_USERNAME = "Orewatokyo"
 TARGET_TOKEN = os.environ.get('ANILIST_TARGET_TOKEN')
 
-WEBHOOK_ANIME = os.environ.get('DISCORD_ANIME_WEBHOOK')
-WEBHOOK_MANGA = os.environ.get('DISCORD_MANGA_WEBHOOK')
+# ⚡ Webhooks (Wired exactly to your updated GitHub Actions Secrets)
+WEBHOOK_ANIME = os.environ.get('DISCORD_ANILIST_ANIME_WEBHOOK')
+WEBHOOK_MANGA = os.environ.get('DISCORD_ANILIST_MANGA_WEBHOOK')
+WEBHOOK_LOG = os.environ.get('DISCORD_ANILIST_LOG_WEBHOOK')
+
 WEBHOOK_AIRING = os.environ.get('DISCORD_AIRING_WEBHOOK')
-WEBHOOK_LOG = os.environ.get('DISCORD_LOG_WEBHOOK')
 WEBHOOK_VIP = os.environ.get('DISCORD_FAVORITES_WEBHOOK')
 WEBHOOK_GHOST = os.environ.get('DISCORD_GHOST_RADAR_WEBHOOK')
 WEBHOOK_ACHIEVEMENTS = os.environ.get('DISCORD_ACHIEVEMENTS_WEBHOOK') 
@@ -30,6 +32,7 @@ ZULIP_URL = os.environ.get('ZULIP_SERVER_URL')
 ZULIP_EMAIL = os.environ.get('ZULIP_BOT_EMAIL')
 ZULIP_API_KEY = os.environ.get('ZULIP_API_KEY')
 
+# ⚡ Legacy Memory Vaults
 DB_SYNC = 'db_sync.json'
 DB_MESSAGES = 'db_messages.json'
 DB_GHOSTS = 'db_ghosts.json'
@@ -37,12 +40,15 @@ DB_VOID = 'db_void.json'
 DB_AIRING = 'db_airing.json'
 DB_ACHIEVEMENTS = 'db_achievements.json' 
 DB_PERFORMANCE_MSG = 'db_performance_msg.json'
-DB_THREADS = 'db_threads.json' # ⚡ NEW: Thread Memory Vault
-DB_INVENTORY = 'db_inventory.json' # ⚡ NEW: The Local Master Database
-DB_TIMESTAMP = 'db_timestamp.json' # ⚡ NEW: The Time Radar
+
+# ⚡ V2 Infrastructure Vaults
+DB_THREADS = 'db_threads.json'     # Forum Post ID Tracking
+DB_INVENTORY = 'db_inventory.json' # Local Master Database (Delta-Sync)
+DB_TIMESTAMP = 'db_timestamp.json' # Time Radar (Delta-Sync)
 XML_FILE_PATH = 'mal_export.xml'
 
-PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
+# ⚡ S-Tier Radar Targets
+PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "Kono Suba", "Dragon Ball Z"]
 
 HEADERS = {
     'Authorization': f'Bearer {TARGET_TOKEN}' if TARGET_TOKEN else '',
@@ -59,6 +65,7 @@ def load_db(filepath):
 
 def save_db(filepath, data):
     with open(filepath, 'w') as f: json.dump(data, f, indent=4)
+    
 
 # ==========================================
 # 🧵 1.5. DYNAMIC THREAD ROUTER
@@ -298,11 +305,11 @@ def drop_classified_ui(tier):
     if tier == 1000: send_discord_alert(WEBHOOK_ACHIEVEMENTS, "💠 1,000 G REACHED", ">> CLASS-A MILESTONE CLEARED <<", 16776960, "https://i.imgur.com/QzXoX1j.gif")
     elif tier == 5000: send_discord_alert(WEBHOOK_ACHIEVEMENTS, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
 
+
 # ==========================================
 # 🔎 6. ANILIST GRAPHQL CORE (DELTA-SYNC)
 # ==========================================
 def fetch_anilist_inventory(username):
-    # ⚡ Added sort: [UPDATED_TIME_DESC] to force newest updates to the very top
     query = '''
     query ($userName: String,$page: Int) {
       Page(page: $page, perPage: 50) {
@@ -329,7 +336,6 @@ def fetch_anilist_inventory(username):
     has_next_page = True
     highest_update = last_sync
     
-    # If the database doesn't exist yet, we run the Deep Analysis
     is_first_run = (last_sync == 0 or not inventory)
     
     if is_first_run:
@@ -347,7 +353,6 @@ def fetch_anilist_inventory(username):
         for item in data.get('mediaList', []):
             updated_at = item.get('updatedAt', 0)
             
-            # ⚡ THE DELTA CUTOFF: If we hit data older than our last scan, sever the connection!
             if not is_first_run and updated_at <= last_sync:
                 has_next_page = False
                 break
@@ -355,33 +360,43 @@ def fetch_anilist_inventory(username):
             if updated_at > highest_update:
                 highest_update = updated_at
 
-            media = item['media']
-            primary_title = media['title'].get('english') or media['title'].get('romaji')
+            # ⚡ TITANIUM ARMOR 1: Detect and bypass Ghost Entries (Deleted AniList Data)
+            media = item.get('media')
+            if not media:
+                continue 
+
+            # ⚡ TITANIUM ARMOR 2: Hyper-safe data extraction for missing tags
+            title_data = media.get('title') or {}
+            primary_title = title_data.get('english') or title_data.get('romaji') or "Unknown_Classified_Media"
             
             raw_custom = item.get('customLists')
             c_lists = raw_custom if isinstance(raw_custom, dict) else {}
             active_lists = [k for k, v in c_lists.items() if v]
-            list_category = active_lists[0] if active_lists else item['status'].replace('_', ' ').title()
+            
+            raw_status = item.get('status') or "UNKNOWN"
+            list_category = active_lists[0] if active_lists else raw_status.replace('_', ' ').title()
             
             if is_first_run:
                 print(f"[SCAN] {primary_title[:40]:<40} -> Cached to Local Vault")
             else:
                 print(f"[NEW UPDATE] Fetched live data for: {primary_title}")
             
-            # Write the fresh data to our local dictionary
+            cover_image = media.get('coverImage') or {}
+            
+            # Secure dictionary write
             inventory[primary_title] = {
-                "mediaId": item['mediaId'],
-                "progress": item['progress'],
-                "status": item['status'],
+                "mediaId": item.get('mediaId'),
+                "progress": item.get('progress', 0),
+                "status": raw_status,
                 "list_category": list_category,
                 "scoreRaw": item.get('score', 0), 
-                "type": media['type'],
-                "cover": media['coverImage']['extraLarge'] if media.get('coverImage') else None,
-                "color": media['coverImage'].get('color'), 
+                "type": media.get('type', 'UNKNOWN'),
+                "cover": cover_image.get('extraLarge'),
+                "color": cover_image.get('color'), 
                 "duration": media.get('duration') or 24,
                 "nextAiring": media.get('nextAiringEpisode'),
-                "romaji": media['title'].get('romaji'),
-                "english": media['title'].get('english'),
+                "romaji": title_data.get('romaji'),
+                "english": title_data.get('english'),
                 "total_episodes": media.get('episodes'),
                 "total_chapters": media.get('chapters')
             }
@@ -389,13 +404,11 @@ def fetch_anilist_inventory(username):
         page += 1
         time.sleep(1) 
         
-    # Lock the updated inventory and the new timestamp into the local vault
     save_db(DB_INVENTORY, inventory)
     save_db(DB_TIMESTAMP, {"last_update": highest_update})
     
     return inventory
-
-
+            
      
 # ==========================================
 # ⏰ 7. AIRING INTELLIGENCE
