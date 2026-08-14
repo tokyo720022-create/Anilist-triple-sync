@@ -19,19 +19,19 @@
         "total_chapters": null
     },
     "The Rising of the Shield Hero": {
-        "mediaId": 99263,
-        "progress": 25,
-        "status": "COMPLETED",
-        "list_category": "Completed",
+        "mediaId": 85442,
+        "progress": 45,
+        "status": "CURRENT",
+        "list_category": "Iseki",
         "scoreRaw": 100,
-        "type": "ANIME",
-        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx99263-LcazQwdlWzMy.jpg",
-        "color": "#5dc9e4",
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx85442-pIcvm2OjfTjR.jpg",
+        "color": "#e4ae43",
         "duration": 24,
         "nextAiring": null,
         "romaji": "Tate no Yuusha no Nariagari",
         "english": "The Rising of the Shield Hero",
-        "total_episodes": 25,
+        "total_episodes": null,
         "total_chapters": null
     },
     "Yama Hime no Mi: Satomi": {
