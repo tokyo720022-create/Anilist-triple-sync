@@ -2,9 +2,15 @@ name: Maximum Overdrive V2 Hub
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # Auto-fires every 4 hours
-  workflow_dispatch:      # Manual detonator
+    # 🟢 Strike 1: Fires at 08:00, 11:00, 14:00, 17:00, 20:00, and 23:00 IST
+    - cron: '30 2,5,8,11,14,17 * * *'
+    
+    # 🟢 Strike 2: Fires at 09:30, 12:30, 15:30, 18:30, and 21:30 IST
+    - cron: '0 4,7,10,13,16 * * *'
+    
+  workflow_dispatch:      # Manual detonator remains armed
 
+  
 permissions:
   contents: write
 
