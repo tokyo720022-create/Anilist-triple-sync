@@ -1920,19 +1920,19 @@
         "total_chapters": 7
     },
     "I Made Friends with the Second Prettiest Girl in My Class": {
-        "mediaId": 148082,
-        "progress": 16,
+        "mediaId": 169580,
+        "progress": 9,
         "status": "CURRENT",
         "list_category": "Current",
-        "scoreRaw": 0,
-        "type": "MANGA",
-        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx148082-kW0qmds2laKs.jpg",
-        "color": null,
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx169580-nXxpmqu6UVux.jpg",
+        "color": "#f1bb50",
         "duration": 24,
         "nextAiring": null,
         "romaji": "Class de 2-banme ni Kawaii Onnanoko to Tomodachi ni Natta",
         "english": "I Made Friends with the Second Prettiest Girl in My Class",
-        "total_episodes": null,
+        "total_episodes": 12,
         "total_chapters": null
     },
     "That Time I Got Reincarnated as a Slime Season 4": {
@@ -2777,7 +2777,7 @@
     },
     "Love Unseen Beneath the Clear Night Sky": {
         "mediaId": 202269,
-        "progress": 5,
+        "progress": 6,
         "status": "CURRENT",
         "list_category": "Current",
         "scoreRaw": 100,
