@@ -108,7 +108,8 @@ def generate_dossier(mal_id, media_type, ghost_title):
     title_rom = data.get('title') or 'N/A'
     
     raw_synopsis = data.get('synopsis') or "No synopsis available."
-    synopsis = raw_synopsis[:400] + "..." if len(raw_synopsis) > 400 else raw_synopsis
+    # Discord limit safety: Hard cap the synopsis string length
+    synopsis = raw_synopsis[:1500] + "..." if len(raw_synopsis) > 1500 else raw_synopsis
     
     genres = ", ".join([g['name'] for g in data.get('genres', [])]) or "N/A"
     
@@ -199,7 +200,8 @@ if __name__ == "__main__":
         print(f"[ENGINE] Extracting dossier for: {ghost_title} (MAL ID: {mal_id})")
         embed = generate_dossier(mal_id, media_type, ghost_title)
         
-                if embed and WEBHOOK_URL:
+        # ⚡ DIAGNOSTIC OVERRIDE: No more silent failures
+        if embed and WEBHOOK_URL:
             try:
                 print(f"[SYSTEM] Firing dossier to Discord for: {ghost_title}...")
                 res = requests.post(WEBHOOK_URL + "?wait=true", json={"embeds": [embed]}, timeout=10)
