@@ -79,31 +79,23 @@ def safe_int(val, default=0):
 # ==========================================
 # 🧵 1.5. SELECTIVE THREAD ROUTER
 # ==========================================
-# ⚡ THE FILTER: Only these exact categories get dedicated threads
+# ⚡ THE STRICT FILTER: Only these categories get Discord alerts
 TARGET_LISTS = [
-    "anime movies", 
-    "iseki", 
-    "milf", 
-    "loli", 
-    "plan to continue", 
-    "hentai", 
-    "favourite", 
-    "fav", 
-    "planning"
+    "anime movies", "iseki", "milf", "loli", 
+    "plan to continue", "hentai", "favourite", "fav", "planning"
 ]
 
 def get_or_create_thread(list_name, media_type, base_webhook):
     if not base_webhook: return None
     threads = load_db(DB_THREADS)
     
-    # ⚡ THE ROUTING LOGIC: Funnel non-target lists to a Global feed
     clean_name = list_name.lower().strip()
     
-    if clean_name in TARGET_LISTS:
-        display_name = list_name.title()
-    else:
-        display_name = "Global Updates"
+    # ⚡ SHIELD ACTIVATED: If it's not a targeted list, abort the ping completely
+    if clean_name not in TARGET_LISTS:
+        return "IGNORE"
         
+    display_name = list_name.title()
     thread_key = f"[{media_type}] {display_name}" 
     
     if thread_key in threads:
@@ -112,7 +104,7 @@ def get_or_create_thread(list_name, media_type, base_webhook):
     print(f"[SYSTEM] Forging new dedicated Forum thread: '{thread_key}'...")
     
     payload = {
-        "content": f"📡 **{display_name}** | {media_type} Telemetry Dashboard Initialized",
+        "content": f"📡 **{display_name}** | {media_type} Telemetry Dashboard",
         "thread_name": thread_key
     }
     
@@ -122,14 +114,10 @@ def get_or_create_thread(list_name, media_type, base_webhook):
             new_thread_id = res.json().get('channel_id')
             threads[thread_key] = new_thread_id
             save_db(DB_THREADS, threads)
-            print(f"[SUCCESS] Thread locked and secured. ID: {new_thread_id}")
             return new_thread_id
-        else:
-            print(f"[ERROR] Failed to build thread for {thread_key}. Status: {res.status_code}")
-            return None
-    except Exception as e:
-        print(f"[ERROR] Network failure during thread construction: {e}")
-        return None
+    except Exception:
+        pass
+    return None
 
 # ==========================================
 # 📊 2. THE V2 TELEMETRY HUB
@@ -335,7 +323,6 @@ def drop_classified_ui(tier):
     if tier == 1000: send_discord_alert(WEBHOOK_ACHIEVEMENTS, "💠 1,000 G REACHED", ">> CLASS-A MILESTONE CLEARED <<", 16776960, "https://i.imgur.com/QzXoX1j.gif")
     elif tier == 5000: send_discord_alert(WEBHOOK_ACHIEVEMENTS, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
 
-
 # ==========================================
 # 🔎 6. ANILIST GRAPHQL CORE (DELTA-SYNC)
 # ==========================================
@@ -349,7 +336,8 @@ def fetch_anilist_inventory(username):
           mediaId progress score status customLists
           media {
             title { romaji english }
-            type episodes chapters duration
+            type format episodes chapters duration
+            genres tags { name }
             coverImage { extraLarge color } 
             nextAiringEpisode { airingAt episode }
           }
@@ -358,20 +346,12 @@ def fetch_anilist_inventory(username):
     }
     '''
     
-    inventory = load_db(DB_INVENTORY)
-    timestamps = load_db(DB_TIMESTAMP)
+    inventory, timestamps = load_db(DB_INVENTORY), load_db(DB_TIMESTAMP)
     last_sync = timestamps.get("last_update", 0)
-    
-    page = 1
-    has_next_page = True
-    highest_update = last_sync
-    
+    page, has_next_page, highest_update = 1, True, last_sync
     is_first_run = (last_sync == 0 or not inventory)
     
-    if is_first_run:
-        print(">>> [SYSTEM] INITIATING DEEP ANALYSIS: Building Local Master Database...")
-    else:
-        print(f">>> [SYSTEM] DELTA-SYNC ENGAGED: Scanning for new updates only...")
+    print(">>> [SYSTEM] INITIATING DEEP ANALYSIS..." if is_first_run else ">>> [SYSTEM] DELTA-SYNC ENGAGED...")
 
     while has_next_page:
         res = fetch_with_armor('https://graphql.anilist.co', {'query': query, 'variables': {"userName": username, "page": page}}, HEADERS)
@@ -381,44 +361,48 @@ def fetch_anilist_inventory(username):
         has_next_page = data.get('pageInfo', {}).get('hasNextPage', False)
         
         for item in data.get('mediaList', []):
-            # ⚡ THE IMMORTAL SHIELD: Survives any corrupted API anomaly
             try:
-                # 1. The True Ghost Defense: Bypasses literal 'null' elements in the array
-                if not item:
-                    continue
-                    
+                if not item: continue
                 updated_at = item.get('updatedAt', 0)
                 
                 if not is_first_run and updated_at <= last_sync:
                     has_next_page = False
                     break
                     
-                if updated_at > highest_update:
-                    highest_update = updated_at
+                if updated_at > highest_update: highest_update = updated_at
 
-                # 2. The Missing Media Defense: Bypasses entries where media data was wiped
                 media = item.get('media')
-                if not media:
-                    continue 
+                if not media: continue 
                 
                 title_data = media.get('title') or {}
                 primary_title = str(title_data.get('english') or title_data.get('romaji') or "Unknown_Classified_Media")
                 
+                # ⚡ EXTRACTION: Pulling Genres and Tags for AI Sorting
+                genres = media.get('genres') or []
+                tags = [t.get('name') for t in (media.get('tags') or []) if t.get('name')]
+                descriptors = [g.lower() for g in genres] + [t.lower() for t in tags]
+                format_type = media.get('format') or ""
+                
+                # 1. Manual Check (If you DID click the button, use it)
                 raw_custom = item.get('customLists')
-                c_lists = raw_custom if isinstance(raw_custom, dict) else {}
-                active_lists = [k for k, v in c_lists.items() if v]
+                active_lists = [k for k, v in raw_custom.items() if v] if isinstance(raw_custom, dict) else []
+                
+                smart_category = None
+                if active_lists:
+                    smart_category = active_lists[0]
+                else:
+                    # 2. ⚡ AI AUTO-CATEGORIZER: Sorting without manual clicks!
+                    if format_type == "MOVIE": smart_category = "Anime movies"
+                    elif "isekai" in descriptors: smart_category = "Iseki"
+                    elif any(x in descriptors for x in ["hentai", "ecchi", "adult", "smut"]): smart_category = "Hentai"
+                    elif any(x in descriptors for x in ["milf", "older woman", "mother"]): smart_category = "Milf"
+                    elif "loli" in descriptors: smart_category = "Loli"
                 
                 raw_status = item.get('status') or "UNKNOWN"
-                list_category = active_lists[0] if active_lists else raw_status.replace('_', ' ').title()
+                list_category = smart_category if smart_category else raw_status.replace('_', ' ').title()
                 
-                if is_first_run:
-                    print(f"[SCAN] {primary_title[:40]:<40} -> Cached to Local Vault")
-                else:
-                    print(f"[NEW UPDATE] Fetched live data for: {primary_title}")
+                print(f"[SCAN/UPDATE] {primary_title[:40]:<40} -> Cached as: {list_category}")
                 
-                cover_image = media.get('coverImage') or {}
-                
-                # Secure dictionary write
                 inventory[primary_title] = {
                     "mediaId": item.get('mediaId'),
                     "progress": item.get('progress', 0),
@@ -426,8 +410,8 @@ def fetch_anilist_inventory(username):
                     "list_category": list_category,
                     "scoreRaw": item.get('score', 0), 
                     "type": media.get('type') or 'UNKNOWN',
-                    "cover": cover_image.get('extraLarge'),
-                    "color": cover_image.get('color'), 
+                    "cover": (media.get('coverImage') or {}).get('extraLarge'),
+                    "color": (media.get('coverImage') or {}).get('color'), 
                     "duration": media.get('duration') or 24,
                     "nextAiring": media.get('nextAiringEpisode'),
                     "romaji": title_data.get('romaji'),
@@ -435,18 +419,12 @@ def fetch_anilist_inventory(username):
                     "total_episodes": media.get('episodes'),
                     "total_chapters": media.get('chapters')
                 }
-                
-            except Exception as e:
-                # ⚡ If anything manages to bypass the armor, it gets caught here.
-                print(f"[WARNING] Extreme anomaly neutralized. Bypassing corrupted entry. Error: {e}")
-                continue
-            
+            except Exception: continue
         page += 1
         time.sleep(1) 
         
     save_db(DB_INVENTORY, inventory)
     save_db(DB_TIMESTAMP, {"last_update": highest_update})
-    
     return inventory
 
      
@@ -542,26 +520,19 @@ def execute_master_sync(inventory):
     
     for title, data in inventory.items():
         media_id = str(data["mediaId"])
-        
-        # ⚡ SHIELD ACTIVATED: Forces progress into a pure integer
-        progress = safe_int(data["progress"])
-        media_type = data["type"]
-        
-        # ⚡ SHIELD ACTIVATED: Purifies dirty data from the local memory vault
+        progress, media_type = safe_int(data["progress"]), data["type"]
         db_progress = safe_int(sync_db.get(media_id, 0))
         
         if str(sync_db.get(media_id)) != str(progress):
             delta = progress - db_progress
             if delta < 0: delta = 0 
             
-            if delta > 0:
-                print(f"\n[🔥 UPDATE DETECTED] {title} | Progress updated to: {progress}")
-            
             g_earned = (delta * 10) if media_type == "ANIME" else (delta * 2)
             is_completed = data["status"] == "COMPLETED"
             if is_completed: g_earned += 100 
             
             if delta > 0:
+                print(f"\n[🔥 UPDATE DETECTED] {title} | Progress updated to: {progress}")
                 update_performance_vault(media_type, delta, data['duration'], g_earned, is_completed)
                 hologram_trigger = True
             
@@ -569,36 +540,36 @@ def execute_master_sync(inventory):
             override_tag = "Orewatokyo" if is_prestige else None
             color = hex_to_int(data["color"])
             fields = [{"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False}, {"name": "📊 Status", "value": data["status"], "inline": False}]
-            
             author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"} if is_completed else {"name": f"🎮 +{g_earned}G | Weekly: {ach_db.get('weekly_g', 0)}G"}
+            
             total = data['total_episodes'] if media_type == "ANIME" else data['total_chapters']
             left = (total - progress) if total else "?"
-            
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
             
-            # Thread Router targets the exact category
             webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
             thread_id = get_or_create_thread(data["list_category"], media_type, webhook)
 
-            # Fire payload directly into the Discord thread
-            send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag, thread_id=thread_id)
+            # ⚡ THE SILENT IGNORE: Only send if it matches your target lists
+            if thread_id != "IGNORE":
+                send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag, thread_id=thread_id)
             
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
             
+            # S-Tier VIPs get alerts regardless of their list category
             is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
-            if is_vip and WEBHOOK_VIP: send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update.", color, data.get('cover'), fields, author_block, override_tag)
+            if is_vip and WEBHOOK_VIP: 
+                send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update.", color, data.get('cover'), fields, author_block, override_tag)
+                
             if hit_1k: drop_classified_ui(1000)
             if hit_5k: drop_classified_ui(5000)
             
-            if TARGET_TOKEN:
-                requests.post('https://graphql.anilist.co', json={'query': '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }''', 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}, headers=HEADERS)
+            if TARGET_TOKEN: requests.post('https://graphql.anilist.co', json={'query': '''mutation ($id: Int, $prog: Int, $score: Int) { SaveMediaListEntry (mediaId: $id, progress: $prog, scoreRaw: $score) { id } }''', 'variables': {"id": data["mediaId"], "prog": progress, "score": data["scoreRaw"]}}, headers=HEADERS)
             
             sync_db[media_id] = progress
             
     save_db(DB_SYNC, sync_db)
     if hologram_trigger: refresh_performance_hologram()
 
-            
 # ==========================================
 # 🔮 11. LIVE TELEMETRY INJECTOR
 # ==========================================
