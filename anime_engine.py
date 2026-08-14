@@ -504,6 +504,13 @@ def execute_master_sync(inventory):
     sync_db = load_db(DB_SYNC)
     hologram_trigger = False
     
+    # ⚡ THE SILENT INITIALIZATION PATCH
+    # If the database is completely empty, we are building the baseline.
+    is_first_sync = len(sync_db) == 0 
+    
+    if is_first_sync:
+        print(">>> [SYSTEM] FIRST RUN DETECTED: Silently building Anime Sync Vault. Bypassing Discord to prevent spam...")
+    
     for title, data in inventory.items():
         media_id = str(data["mediaId"])
         progress, media_type = safe_int(data["progress"]), data["type"]
@@ -513,7 +520,12 @@ def execute_master_sync(inventory):
             delta = progress - db_progress
             if delta < 0: delta = 0 
             
-            # ⚡ ANIME CORE: Multiplier set to 10G per episode watched
+            # ⚡ If it is the first run, ONLY save the memory and skip the alerts entirely
+            if is_first_sync:
+                sync_db[media_id] = progress
+                continue
+            
+            # --- Normal Active Telemetry Below ---
             g_earned = (delta * 10) 
             is_completed = data["status"] == "COMPLETED"
             if is_completed: g_earned += 100 
@@ -529,12 +541,10 @@ def execute_master_sync(inventory):
             fields = [{"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False}, {"name": "📊 Status", "value": data["status"], "inline": False}]
             author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"} if is_completed else {"name": f"🎮 +{g_earned}G | Weekly: {ach_db.get('weekly_g', 0)}G"}
             
-            # ⚡ ANIME CORE: Tracking episodes instead of chapters
             total = data['total_episodes'] 
             left = (total - progress) if total else "?"
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
             
-            # ⚡ ROUTER ACTIVATED: Grabs specific Custom Thread or defaults to General Updates
             thread_id = get_or_create_thread(data["list_category"], media_type, WEBHOOK_ANIME)
 
             send_discord_alert(
@@ -548,14 +558,14 @@ def execute_master_sync(inventory):
                 override_tag,
                 thread_id=thread_id
             )
-            time.sleep(2) # 🛡️ Anti-Rate Limit Shield Activated
+            time.sleep(2) 
             
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
             
             is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
             if is_vip and WEBHOOK_VIP: 
                 send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update.", color, data.get('cover'), fields, author_block, override_tag)
-                time.sleep(2) # 🛡️ Anti-Rate Limit Shield Activated
+                time.sleep(2) 
                 
             if hit_1k: drop_classified_ui(1000)
             if hit_5k: drop_classified_ui(5000)
@@ -566,18 +576,6 @@ def execute_master_sync(inventory):
             
     save_db(DB_SYNC, sync_db)
     if hologram_trigger: refresh_performance_hologram()
-# ==========================================
-# 🔮 11. LIVE TELEMETRY INJECTOR
-# ==========================================
-def update_readme_telemetry():
-    cli_board = generate_cli_board()
-    telemetry_md = f"<!-- TELEMETRY_START -->\n```text\n{cli_board}\n```\n<!-- TELEMETRY_END -->"
-    
-    try:
-        with open('README.md', 'r', encoding='utf-8') as f: content = f.read()
-        with open('README.md', 'w', encoding='utf-8') as f: f.write(re.sub(r'<!-- TELEMETRY_START -->.*?<!-- TELEMETRY_END -->', telemetry_md, content, flags=re.DOTALL))
-    except Exception as e: print(f"[SYSTEM] Telemetry Injection Failed: {e}")
-
 # ==========================================
 # 🚀 12. INITIATION SEQUENCE
 # ==========================================
