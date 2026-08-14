@@ -38,6 +38,8 @@ DB_AIRING = 'db_airing.json'
 DB_ACHIEVEMENTS = 'db_achievements.json' 
 DB_PERFORMANCE_MSG = 'db_performance_msg.json'
 DB_THREADS = 'db_threads.json' # ⚡ NEW: Thread Memory Vault
+DB_INVENTORY = 'db_inventory.json' # ⚡ NEW: The Local Master Database
+DB_TIMESTAMP = 'db_timestamp.json' # ⚡ NEW: The Time Radar
 XML_FILE_PATH = 'mal_export.xml'
 
 PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
@@ -297,14 +299,16 @@ def drop_classified_ui(tier):
     elif tier == 5000: send_discord_alert(WEBHOOK_ACHIEVEMENTS, "🔥 5,000 G: OVERDRIVE", ">> SYSTEM MAXIMIZED. APEX TIER REACHED <<", 16711680, "https://i.imgur.com/W2dM9Ue.gif")
 
 # ==========================================
-# 🔎 6. ANILIST GRAPHQL CORE
+# 🔎 6. ANILIST GRAPHQL CORE (DELTA-SYNC)
 # ==========================================
 def fetch_anilist_inventory(username):
+    # ⚡ Added sort: [UPDATED_TIME_DESC] to force newest updates to the very top
     query = '''
     query ($userName: String,$page: Int) {
       Page(page: $page, perPage: 50) {
         pageInfo { hasNextPage }
-        mediaList(userName: $userName) {
+        mediaList(userName: $userName, sort: [UPDATED_TIME_DESC]) {
+          updatedAt
           mediaId progress score status customLists
           media {
             title { romaji english }
@@ -316,27 +320,55 @@ def fetch_anilist_inventory(username):
       }
     }
     '''
-    inventory, page, has_next_page = {}, 1, True
     
+    inventory = load_db(DB_INVENTORY)
+    timestamps = load_db(DB_TIMESTAMP)
+    last_sync = timestamps.get("last_update", 0)
+    
+    page = 1
+    has_next_page = True
+    highest_update = last_sync
+    
+    # If the database doesn't exist yet, we run the Deep Analysis
+    is_first_run = (last_sync == 0 or not inventory)
+    
+    if is_first_run:
+        print(">>> [SYSTEM] INITIATING DEEP ANALYSIS: Building Local Master Database...")
+    else:
+        print(f">>> [SYSTEM] DELTA-SYNC ENGAGED: Scanning for new updates only...")
+
     while has_next_page:
         res = fetch_with_armor('https://graphql.anilist.co', {'query': query, 'variables': {"userName": username, "page": page}}, HEADERS)
         if not res: break
+        
         data = res.json().get('data', {}).get('Page', {})
         has_next_page = data.get('pageInfo', {}).get('hasNextPage', False)
         
         for item in data.get('mediaList', []):
+            updated_at = item.get('updatedAt', 0)
+            
+            # ⚡ THE DELTA CUTOFF: If we hit data older than our last scan, sever the connection!
+            if not is_first_run and updated_at <= last_sync:
+                has_next_page = False
+                break
+                
+            if updated_at > highest_update:
+                highest_update = updated_at
+
             media = item['media']
             primary_title = media['title'].get('english') or media['title'].get('romaji')
             
-            # Parse the customLists JSON to find your specific category
             raw_custom = item.get('customLists')
             c_lists = raw_custom if isinstance(raw_custom, dict) else {}
             active_lists = [k for k, v in c_lists.items() if v]
             list_category = active_lists[0] if active_lists else item['status'].replace('_', ' ').title()
             
-            # ⚡ X-RAY VISION ACTIVATED: Prints every title and its detected category
-            print(f"[SCAN] {primary_title[:40]:<40} -> Category Locked: {list_category}")
+            if is_first_run:
+                print(f"[SCAN] {primary_title[:40]:<40} -> Cached to Local Vault")
+            else:
+                print(f"[NEW UPDATE] Fetched live data for: {primary_title}")
             
+            # Write the fresh data to our local dictionary
             inventory[primary_title] = {
                 "mediaId": item['mediaId'],
                 "progress": item['progress'],
@@ -353,9 +385,18 @@ def fetch_anilist_inventory(username):
                 "total_episodes": media.get('episodes'),
                 "total_chapters": media.get('chapters')
             }
+            
         page += 1
         time.sleep(1) 
+        
+    # Lock the updated inventory and the new timestamp into the local vault
+    save_db(DB_INVENTORY, inventory)
+    save_db(DB_TIMESTAMP, {"last_update": highest_update})
+    
     return inventory
+
+
+     
 # ==========================================
 # ⏰ 7. AIRING INTELLIGENCE
 # ==========================================
