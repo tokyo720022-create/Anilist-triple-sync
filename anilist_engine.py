@@ -300,7 +300,6 @@ def drop_classified_ui(tier):
 # 🔎 6. ANILIST GRAPHQL CORE
 # ==========================================
 def fetch_anilist_inventory(username):
-    # ⚡ NEW: Added customLists to the GraphQL query to extract your personal categories
     query = '''
     query ($userName: String,$page: Int) {
       Page(page: $page, perPage: 50) {
@@ -329,17 +328,20 @@ def fetch_anilist_inventory(username):
             media = item['media']
             primary_title = media['title'].get('english') or media['title'].get('romaji')
             
-            # ⚡ NEW: Parse the customLists JSON to find your specific category
+            # Parse the customLists JSON to find your specific category
             raw_custom = item.get('customLists')
             c_lists = raw_custom if isinstance(raw_custom, dict) else {}
             active_lists = [k for k, v in c_lists.items() if v]
             list_category = active_lists[0] if active_lists else item['status'].replace('_', ' ').title()
             
+            # ⚡ X-RAY VISION ACTIVATED: Prints every title and its detected category
+            print(f"[SCAN] {primary_title[:40]:<40} -> Category Locked: {list_category}")
+            
             inventory[primary_title] = {
                 "mediaId": item['mediaId'],
                 "progress": item['progress'],
                 "status": item['status'],
-                "list_category": list_category, # Saving the category for the Thread Router
+                "list_category": list_category,
                 "scoreRaw": item.get('score', 0), 
                 "type": media['type'],
                 "cover": media['coverImage']['extraLarge'] if media.get('coverImage') else None,
@@ -354,7 +356,6 @@ def fetch_anilist_inventory(username):
         page += 1
         time.sleep(1) 
     return inventory
-
 # ==========================================
 # ⏰ 7. AIRING INTELLIGENCE
 # ==========================================
