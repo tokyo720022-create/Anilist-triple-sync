@@ -1,0 +1,87 @@
+name: Maximum Overdrive V2 - Manga Engine
+
+on:
+  schedule:
+    # GitHub Actions cron uses UTC.
+    # These run at 10:00, 11:30, 13:00, 14:30, 16:00,
+    # 17:30, 19:00, 20:30 and 22:00 IST.
+    # No Manga engine runs from 22:00 IST until 10:00 IST.
+    - cron: '30 4 * * *'
+    - cron: '0 6 * * *'
+    - cron: '30 7 * * *'
+    - cron: '0 9 * * *'
+    - cron: '30 10 * * *'
+    - cron: '0 12 * * *'
+    - cron: '30 13 * * *'
+    - cron: '0 15 * * *'
+    - cron: '30 16 * * *'
+
+  # Manual trigger remains available.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  manga_engine:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run Manga Engine
+        env:
+          # AniList
+          ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
+
+          # Discord - Manga engine uses Manga + shared feature webhooks
+          DISCORD_ANILIST_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }}
+          DISCORD_ANILIST_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
+          DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
+          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }}
+          DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
+          DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
+          DISCORD_PERFORMANCE_WEBHOOK: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK }}
+
+          # Telegram
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+          # Zulip
+          ZULIP_SERVER_URL: ${{ secrets.ZULIP_SERVER_URL }}
+          ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
+          ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
+
+        run: |
+          python -u manga_engine.py
+
+      - name: Lock Memory to Git Vault
+        if: success()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          git pull origin main --rebase || true
+
+          # Manga-specific DBs + shared performance/README telemetry.
+          git add '*.json' performance/ README.md || true
+
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: Manga Engine Telemetry Sync [skip ci]"
+            git push
+          else
+            echo "No Manga database or telemetry changes to commit."
+          fi
