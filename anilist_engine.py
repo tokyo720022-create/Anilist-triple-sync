@@ -37,6 +37,7 @@ DB_VOID = 'db_void.json'
 DB_AIRING = 'db_airing.json'
 DB_ACHIEVEMENTS = 'db_achievements.json' 
 DB_PERFORMANCE_MSG = 'db_performance_msg.json'
+DB_THREADS = 'db_threads.json' # ⚡ NEW: Thread Memory Vault
 XML_FILE_PATH = 'mal_export.xml'
 
 PRIORITY_FAVORITES = ["One Piece", "Detective Conan", "JoJo's Bizarre Adventure", "Dragon Ball Z"]
@@ -56,6 +57,40 @@ def load_db(filepath):
 
 def save_db(filepath, data):
     with open(filepath, 'w') as f: json.dump(data, f, indent=4)
+
+# ==========================================
+# 🧵 1.5. DYNAMIC THREAD ROUTER
+# ==========================================
+def get_or_create_thread(list_name, media_type, base_webhook):
+    if not base_webhook: return None
+    threads = load_db(DB_THREADS)
+    
+    thread_key = f"[{media_type}] {list_name}" 
+    
+    if thread_key in threads:
+        return threads[thread_key]
+        
+    print(f"[SYSTEM] Brand new category detected: '{thread_key}'. Constructing Discord thread...")
+    
+    payload = {
+        "content": f"📡 **{list_name}** | {media_type} Telemetry Dashboard Initialized",
+        "thread_name": thread_key
+    }
+    
+    try:
+        res = requests.post(base_webhook + "?wait=true", json=payload, timeout=15)
+        if res.status_code in [200, 204]:
+            new_thread_id = res.json().get('channel_id')
+            threads[thread_key] = new_thread_id
+            save_db(DB_THREADS, threads)
+            print(f"[SUCCESS] Thread locked and secured. ID: {new_thread_id}")
+            return new_thread_id
+        else:
+            print(f"[ERROR] Failed to build thread for {thread_key}. Status: {res.status_code}")
+            return None
+    except Exception as e:
+        print(f"[ERROR] Network failure during thread construction: {e}")
+        return None
 
 # ==========================================
 # 📊 2. THE V2 TELEMETRY HUB
@@ -178,7 +213,8 @@ def fetch_with_armor(url, payload, headers, retries=3):
 # ==========================================
 # 📡 4. COMMUNICATION PROTOCOLS
 # ==========================================
-def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None):
+# ⚡ NEW: Accepts thread_id parameter to route straight into the dashboard
+def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None, thread_id=None):
     if not webhook_url: return
     embed = {"title": title[:256], "description": description[:4096] if description else "", "color": color, "timestamp": datetime.now(timezone.utc).isoformat()}
     if image_url: embed["image"] = {"url": image_url}
@@ -186,8 +222,11 @@ def send_discord_alert(webhook_url, title, description, color, image_url=None, f
     if author: embed["author"] = author
     payload = {"embeds": [embed]}
     if override_name: payload["username"] = override_name[:80]
+    
+    target_url = f"{webhook_url}?thread_id={thread_id}&wait=true" if thread_id else f"{webhook_url}?wait=true"
+    
     try:
-        res = requests.post(webhook_url + "?wait=true", json=payload, timeout=10)
+        res = requests.post(target_url, json=payload, timeout=10)
         if res.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
             try:
                 msg_id = res.json().get("id")
@@ -261,12 +300,13 @@ def drop_classified_ui(tier):
 # 🔎 6. ANILIST GRAPHQL CORE
 # ==========================================
 def fetch_anilist_inventory(username):
+    # ⚡ NEW: Added customLists to the GraphQL query to extract your personal categories
     query = '''
     query ($userName: String,$page: Int) {
       Page(page: $page, perPage: 50) {
         pageInfo { hasNextPage }
         mediaList(userName: $userName) {
-          mediaId progress score status
+          mediaId progress score status customLists
           media {
             title { romaji english }
             type episodes chapters duration
@@ -288,10 +328,18 @@ def fetch_anilist_inventory(username):
         for item in data.get('mediaList', []):
             media = item['media']
             primary_title = media['title'].get('english') or media['title'].get('romaji')
+            
+            # ⚡ NEW: Parse the customLists JSON to find your specific category
+            raw_custom = item.get('customLists')
+            c_lists = raw_custom if isinstance(raw_custom, dict) else {}
+            active_lists = [k for k, v in c_lists.items() if v]
+            list_category = active_lists[0] if active_lists else item['status'].replace('_', ' ').title()
+            
             inventory[primary_title] = {
                 "mediaId": item['mediaId'],
                 "progress": item['progress'],
                 "status": item['status'],
+                "list_category": list_category, # Saving the category for the Thread Router
                 "scoreRaw": item.get('score', 0), 
                 "type": media['type'],
                 "cover": media['coverImage']['extraLarge'] if media.get('coverImage') else None,
@@ -368,7 +416,6 @@ def execute_ghost_radar(ghost_db):
             send_discord_alert(WEBHOOK_GHOST, "🟢 GHOST ASSIMILATED", f"**{title}** recovered.", 3066993)
             assimilated.append(title)
         else:
-            # 🔴 RESTORED: The Ghost Rejected / Not Found Ping
             send_discord_alert(WEBHOOK_LOG, "🔴 GHOST REJECTED / NOT FOUND", f"AniList database rejected or could not locate search query: **{title}** ({data.get('type', 'MANGA')})", 16711680)
         time.sleep(1.5) 
     for title in assimilated: del ghost_db[title]
@@ -427,7 +474,12 @@ def execute_master_sync(inventory):
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
             webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
 
-            send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag)
+            # ⚡ NEW: Call the Thread Router to get the exact ID before sending the Discord alert
+            thread_id = get_or_create_thread(data["list_category"], media_type, webhook)
+
+            # ⚡ NEW: Pass the thread_id into your send_discord_alert function
+            send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag, thread_id=thread_id)
+            
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
             
             is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
@@ -464,7 +516,6 @@ if __name__ == '__main__':
     
     live_inventory = fetch_anilist_inventory(SOURCE_USERNAME)
     
-    # RESTORED: Checking BOTH Romaji and English names for the known pool
     known_titles_pool = set()
     for data in live_inventory.values():
         if data.get('romaji'): known_titles_pool.add(data['romaji'].lower())
