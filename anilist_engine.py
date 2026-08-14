@@ -351,55 +351,65 @@ def fetch_anilist_inventory(username):
         has_next_page = data.get('pageInfo', {}).get('hasNextPage', False)
         
         for item in data.get('mediaList', []):
-            updated_at = item.get('updatedAt', 0)
-            
-            if not is_first_run and updated_at <= last_sync:
-                has_next_page = False
-                break
+            # ⚡ THE IMMORTAL SHIELD: Survives any corrupted API anomaly
+            try:
+                # 1. The True Ghost Defense: Bypasses literal 'null' elements in the array
+                if not item:
+                    continue
+                    
+                updated_at = item.get('updatedAt', 0)
                 
-            if updated_at > highest_update:
-                highest_update = updated_at
+                if not is_first_run and updated_at <= last_sync:
+                    has_next_page = False
+                    break
+                    
+                if updated_at > highest_update:
+                    highest_update = updated_at
 
-            # ⚡ TITANIUM ARMOR 1: Detect and bypass Ghost Entries (Deleted AniList Data)
-            media = item.get('media')
-            if not media:
-                continue 
-
-            # ⚡ TITANIUM ARMOR 2: Hyper-safe data extraction for missing tags
-            title_data = media.get('title') or {}
-            primary_title = title_data.get('english') or title_data.get('romaji') or "Unknown_Classified_Media"
-            
-            raw_custom = item.get('customLists')
-            c_lists = raw_custom if isinstance(raw_custom, dict) else {}
-            active_lists = [k for k, v in c_lists.items() if v]
-            
-            raw_status = item.get('status') or "UNKNOWN"
-            list_category = active_lists[0] if active_lists else raw_status.replace('_', ' ').title()
-            
-            if is_first_run:
-                print(f"[SCAN] {primary_title[:40]:<40} -> Cached to Local Vault")
-            else:
-                print(f"[NEW UPDATE] Fetched live data for: {primary_title}")
-            
-            cover_image = media.get('coverImage') or {}
-            
-            # Secure dictionary write
-            inventory[primary_title] = {
-                "mediaId": item.get('mediaId'),
-                "progress": item.get('progress', 0),
-                "status": raw_status,
-                "list_category": list_category,
-                "scoreRaw": item.get('score', 0), 
-                "type": media.get('type', 'UNKNOWN'),
-                "cover": cover_image.get('extraLarge'),
-                "color": cover_image.get('color'), 
-                "duration": media.get('duration') or 24,
-                "nextAiring": media.get('nextAiringEpisode'),
-                "romaji": title_data.get('romaji'),
-                "english": title_data.get('english'),
-                "total_episodes": media.get('episodes'),
-                "total_chapters": media.get('chapters')
-            }
+                # 2. The Missing Media Defense: Bypasses entries where media data was wiped
+                media = item.get('media')
+                if not media:
+                    continue 
+                
+                title_data = media.get('title') or {}
+                primary_title = str(title_data.get('english') or title_data.get('romaji') or "Unknown_Classified_Media")
+                
+                raw_custom = item.get('customLists')
+                c_lists = raw_custom if isinstance(raw_custom, dict) else {}
+                active_lists = [k for k, v in c_lists.items() if v]
+                
+                raw_status = item.get('status') or "UNKNOWN"
+                list_category = active_lists[0] if active_lists else raw_status.replace('_', ' ').title()
+                
+                if is_first_run:
+                    print(f"[SCAN] {primary_title[:40]:<40} -> Cached to Local Vault")
+                else:
+                    print(f"[NEW UPDATE] Fetched live data for: {primary_title}")
+                
+                cover_image = media.get('coverImage') or {}
+                
+                # Secure dictionary write
+                inventory[primary_title] = {
+                    "mediaId": item.get('mediaId'),
+                    "progress": item.get('progress', 0),
+                    "status": raw_status,
+                    "list_category": list_category,
+                    "scoreRaw": item.get('score', 0), 
+                    "type": media.get('type') or 'UNKNOWN',
+                    "cover": cover_image.get('extraLarge'),
+                    "color": cover_image.get('color'), 
+                    "duration": media.get('duration') or 24,
+                    "nextAiring": media.get('nextAiringEpisode'),
+                    "romaji": title_data.get('romaji'),
+                    "english": title_data.get('english'),
+                    "total_episodes": media.get('episodes'),
+                    "total_chapters": media.get('chapters')
+                }
+                
+            except Exception as e:
+                # ⚡ If anything manages to bypass the armor, it gets caught here.
+                print(f"[WARNING] Extreme anomaly neutralized. Bypassing corrupted entry. Error: {e}")
+                continue
             
         page += 1
         time.sleep(1) 
@@ -408,7 +418,7 @@ def fetch_anilist_inventory(username):
     save_db(DB_TIMESTAMP, {"last_update": highest_update})
     
     return inventory
-            
+
      
 # ==========================================
 # ⏰ 7. AIRING INTELLIGENCE
