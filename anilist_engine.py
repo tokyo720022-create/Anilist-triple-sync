@@ -65,7 +65,16 @@ def load_db(filepath):
 
 def save_db(filepath, data):
     with open(filepath, 'w') as f: json.dump(data, f, indent=4)
-    
+
+def safe_int(val, default=0):
+    if val is None: return default
+    try:
+        # ⚡ Automatically extracts the first valid number it finds, ignores dashes/letters
+        match = re.search(r'-?\d+', str(val))
+        return int(match.group()) if match else default
+    except Exception:
+        return default
+        
 
 # ==========================================
 # 🧵 1.5. DYNAMIC THREAD ROUTER
@@ -512,15 +521,20 @@ def execute_master_sync(inventory):
     
     for title, data in inventory.items():
         media_id = str(data["mediaId"])
-        progress = data["progress"]
+        
+        # ⚡ SHIELD ACTIVATED: Forces progress into a pure integer
+        progress = safe_int(data["progress"])
         media_type = data["type"]
         
+        # ⚡ SHIELD ACTIVATED: Purifies dirty data from the local memory vault
+        db_progress = safe_int(sync_db.get(media_id, 0))
+        
         if str(sync_db.get(media_id)) != str(progress):
-            delta = progress - int(sync_db.get(media_id, 0))
+            delta = progress - db_progress
             if delta < 0: delta = 0 
             
-            # ⚡ ALARM ACTIVATED: Prints out the exact progress change
-            print(f"\n[🔥 UPDATE DETECTED] {title} | Progress updated to: {progress}")
+            if delta > 0:
+                print(f"\n[🔥 UPDATE DETECTED] {title} | Progress updated to: {progress}")
             
             g_earned = (delta * 10) if media_type == "ANIME" else (delta * 2)
             is_completed = data["status"] == "COMPLETED"
@@ -540,9 +554,9 @@ def execute_master_sync(inventory):
             left = (total - progress) if total else "?"
             
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
-            webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
-
+            
             # Thread Router targets the exact category
+            webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
             thread_id = get_or_create_thread(data["list_category"], media_type, webhook)
 
             # Fire payload directly into the Discord thread
@@ -563,6 +577,7 @@ def execute_master_sync(inventory):
     save_db(DB_SYNC, sync_db)
     if hologram_trigger: refresh_performance_hologram()
 
+            
 # ==========================================
 # 🔮 11. LIVE TELEMETRY INJECTOR
 # ==========================================
