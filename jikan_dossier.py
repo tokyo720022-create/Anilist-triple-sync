@@ -199,12 +199,17 @@ if __name__ == "__main__":
         print(f"[ENGINE] Extracting dossier for: {ghost_title} (MAL ID: {mal_id})")
         embed = generate_dossier(mal_id, media_type, ghost_title)
         
-        if embed and WEBHOOK_URL:
+                if embed and WEBHOOK_URL:
             try:
+                print(f"[SYSTEM] Firing dossier to Discord for: {ghost_title}...")
                 res = requests.post(WEBHOOK_URL + "?wait=true", json={"embeds": [embed]}, timeout=10)
                 if res.status_code in [200, 204]:
+                    print(f"[SUCCESS] Payload delivered.")
                     dossiers[ghost_title] = {"mal_id": mal_id, "processed_at": time.time()}
-            except Exception: pass
+                else:
+                    print(f"[ERROR] Discord rejected the payload! Status: {res.status_code} | Reason: {res.text}")
+            except Exception as e:
+                print(f"[ERROR] Webhook connection completely failed: {e}")
                 
         time.sleep(2.5)
         
