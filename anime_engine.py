@@ -81,12 +81,16 @@ def get_or_create_thread(list_name, media_type, base_webhook):
     threads = load_db(DB_THREADS)
     
     clean_name = list_name.lower().strip()
+    
+    # ⚡ THE CATCH-ALL: If it's not a custom list, route it to a general thread
     if clean_name not in TARGET_LISTS:
-        return "IGNORE"
+        display_name = "General Updates"
+    else:
+        display_name = list_name.title()
         
-    display_name = list_name.title()
     thread_key = f"[{media_type}] {display_name}" 
     
+    # Validates that the ID is actual data, not a corrupted null string
     if thread_key in threads and threads[thread_key] and threads[thread_key] != "None":
         return str(threads[thread_key])
         
@@ -115,7 +119,6 @@ def get_or_create_thread(list_name, media_type, base_webhook):
         print(f"[ERROR] Thread network failure: {e}")
         
     return None
-
 # ==========================================
 # 📊 2. THE V2 TELEMETRY HUB
 # ==========================================
@@ -495,7 +498,7 @@ def execute_void_radar():
     return void_db
 
 # ==========================================
-# ⚡ 10. THE MASTER SYNC ENGINE 
+# ⚡ 10. THE MASTER SYNC ENGINE (ANIME CORE)
 # ==========================================
 def execute_master_sync(inventory):
     sync_db = load_db(DB_SYNC)
@@ -510,7 +513,8 @@ def execute_master_sync(inventory):
             delta = progress - db_progress
             if delta < 0: delta = 0 
             
-            g_earned = (delta * 10)
+            # ⚡ ANIME CORE: Multiplier set to 10G per episode watched
+            g_earned = (delta * 10) 
             is_completed = data["status"] == "COMPLETED"
             if is_completed: g_earned += 100 
             
@@ -525,14 +529,13 @@ def execute_master_sync(inventory):
             fields = [{"name": "🇯🇵 Romaji", "value": data['romaji'] or "N/A", "inline": False}, {"name": "📊 Status", "value": data["status"], "inline": False}]
             author_block = {"name": f"🏆 {g_earned}G EARNED | SERIES COMPLETED", "icon_url": "https://i.imgur.com/gO0wVp5.png"} if is_completed else {"name": f"🎮 +{g_earned}G | Weekly: {ach_db.get('weekly_g', 0)}G"}
             
-            total = data['total_episodes']
+            # ⚡ ANIME CORE: Tracking episodes instead of chapters
+            total = data['total_episodes'] 
             left = (total - progress) if total else "?"
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
             
+            # ⚡ ROUTER ACTIVATED: Grabs specific Custom Thread or defaults to General Updates
             thread_id = get_or_create_thread(data["list_category"], media_type, WEBHOOK_ANIME)
-
-            if thread_id == "IGNORE":
-                thread_id = None
 
             send_discord_alert(
                 WEBHOOK_ANIME,
@@ -545,12 +548,14 @@ def execute_master_sync(inventory):
                 override_tag,
                 thread_id=thread_id
             )
+            time.sleep(2) # 🛡️ Anti-Rate Limit Shield Activated
             
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
             
             is_vip = any(vip.lower() in (data['romaji'] or "").lower() or vip.lower() in (data['english'] or "").lower() for vip in PRIORITY_FAVORITES)
             if is_vip and WEBHOOK_VIP: 
                 send_discord_alert(WEBHOOK_VIP, f"⭐ VIP UPDATE: {title}", "S-Tier Franchise Update.", color, data.get('cover'), fields, author_block, override_tag)
+                time.sleep(2) # 🛡️ Anti-Rate Limit Shield Activated
                 
             if hit_1k: drop_classified_ui(1000)
             if hit_5k: drop_classified_ui(5000)
@@ -561,7 +566,6 @@ def execute_master_sync(inventory):
             
     save_db(DB_SYNC, sync_db)
     if hologram_trigger: refresh_performance_hologram()
-
 # ==========================================
 # 🔮 11. LIVE TELEMETRY INJECTOR
 # ==========================================
