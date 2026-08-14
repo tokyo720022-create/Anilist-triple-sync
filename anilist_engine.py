@@ -455,6 +455,9 @@ def execute_master_sync(inventory):
             delta = progress - int(sync_db.get(media_id, 0))
             if delta < 0: delta = 0 
             
+            # ⚡ ALARM ACTIVATED: Prints out the exact progress change
+            print(f"\n[🔥 UPDATE DETECTED] {title} | Progress updated to: {progress}")
+            
             g_earned = (delta * 10) if media_type == "ANIME" else (delta * 2)
             is_completed = data["status"] == "COMPLETED"
             if is_completed: g_earned += 100 
@@ -475,10 +478,10 @@ def execute_master_sync(inventory):
             fields.extend([{"name": "✅ Progress", "value": f"{progress}", "inline": True}, {"name": "⏳ Left", "value": f"{left}", "inline": True}])
             webhook = WEBHOOK_ANIME if media_type == "ANIME" else WEBHOOK_MANGA
 
-            # ⚡ NEW: Call the Thread Router to get the exact ID before sending the Discord alert
+            # Thread Router targets the exact category
             thread_id = get_or_create_thread(data["list_category"], media_type, webhook)
 
-            # ⚡ NEW: Pass the thread_id into your send_discord_alert function
+            # Fire payload directly into the Discord thread
             send_discord_alert(webhook, f"UPDATE: {title}", "", color, data.get('cover'), fields, author_block, override_tag, thread_id=thread_id)
             
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
