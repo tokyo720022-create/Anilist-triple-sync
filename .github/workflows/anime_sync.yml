@@ -1,0 +1,53 @@
+name: Anime Overdrive Core
+
+on:
+  schedule:
+    # Fires at 08:00, 11:00, 14:00, 17:00, 20:00, 23:00 IST
+    - cron: '30 2,5,8,11,14,17 * * *'
+  workflow_dispatch: 
+
+permissions:
+  contents: write
+
+jobs:
+  run_anime_core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Detonate Anime Engine
+        env:
+          ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
+          DISCORD_ANILIST_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }}
+          DISCORD_ANILIST_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
+          DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
+          DISCORD_FAVORITES_WEBHOOK: ${{ secrets.DISCORD_FAVORITES_WEBHOOK }}
+          DISCORD_GHOST_RADAR_WEBHOOK: ${{ secrets.DISCORD_GHOST_RADAR_WEBHOOK }}
+          DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
+          DISCORD_PERFORMANCE_WEBHOOK: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ZULIP_SERVER_URL: ${{ secrets.ZULIP_SERVER_URL }}
+          ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
+          ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
+        run: python anime_engine.py
+
+      - name: Lock Anime Memory to Git Vault
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git pull origin main --rebase || true 
+          git add db_anime_*.json performance/ README.md || true 
+          git diff --staged --quiet || git commit -m "chore: Anime Telemetry Matrix Sync [skip ci]"
+          git push
