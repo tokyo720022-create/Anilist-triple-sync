@@ -2734,24 +2734,24 @@ The source expects:
 TODAY
 ─────────────────────────
 Anime             5 eps
-Manga            13 ch
-Time            174 min
-Gamerscore      76 G
+Manga            15 ch
+Time            184 min
+Gamerscore     180 G
 
 THIS WEEK
 ─────────────────────────
 Anime             8 eps
-Manga            52 ch
-Time            433 min
-Gamerscore     232 G
+Manga            54 ch
+Time            443 min
+Gamerscore     336 G
 
 ALL TIME
 ─────────────────────────
 Episodes          7
-Chapters         31
-Minutes         306
-Gamerscore     232 G
-Completed         1
+Chapters         33
+Minutes         316
+Gamerscore     336 G
+Completed         2
 
 ```
 <!-- TELEMETRY_END -->
@@ -2771,24 +2771,24 @@ The inserted block has this structure:
 TODAY
 ─────────────────────────
 Anime             5 eps
-Manga            13 ch
-Time            174 min
-Gamerscore      76 G
+Manga            15 ch
+Time            184 min
+Gamerscore     180 G
 
 THIS WEEK
 ─────────────────────────
 Anime             8 eps
-Manga            52 ch
-Time            433 min
-Gamerscore     232 G
+Manga            54 ch
+Time            443 min
+Gamerscore     336 G
 
 ALL TIME
 ─────────────────────────
 Episodes          7
-Chapters         31
-Minutes         306
-Gamerscore     232 G
-Completed         1
+Chapters         33
+Minutes         316
+Gamerscore     336 G
+Completed         2
 
 ```
 <!-- TELEMETRY_END -->
@@ -2806,24 +2806,24 @@ The replacement uses a DOTALL regular expression:
 TODAY
 ─────────────────────────
 Anime             5 eps
-Manga            13 ch
-Time            174 min
-Gamerscore      76 G
+Manga            15 ch
+Time            184 min
+Gamerscore     180 G
 
 THIS WEEK
 ─────────────────────────
 Anime             8 eps
-Manga            52 ch
-Time            433 min
-Gamerscore     232 G
+Manga            54 ch
+Time            443 min
+Gamerscore     336 G
 
 ALL TIME
 ─────────────────────────
 Episodes          7
-Chapters         31
-Minutes         306
-Gamerscore     232 G
-Completed         1
+Chapters         33
+Minutes         316
+Gamerscore     336 G
+Completed         2
 
 ```
 <!-- TELEMETRY_END -->
@@ -2901,24 +2901,24 @@ Therefore the README must contain:
 TODAY
 ─────────────────────────
 Anime             5 eps
-Manga            13 ch
-Time            174 min
-Gamerscore      76 G
+Manga            15 ch
+Time            184 min
+Gamerscore     180 G
 
 THIS WEEK
 ─────────────────────────
 Anime             8 eps
-Manga            52 ch
-Time            433 min
-Gamerscore     232 G
+Manga            54 ch
+Time            443 min
+Gamerscore     336 G
 
 ALL TIME
 ─────────────────────────
 Episodes          7
-Chapters         31
-Minutes         306
-Gamerscore     232 G
-Completed         1
+Chapters         33
+Minutes         316
+Gamerscore     336 G
+Completed         2
 
 ```
 <!-- TELEMETRY_END -->
@@ -3435,24 +3435,24 @@ Before the engine can inject telemetry, include:
 TODAY
 ─────────────────────────
 Anime             5 eps
-Manga            13 ch
-Time            174 min
-Gamerscore      76 G
+Manga            15 ch
+Time            184 min
+Gamerscore     180 G
 
 THIS WEEK
 ─────────────────────────
 Anime             8 eps
-Manga            52 ch
-Time            433 min
-Gamerscore     232 G
+Manga            54 ch
+Time            443 min
+Gamerscore     336 G
 
 ALL TIME
 ─────────────────────────
 Episodes          7
-Chapters         31
-Minutes         306
-Gamerscore     232 G
-Completed         1
+Chapters         33
+Minutes         316
+Gamerscore     336 G
+Completed         2
 
 ```
 <!-- TELEMETRY_END -->
