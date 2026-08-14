@@ -127,24 +127,47 @@ if __name__ == "__main__":
         if ghost_title in dossiers:
             continue # Bypass previously extracted ghosts
             
+        media_type = ghost_data.get("type", "MANGA").lower()
         mapping = title_to_id.get(ghost_title)
-        if not mapping:
-            print(f"[SYSTEM] Could not locate exact MAL ID for '{ghost_title}' in XML. Skipping.")
-            continue
-            
-        mal_id = mapping['id']
-        media_type = mapping['type']
+        mal_id = None
         
+        # ⚡ THE FALLBACK PROTOCOL
+        if mapping:
+            mal_id = mapping['id']
+        else:
+            print(f"[SYSTEM] No XML match for '{ghost_title}'. Engaging Jikan Search Protocol...")
+            search_url = f"https://api.jikan.moe/v4/{media_type}?q={ghost_title}&limit=1"
+            
+            try:
+                res = requests.get(search_url, timeout=10)
+                time.sleep(2.5) # Jikan rate limit buffer
+                
+                if res.status_code == 200:
+                    results = res.json().get('data', [])
+                    if results:
+                        mal_id = results[0]['mal_id']
+                    else:
+                        print(f"[ERROR] Jikan Search found zero results for '{ghost_title}'. Skipping.")
+                        continue
+                else:
+                    print(f"[ERROR] Jikan Search API failed for '{ghost_title}'. Status: {res.status_code}")
+                    continue
+            except Exception as e:
+                print(f"[ERROR] Network failure during search for '{ghost_title}': {e}")
+                continue
+                
         print(f"[ENGINE] Extracting heavy data for: {ghost_title} (MAL ID: {mal_id})")
         embed = generate_dossier(mal_id, media_type, ghost_title)
         
         if embed and WEBHOOK_URL:
-            res = requests.post(WEBHOOK_URL + "?wait=true", json={"embeds": [embed]}, timeout=10)
-            if res.status_code in [200, 204]:
-                dossiers[ghost_title] = {"mal_id": mal_id, "processed_at": time.time()}
+            try:
+                res = requests.post(WEBHOOK_URL + "?wait=true", json={"embeds": [embed]}, timeout=10)
+                if res.status_code in [200, 204]:
+                    dossiers[ghost_title] = {"mal_id": mal_id, "processed_at": time.time()}
+            except Exception: pass
                 
         time.sleep(2.5) # Jikan API enforces a strict rate limit. Do not lower this.
         
     save_db(DB_DOSSIERS, dossiers)
     print("=== DOSSIER EXTRACTION COMPLETE ===")
-  
+            
