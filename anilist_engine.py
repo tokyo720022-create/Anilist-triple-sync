@@ -79,7 +79,6 @@ def safe_int(val, default=0):
 # ==========================================
 # 🧵 1.5. SELECTIVE THREAD ROUTER
 # ==========================================
-# ⚡ THE STRICT FILTER: Only these categories get Discord alerts
 TARGET_LISTS = [
     "anime movies", "iseki", "milf", "loli", 
     "plan to continue", "hentai", "favourite", "fav", "planning"
@@ -90,16 +89,15 @@ def get_or_create_thread(list_name, media_type, base_webhook):
     threads = load_db(DB_THREADS)
     
     clean_name = list_name.lower().strip()
-    
-    # ⚡ SHIELD ACTIVATED: If it's not a targeted list, abort the ping completely
     if clean_name not in TARGET_LISTS:
         return "IGNORE"
         
     display_name = list_name.title()
     thread_key = f"[{media_type}] {display_name}" 
     
-    if thread_key in threads:
-        return threads[thread_key]
+    # ⚡ SHIELD: Validates that the ID is actual data, not a corrupted null string
+    if thread_key in threads and threads[thread_key] and threads[thread_key] != "None":
+        return str(threads[thread_key])
         
     print(f"[SYSTEM] Forging new dedicated Forum thread: '{thread_key}'...")
     
@@ -108,16 +106,28 @@ def get_or_create_thread(list_name, media_type, base_webhook):
         "thread_name": thread_key
     }
     
+    # Safely injects the wait parameter to force Discord to return the message object
+    target_url = base_webhook
+    separator = "&" if "?" in target_url else "?"
+    target_url = f"{target_url}{separator}wait=true"
+    
     try:
-        res = requests.post(base_webhook + "?wait=true", json=payload, timeout=15)
-        if res.status_code in [200, 204]:
-            new_thread_id = res.json().get('channel_id')
-            threads[thread_key] = new_thread_id
-            save_db(DB_THREADS, threads)
-            return new_thread_id
-    except Exception:
-        pass
+        res = requests.post(target_url, json=payload, timeout=15)
+        if res.status_code in [200, 201, 204]:
+            # Extracts the specific channel ID of the newly created thread
+            new_thread_id = str(res.json().get('channel_id'))
+            if new_thread_id and new_thread_id != "None":
+                threads[thread_key] = new_thread_id
+                save_db(DB_THREADS, threads)
+                return new_thread_id
+        else:
+            print(f"[ERROR] Failed to forge thread. Code: {res.status_code} | Reason: {res.text}")
+    except Exception as e:
+        print(f"[ERROR] Thread network failure: {e}")
+        
     return None
+
+
 
 # ==========================================
 # 📊 2. THE V2 TELEMETRY HUB
@@ -236,33 +246,39 @@ def fetch_with_armor(url, payload, headers, retries=3):
         except Exception: pass
         time.sleep((attempt + 1) * 3) 
     return None
-
 # ==========================================
 # 📡 4. COMMUNICATION PROTOCOLS
 # ==========================================
-# ⚡ NEW: Accepts thread_id parameter to route straight into the dashboard
-def send_discord_alert(webhook_url, title, description, color, image_url=None, fields=None, author=None, override_name=None, thread_id=None):
+def send_discord_alert(webhook_url, title, desc, color, image, fields, author, override_tag=None, thread_id=None):
     if not webhook_url: return
-    embed = {"title": title[:256], "description": description[:4096] if description else "", "color": color, "timestamp": datetime.now(timezone.utc).isoformat()}
-    if image_url: embed["image"] = {"url": image_url}
-    if fields: embed["fields"] = fields[:25]
-    if author: embed["author"] = author
-    payload = {"embeds": [embed]}
-    if override_name: payload["username"] = override_name[:80]
     
-    target_url = f"{webhook_url}?thread_id={thread_id}&wait=true" if thread_id else f"{webhook_url}?wait=true"
+    # ⚡ Safely attaches the thread ID to the webhook URL without breaking query logic
+    target_url = webhook_url
+    if thread_id and thread_id != "IGNORE":
+        separator = "&" if "?" in target_url else "?"
+        target_url = f"{target_url}{separator}thread_id={thread_id}"
+        
+    embed = {
+        "title": title[:256],
+        "description": desc,
+        "color": color,
+        "fields": fields[:25]
+    }
+    if image: embed["image"] = {"url": image}
+    if author: embed["author"] = author
+    
+    payload = {"embeds": [embed]}
+    if override_tag: payload["username"] = override_tag
     
     try:
-        res = requests.post(target_url, json=payload, timeout=10)
-        if res.status_code in [200, 204] and webhook_url == WEBHOOK_LOG:
-            try:
-                msg_id = res.json().get("id")
-                if msg_id:
-                    messages_db = load_db(DB_MESSAGES)
-                    messages_db[msg_id] = {"timestamp": time.time(), "delete_url": f"{webhook_url}/messages/{msg_id}"}
-                    save_db(DB_MESSAGES, messages_db)
-            except Exception: pass
-    except Exception: pass
+        res = requests.post(target_url, json=payload, timeout=15)
+        # ⚡ THE ALARM: If Discord rejects it, the engine will yell instead of dying silently
+        if res.status_code not in [200, 201, 204]:
+            print(f"\n[ERROR] Discord rejected payload for '{title}'.")
+            print(f"Status: {res.status_code} | Reason: {res.text}\n")
+    except Exception as e:
+        print(f"\n[ERROR] Discord transmission completely failed: {e}\n")
+
 
 def fire_zulip_archive(media_type, title, progress, total_episodes, score):
     if not ZULIP_URL or not ZULIP_EMAIL or not ZULIP_API_KEY: return
