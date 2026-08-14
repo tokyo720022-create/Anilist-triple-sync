@@ -2733,21 +2733,21 @@ The source expects:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,879 ch
-Time         44,395 min
-Gamerscore  28,638 G
+Manga         8,880 ch
+Time         44,400 min
+Gamerscore  28,640 G
 
 THIS WEEK
 ─────────────────────────
-Manga         8,918 ch
-Time         44,590 min
-Gamerscore  28,794 G
+Manga         8,919 ch
+Time         44,595 min
+Gamerscore  28,796 G
 
 ALL TIME
 ─────────────────────────
-Chapters      8,897
-Minutes      44,485
-Gamerscore  28,794 G
+Chapters      8,898
+Minutes      44,490
+Gamerscore  28,796 G
 Completed       109
 
 ```
@@ -2767,21 +2767,21 @@ The inserted block has this structure:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,879 ch
-Time         44,395 min
-Gamerscore  28,638 G
+Manga         8,880 ch
+Time         44,400 min
+Gamerscore  28,640 G
 
 THIS WEEK
 ─────────────────────────
-Manga         8,918 ch
-Time         44,590 min
-Gamerscore  28,794 G
+Manga         8,919 ch
+Time         44,595 min
+Gamerscore  28,796 G
 
 ALL TIME
 ─────────────────────────
-Chapters      8,897
-Minutes      44,485
-Gamerscore  28,794 G
+Chapters      8,898
+Minutes      44,490
+Gamerscore  28,796 G
 Completed       109
 
 ```
@@ -2799,21 +2799,21 @@ The replacement uses a DOTALL regular expression:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,879 ch
-Time         44,395 min
-Gamerscore  28,638 G
+Manga         8,880 ch
+Time         44,400 min
+Gamerscore  28,640 G
 
 THIS WEEK
 ─────────────────────────
-Manga         8,918 ch
-Time         44,590 min
-Gamerscore  28,794 G
+Manga         8,919 ch
+Time         44,595 min
+Gamerscore  28,796 G
 
 ALL TIME
 ─────────────────────────
-Chapters      8,897
-Minutes      44,485
-Gamerscore  28,794 G
+Chapters      8,898
+Minutes      44,490
+Gamerscore  28,796 G
 Completed       109
 
 ```
@@ -2891,21 +2891,21 @@ Therefore the README must contain:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,879 ch
-Time         44,395 min
-Gamerscore  28,638 G
+Manga         8,880 ch
+Time         44,400 min
+Gamerscore  28,640 G
 
 THIS WEEK
 ─────────────────────────
-Manga         8,918 ch
-Time         44,590 min
-Gamerscore  28,794 G
+Manga         8,919 ch
+Time         44,595 min
+Gamerscore  28,796 G
 
 ALL TIME
 ─────────────────────────
-Chapters      8,897
-Minutes      44,485
-Gamerscore  28,794 G
+Chapters      8,898
+Minutes      44,490
+Gamerscore  28,796 G
 Completed       109
 
 ```
@@ -3422,21 +3422,21 @@ Before the engine can inject telemetry, include:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,879 ch
-Time         44,395 min
-Gamerscore  28,638 G
+Manga         8,880 ch
+Time         44,400 min
+Gamerscore  28,640 G
 
 THIS WEEK
 ─────────────────────────
-Manga         8,918 ch
-Time         44,590 min
-Gamerscore  28,794 G
+Manga         8,919 ch
+Time         44,595 min
+Gamerscore  28,796 G
 
 ALL TIME
 ─────────────────────────
-Chapters      8,897
-Minutes      44,485
-Gamerscore  28,794 G
+Chapters      8,898
+Minutes      44,490
+Gamerscore  28,796 G
 Completed       109
 
 ```
