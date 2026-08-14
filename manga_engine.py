@@ -79,12 +79,16 @@ def get_or_create_thread(list_name, media_type, base_webhook):
     threads = load_db(DB_THREADS)
     
     clean_name = list_name.lower().strip()
+    
+    # ⚡ THE CATCH-ALL: If it's not a custom list, route it to a general thread
     if clean_name not in TARGET_LISTS:
-        return "IGNORE"
+        display_name = "General Updates"
+    else:
+        display_name = list_name.title()
         
-    display_name = list_name.title()
     thread_key = f"[{media_type}] {display_name}" 
     
+    # Validates that the ID is actual data, not a corrupted null string
     if thread_key in threads and threads[thread_key] and threads[thread_key] != "None":
         return str(threads[thread_key])
         
@@ -113,7 +117,6 @@ def get_or_create_thread(list_name, media_type, base_webhook):
         print(f"[ERROR] Thread network failure: {e}")
         
     return None
-
 # ==========================================
 # 📊 2. THE V2 TELEMETRY HUB
 # ==========================================
