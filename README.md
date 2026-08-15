@@ -5870,21 +5870,21 @@ paths before changing the shared behavior.
 ```text
 TODAY
 ─────────────────────────
-Anime             0 eps
-Time              0 min
-Gamerscore       0 G
+Anime             1 eps
+Time             21 min
+Gamerscore      10 G
 
 THIS WEEK
 ─────────────────────────
-Anime            11 eps
-Time            239 min
-Gamerscore  28,796 G
+Anime            12 eps
+Time            260 min
+Gamerscore  28,806 G
 
 ALL TIME
 ─────────────────────────
-Episodes         10
-Minutes         217
-Gamerscore  28,796 G
+Episodes         11
+Minutes         238
+Gamerscore  28,806 G
 Completed       109
 
 ```
