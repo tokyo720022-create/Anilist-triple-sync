@@ -4240,5 +4240,19 @@
         "romaji": "Isekai Magic Mirror-gou",
         "english": null,
         "total_chapters": 15
+    },
+    "TRPG Player ga Isekai de Saikyou Build wo Mezasu: Henderson-shi no Fukuin wo": {
+        "mediaId": 156868,
+        "progress": 2,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 91,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx156868-0UBzt0g35FV3.jpg",
+        "color": "#e4a15d",
+        "duration": 24,
+        "romaji": "TRPG Player ga Isekai de Saikyou Build wo Mezasu: Henderson-shi no Fukuin wo",
+        "english": null,
+        "total_chapters": null
     }
 }
