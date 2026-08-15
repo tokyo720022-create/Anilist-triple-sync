@@ -2733,9 +2733,9 @@ The source expects:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,880 ch
-Time         44,400 min
-Gamerscore  28,640 G
+Manga             0 ch
+Time              0 min
+Gamerscore       0 G
 
 THIS WEEK
 ─────────────────────────
@@ -2767,9 +2767,9 @@ The inserted block has this structure:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,880 ch
-Time         44,400 min
-Gamerscore  28,640 G
+Manga             0 ch
+Time              0 min
+Gamerscore       0 G
 
 THIS WEEK
 ─────────────────────────
@@ -2799,9 +2799,9 @@ The replacement uses a DOTALL regular expression:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,880 ch
-Time         44,400 min
-Gamerscore  28,640 G
+Manga             0 ch
+Time              0 min
+Gamerscore       0 G
 
 THIS WEEK
 ─────────────────────────
@@ -2891,9 +2891,9 @@ Therefore the README must contain:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,880 ch
-Time         44,400 min
-Gamerscore  28,640 G
+Manga             0 ch
+Time              0 min
+Gamerscore       0 G
 
 THIS WEEK
 ─────────────────────────
@@ -3422,9 +3422,9 @@ Before the engine can inject telemetry, include:
 ```text
 TODAY
 ─────────────────────────
-Manga         8,880 ch
-Time         44,400 min
-Gamerscore  28,640 G
+Manga             0 ch
+Time              0 min
+Gamerscore       0 G
 
 THIS WEEK
 ─────────────────────────
