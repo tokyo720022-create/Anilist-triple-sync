@@ -10318,5 +10318,23 @@
         "romaji": "BORUTO: NARUTO NEXT GENERATIONS",
         "english": "Boruto: Naruto Next Generations",
         "total_episodes": 293
+    },
+    "Firefly Wedding": {
+        "mediaId": 205909,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx205909-DM0fAzNQulod.jpg",
+        "color": "#aebb35",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791556200,
+            "episode": 1
+        },
+        "romaji": "Hotaru no Yomeiri",
+        "english": "Firefly Wedding",
+        "total_episodes": null
     }
 }
