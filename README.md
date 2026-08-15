@@ -5866,3 +5866,26 @@ OUTPUT
 When modifying this subsystem, verify its neighboring state files and notification
 paths before changing the shared behavior.
 
+<!-- ANIME_TELEMETRY_START -->
+```text
+TODAY
+─────────────────────────
+Anime             0 eps
+Time              0 min
+Gamerscore       0 G
+
+THIS WEEK
+─────────────────────────
+Anime            11 eps
+Time            239 min
+Gamerscore  28,796 G
+
+ALL TIME
+─────────────────────────
+Episodes         10
+Minutes         217
+Gamerscore  28,796 G
+Completed       109
+
+```
+<!-- ANIME_TELEMETRY_END -->
