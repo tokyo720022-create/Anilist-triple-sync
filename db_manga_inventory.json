@@ -4226,5 +4226,19 @@
         "romaji": "Succubus Nanka ni Makenai Isekai Seikatsu",
         "english": null,
         "total_chapters": 24
+    },
+    "Isekai Magic Mirror-gou": {
+        "mediaId": 183055,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx183055-w0q884X1xzcp.png",
+        "color": "#e4c935",
+        "duration": 24,
+        "romaji": "Isekai Magic Mirror-gou",
+        "english": null,
+        "total_chapters": 15
     }
 }
