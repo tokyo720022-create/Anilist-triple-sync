@@ -80,17 +80,17 @@ def get_or_create_thread(list_name, media_type, base_webhook):
     if not base_webhook: return None
     threads = load_db(DB_THREADS)
     
-    clean_name = list_name.lower().strip()
+    # ⚡ SAFETY FIX: Prevent NoneType errors if list_name is empty
+    clean_name = str(list_name or "Unknown").lower().strip()
     
-    # ⚡ THE CATCH-ALL: If it's not a custom list, route it to a general thread
+    # ⚡ THE CATCH-ALL
     if clean_name not in TARGET_LISTS:
         display_name = "General Updates"
     else:
-        display_name = list_name.title()
+        display_name = str(list_name).title()
         
     thread_key = f"[{media_type}] {display_name}" 
     
-    # Validates that the ID is actual data, not a corrupted null string
     if thread_key in threads and threads[thread_key] and threads[thread_key] != "None":
         return str(threads[thread_key])
         
@@ -119,6 +119,8 @@ def get_or_create_thread(list_name, media_type, base_webhook):
         print(f"[ERROR] Thread network failure: {e}")
         
     return None
+
+
 # ==========================================
 # 📊 2. THE V2 TELEMETRY HUB
 # ==========================================
@@ -496,7 +498,7 @@ def execute_void_radar():
         time.sleep(1.5) 
     for title in assimilated: del void_db[title]
     return void_db
-
+    
 # ==========================================
 # ⚡ 10. THE MASTER SYNC ENGINE (ANIME CORE)
 # ==========================================
@@ -504,8 +506,7 @@ def execute_master_sync(inventory):
     sync_db = load_db(DB_SYNC)
     hologram_trigger = False
     
-    # ⚡ THE SILENT INITIALIZATION PATCH
-    # If the database is completely empty, we are building the baseline.
+    # ⚡ THE SILENT INITIALIZATION PATCH (Prevents the 9-minute spam!)
     is_first_sync = len(sync_db) == 0 
     
     if is_first_sync:
@@ -525,7 +526,6 @@ def execute_master_sync(inventory):
                 sync_db[media_id] = progress
                 continue
             
-            # --- Normal Active Telemetry Below ---
             g_earned = (delta * 10) 
             is_completed = data["status"] == "COMPLETED"
             if is_completed: g_earned += 100 
@@ -547,18 +547,22 @@ def execute_master_sync(inventory):
             
             thread_id = get_or_create_thread(data["list_category"], media_type, WEBHOOK_ANIME)
 
-            send_discord_alert(
-                WEBHOOK_ANIME,
-                f"UPDATE: {title}",
-                "",
-                color,
-                data.get('cover'),
-                fields,
-                author_block,
-                override_tag,
-                thread_id=thread_id
-            )
-            time.sleep(2) 
+            # 🛡️ THE FORUM FAIL-SAFE SHIELD (From your screenshots!)
+            if thread_id:
+                send_discord_alert(
+                    WEBHOOK_ANIME,
+                    f"UPDATE: {title}",
+                    "",
+                    color,
+                    data.get('cover'),
+                    fields,
+                    author_block,
+                    override_tag,
+                    thread_id=thread_id
+                )
+                time.sleep(2) # Anti-Rate Limit Shield
+            else:
+                print(f"[ERROR] Could not create/find Discord thread for '{title}'. Notification skipped safely.")
             
             fire_zulip_archive(media_type, title, progress, total, data.get('scoreRaw'))
             
@@ -576,6 +580,9 @@ def execute_master_sync(inventory):
             
     save_db(DB_SYNC, sync_db)
     if hologram_trigger: refresh_performance_hologram()
+
+
+                
 # ==========================================
 # 🚀 12. INITIATION SEQUENCE
 # ==========================================
