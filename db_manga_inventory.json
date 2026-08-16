@@ -4254,5 +4254,47 @@
         "romaji": "TRPG Player ga Isekai de Saikyou Build wo Mezasu: Henderson-shi no Fukuin wo",
         "english": null,
         "total_chapters": null
+    },
+    "Kanojo no Tomodachi": {
+        "mediaId": 133932,
+        "progress": 69,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx133932-IGj479z13nGK.jpg",
+        "color": "#e45da1",
+        "duration": 24,
+        "romaji": "Kanojo no Tomodachi",
+        "english": null,
+        "total_chapters": null
+    },
+    "Multi-Mind Mayhem: Isekai Tensei Soudouki": {
+        "mediaId": 95098,
+        "progress": 4,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx95098-wrE4LO1sLJTs.jpg",
+        "color": "#e44350",
+        "duration": 24,
+        "romaji": "Isekai Tensei Soudouki",
+        "english": "Multi-Mind Mayhem: Isekai Tensei Soudouki",
+        "total_chapters": null
+    },
+    "Isekai Tensei Soudouki": {
+        "mediaId": 99119,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx99119-zI6uBmE71zkD.jpg",
+        "color": "#43bbe4",
+        "duration": 24,
+        "romaji": "Isekai Tensei Soudouki",
+        "english": null,
+        "total_chapters": null
     }
 }
