@@ -1003,7 +1003,7 @@
     },
     "Hanaori-san Still Wants to Fight in the Next Life": {
         "mediaId": 199066,
-        "progress": 5,
+        "progress": 6,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 100,
@@ -1012,8 +1012,8 @@
         "color": "#43bbe4",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1786813200,
-            "episode": 6
+            "airingAt": 1787418000,
+            "episode": 7
         },
         "romaji": "Hanaori-san wa Tensei Shite mo Kenka ga Shitai",
         "english": "Hanaori-san Still Wants to Fight in the Next Life",
@@ -1021,7 +1021,7 @@
     },
     "The Cat and the Dragon": {
         "mediaId": 186863,
-        "progress": 7,
+        "progress": 8,
         "status": "CURRENT",
         "list_category": "Current",
         "scoreRaw": 100,
@@ -1030,8 +1030,8 @@
         "color": "#e4e45d",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1786795200,
-            "episode": 8
+            "airingAt": 1787400000,
+            "episode": 9
         },
         "romaji": "Neko to Ryuu",
         "english": "The Cat and the Dragon",
@@ -10335,6 +10335,84 @@
         },
         "romaji": "Hotaru no Yomeiri",
         "english": "Firefly Wedding",
+        "total_episodes": null
+    },
+    "To You in the Beyond": {
+        "mediaId": 207327,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Anime movies",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx207327-OSrMbh8DrGE4.jpg",
+        "color": "#f1d6ae",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791471600,
+            "episode": 1
+        },
+        "romaji": "Doko yori mo Tooi Basho ni Iru Kimi e",
+        "english": "To You in the Beyond",
+        "total_episodes": 1
+    },
+    "Marronnier Oukoku no Shichinin no Kishi": {
+        "mediaId": 212799,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx212799-n7WDdic7IL1z.png",
+        "color": "#e46b5d",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Marronnier Oukoku no Shichinin no Kishi",
+        "english": null,
+        "total_episodes": null
+    },
+    "Romelia War Chronicle": {
+        "mediaId": 180894,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx180894-FC9CSjwZPFMO.png",
+        "color": "#e4c9ae",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Romeria Senki: Maou wo Taoshita nochi mo Jinrui Yabasou dakara Guntai Soshiki Shita",
+        "english": "Romelia War Chronicle",
+        "total_episodes": null
+    },
+    "Hotel Inhumans 2nd Season": {
+        "mediaId": 199426,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx199426-nLcvtPfuWcms.jpg",
+        "color": "#fe5078",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Hotel Inhumans 2nd Season",
+        "english": null,
+        "total_episodes": null
+    },
+    "Gensou Suikoden": {
+        "mediaId": 187316,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx187316-jucYCojVTjSY.jpg",
+        "color": "#e4bb5d",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Gensou Suikoden",
+        "english": null,
         "total_episodes": null
     }
 }
