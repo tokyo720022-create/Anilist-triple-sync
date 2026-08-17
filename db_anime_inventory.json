@@ -52,8 +52,8 @@
     },
     "Mushoku Tensei: Jobless Reincarnation Season 3": {
         "mediaId": 178789,
-        "progress": 7,
-        "status": "PLANNING",
+        "progress": 8,
+        "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 100,
         "type": "ANIME",
@@ -61,8 +61,8 @@
         "color": "#28bbe4",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1786892400,
-            "episode": 8
+            "airingAt": 1787497200,
+            "episode": 9
         },
         "romaji": "Mushoku Tensei III: Isekai Ittara Honki Dasu",
         "english": "Mushoku Tensei: Jobless Reincarnation Season 3",
@@ -784,17 +784,17 @@
     },
     "Though I Am an Inept Villainess": {
         "mediaId": 188139,
-        "progress": 5,
+        "progress": 6,
         "status": "CURRENT",
         "list_category": "Current",
-        "scoreRaw": 0,
+        "scoreRaw": 95,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx188139-1qIJfWxym8FX.jpg",
         "color": "#0d86fe",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1786891560,
-            "episode": 6
+            "airingAt": 1787496360,
+            "episode": 7
         },
         "romaji": "Futsutsuka na Akujo de wa Gozaimasu ga: Suuguu Chouso Torikae Den",
         "english": "Though I Am an Inept Villainess",
