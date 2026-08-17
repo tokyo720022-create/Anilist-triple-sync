@@ -4394,5 +4394,19 @@
         "romaji": "Jomuraegi Gongjakgaui Kkangpae Aginim",
         "english": "The Gangster Daughter of the Henchman Duke's Family",
         "total_chapters": null
+    },
+    "Tsukimichi: Moonlit Fantasy": {
+        "mediaId": 87224,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx87224-cXzygUtaRK8s.jpg",
+        "color": "#fee40d",
+        "duration": 24,
+        "romaji": "Tsuki ga Michibiku Isekai Douchuu",
+        "english": "Tsukimichi: Moonlit Fantasy",
+        "total_chapters": null
     }
 }
