@@ -4380,5 +4380,19 @@
         "romaji": "Isekai demo Bunan ni Ikitai Shoukougun",
         "english": null,
         "total_chapters": null
+    },
+    "The Gangster Daughter of the Henchman Duke's Family": {
+        "mediaId": 170192,
+        "progress": 0,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx170192-7SQOFcFbnd8y.jpg",
+        "color": "#e45d6b",
+        "duration": 24,
+        "romaji": "Jomuraegi Gongjakgaui Kkangpae Aginim",
+        "english": "The Gangster Daughter of the Henchman Duke's Family",
+        "total_chapters": null
     }
 }
