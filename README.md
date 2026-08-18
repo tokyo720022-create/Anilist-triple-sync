@@ -131,21 +131,21 @@ The Anime README telemetry block uses:
 ```text
 TODAY
 ─────────────────────────
-Anime             0 eps
-Time              0 min
-Gamerscore     226 G
+Anime             1 eps
+Time             22 min
+Gamerscore     246 G
 
 THIS WEEK
 ─────────────────────────
-Anime             2 eps
-Time             44 min
-Gamerscore     542 G
+Anime             3 eps
+Time             66 min
+Gamerscore     562 G
 
 ALL TIME
 ─────────────────────────
-Episodes         16
-Minutes         348
-Gamerscore  29,556 G
+Episodes         17
+Minutes         370
+Gamerscore  29,576 G
 Completed       111
 
 ```
