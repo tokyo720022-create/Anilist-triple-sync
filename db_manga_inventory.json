@@ -4383,7 +4383,7 @@
     },
     "The Gangster Daughter of the Henchman Duke's Family": {
         "mediaId": 170192,
-        "progress": 75,
+        "progress": 81,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 0,
@@ -4407,6 +4407,48 @@
         "duration": 24,
         "romaji": "Tsuki ga Michibiku Isekai Douchuu",
         "english": "Tsukimichi: Moonlit Fantasy",
+        "total_chapters": null
+    },
+    "Chronicles of an Aristocrat Reborn in Another World": {
+        "mediaId": 103238,
+        "progress": 30,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx103238-dBhvixEd2wej.jpg",
+        "color": "#f1d600",
+        "duration": 24,
+        "romaji": "Tensei Kizoku no Isekai Boukenroku: Jichou wo Shiranai Kamigami no Shito",
+        "english": "Chronicles of an Aristocrat Reborn in Another World",
+        "total_chapters": null
+    },
+    "MAOYU: Archenemy and Hero \"Be Mine, Hero!\" \"I Refuse!\"": {
+        "mediaId": 56441,
+        "progress": 1,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx56441-zWJGuQYqZBYL.jpg",
+        "color": "#ae355d",
+        "duration": 24,
+        "romaji": "Maoyuu Maou Yuusha: 'Kono Watashi no Mono Tonare, Yuusha yo' 'Kotowaru!'",
+        "english": "MAOYU: Archenemy and Hero \"Be Mine, Hero!\" \"I Refuse!\"",
+        "total_chapters": 59
+    },
+    "Death March to the Parallel World Rhapsody": {
+        "mediaId": 86511,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx86511-rs2JfTIW5VhJ.png",
+        "color": "#285d78",
+        "duration": 24,
+        "romaji": "Death March Kara Hajimaru Isekai Kyousoukyoku",
+        "english": "Death March to the Parallel World Rhapsody",
         "total_chapters": null
     }
 }
