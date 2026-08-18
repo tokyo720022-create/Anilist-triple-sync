@@ -4411,7 +4411,7 @@
     },
     "Chronicles of an Aristocrat Reborn in Another World": {
         "mediaId": 103238,
-        "progress": 30,
+        "progress": 42,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 0,
@@ -4450,5 +4450,33 @@
         "romaji": "Death March Kara Hajimaru Isekai Kyousoukyoku",
         "english": "Death March to the Parallel World Rhapsody",
         "total_chapters": null
+    },
+    "Teisou Gyakuten Sekai": {
+        "mediaId": 98522,
+        "progress": 2,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx98522-h3bEyfLpXs7L.jpg",
+        "color": "#f1ae5d",
+        "duration": 24,
+        "romaji": "Teisou Gyakuten Sekai",
+        "english": null,
+        "total_chapters": null
+    },
+    "Umarekawattara Teisou Gyakuten Sekai": {
+        "mediaId": 150690,
+        "progress": 12,
+        "status": "COMPLETED",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx150690-Rza9Klf5zdtB.jpg",
+        "color": "#5d5de4",
+        "duration": 24,
+        "romaji": "Umarekawattara Teisou Gyakuten Sekai",
+        "english": null,
+        "total_chapters": 12
     }
 }
