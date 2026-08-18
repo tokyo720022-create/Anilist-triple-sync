@@ -72,7 +72,7 @@ def safe_int(val, default=0):
 # 🧵 1.5. SELECTIVE THREAD ROUTER
 # ==========================================
 TARGET_LISTS = [
-    "anime movies", "iseki", "isekai", "milf", "loli", "rom com" ,
+    "anime movies", "iseki", "isekai", "milf", "loli", "rom com",
     "plan to continue", "hentai", "favourite", "fav", "planning"
 ]
 
