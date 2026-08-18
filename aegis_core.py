@@ -38,7 +38,7 @@ async def status(interaction: discord.Interaction):
 # 🔑 4. SYSTEM IGNITION
 # ==========================================
 # Securely pulls the token from the cloud server's vault
-BOT_TOKEN = os.environ.get("DISCORD_TOKEN")
+BOT_TOKEN = os.environ.get("MTUzOTI1MzU2MTAxMDAzMjc3Mg.GRoyMX.v_NUhwzFbjiJ1bZLQ4z1e25dCjYDQjewe1HThU")
 
 if __name__ == '__main__':
     bot.run(BOT_TOKEN)
