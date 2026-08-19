@@ -4579,10 +4579,10 @@
     },
     "Yuutousei to Himitsu no Oshigoto": {
         "mediaId": 108310,
-        "progress": 35,
+        "progress": 40,
         "status": "CURRENT",
         "list_category": "Hentai",
-        "scoreRaw": 0,
+        "scoreRaw": 100,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx108310-TuhfdYrkLQ0R.jpg",
         "color": "#e4356b",
@@ -4604,5 +4604,33 @@
         "romaji": "Okusama ga Seito Kaichou!",
         "english": null,
         "total_chapters": 70
+    },
+    "Mama wa Doukyuusei": {
+        "mediaId": 45343,
+        "progress": 10,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx45343-rvZLYBB9Wa5S.jpg",
+        "color": "#f150bb",
+        "duration": 24,
+        "romaji": "Mama wa Doukyuusei",
+        "english": null,
+        "total_chapters": 40
+    },
+    "Hoshihimemura no Naishobanashi": {
+        "mediaId": 104261,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx104261-LZ228D2FafEG.png",
+        "color": "#f13578",
+        "duration": 24,
+        "romaji": "Hoshihimemura no Naishobanashi",
+        "english": null,
+        "total_chapters": 38
     }
 }
