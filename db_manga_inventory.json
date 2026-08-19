@@ -4537,7 +4537,7 @@
     },
     "Shishunki-chan no Shitsukekata": {
         "mediaId": 108330,
-        "progress": 15,
+        "progress": 26,
         "status": "CURRENT",
         "list_category": "Rom Com",
         "scoreRaw": 0,
@@ -4548,5 +4548,61 @@
         "romaji": "Shishunki-chan no Shitsukekata",
         "english": null,
         "total_chapters": 53
+    },
+    "Kono Naka ni Hitori, Imouto ga Iru!": {
+        "mediaId": 56819,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx56819-5li8QWQ0MkvY.jpg",
+        "color": "#f1ae28",
+        "duration": 24,
+        "romaji": "Kono Naka ni Hitori, Imouto ga Iru!",
+        "english": null,
+        "total_chapters": 27
+    },
+    "Papa no Iukoto wo Kikinasai!: Rojou Kansatsu Kenkyuukai Nisshi": {
+        "mediaId": 63101,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/63101-6sGzWe8biRER.jpg",
+        "color": "#e45086",
+        "duration": 24,
+        "romaji": "Papa no Iukoto wo Kikinasai!: Rojou Kansatsu Kenkyuukai Nisshi",
+        "english": null,
+        "total_chapters": 32
+    },
+    "Yuutousei to Himitsu no Oshigoto": {
+        "mediaId": 108310,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx108310-TuhfdYrkLQ0R.jpg",
+        "color": "#e4356b",
+        "duration": 24,
+        "romaji": "Yuutousei to Himitsu no Oshigoto",
+        "english": null,
+        "total_chapters": 68
+    },
+    "Okusama ga Seito Kaichou!": {
+        "mediaId": 79967,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx79967-lFnV1KlZh6Vh.png",
+        "color": "#f15d93",
+        "duration": 24,
+        "romaji": "Okusama ga Seito Kaichou!",
+        "english": null,
+        "total_chapters": 70
     }
 }
