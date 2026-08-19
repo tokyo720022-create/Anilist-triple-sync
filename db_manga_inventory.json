@@ -4495,9 +4495,9 @@
     },
     "A Hidden Side to my Crush": {
         "mediaId": 141355,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Planning",
+        "progress": 3,
+        "status": "CURRENT",
+        "list_category": "Rom Com",
         "scoreRaw": 0,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b141355-K4NCcnLlMLtJ.png",
@@ -4506,5 +4506,33 @@
         "romaji": "Waka-chan wa Kyou mo Azatoi",
         "english": "A Hidden Side to my Crush",
         "total_chapters": 222
+    },
+    "Imouto wa Kanojo ni Dekinai no ni": {
+        "mediaId": 157136,
+        "progress": 5,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx157136-AP2D9iLmqAVv.jpg",
+        "color": "#e4bb5d",
+        "duration": 24,
+        "romaji": "Imouto wa Kanojo ni Dekinai no ni",
+        "english": null,
+        "total_chapters": null
+    },
+    "Omae Imouto ja Nakute Iinazuke datta no kayo!?": {
+        "mediaId": 159628,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx159628-PCXJq08UnyDS.jpg",
+        "color": "#f1ae43",
+        "duration": 24,
+        "romaji": "Omae Imouto ja Nakute Iinazuke datta no kayo!?",
+        "english": null,
+        "total_chapters": 30
     }
 }
