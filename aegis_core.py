@@ -1,6 +1,25 @@
 import discord
 from discord.ext import commands
 import os
+from flask import Flask
+from threading import Thread
+
+# ==========================================
+# 🌐 0. THE RENDER BYPASS (INVISIBLE WEB SERVER)
+# ==========================================
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Aegis Overseer is Online and Operational."
+
+def run_server():
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run_server)
+    t.start()
 
 # ==========================================
 # ⚙️ 1. CORE INTENTS & INITIALIZATION
@@ -37,8 +56,8 @@ async def status(interaction: discord.Interaction):
 # ==========================================
 # 🔑 4. SYSTEM IGNITION
 # ==========================================
-# Securely pulls the token from the cloud server's vault
 BOT_TOKEN = os.environ.get("MTUzOTI1MzU2MTAxMDAzMjc3Mg.GRoyMX.v_NUhwzFbjiJ1bZLQ4z1e25dCjYDQjewe1HThU")
 
 if __name__ == '__main__':
-    bot.run(BOT_TOKEN)
+    keep_alive() # Ignites the invisible web server for Render
+    bot.run(BOT_TOKEN) # Ignites the Discord Bot
