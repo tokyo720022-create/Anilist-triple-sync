@@ -4534,5 +4534,19 @@
         "romaji": "Omae Imouto ja Nakute Iinazuke datta no kayo!?",
         "english": null,
         "total_chapters": 30
+    },
+    "Shishunki-chan no Shitsukekata": {
+        "mediaId": 108330,
+        "progress": 10,
+        "status": "CURRENT",
+        "list_category": "Rom Com",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx108330-wDz11JaxtUtj.jpg",
+        "color": "#e4d650",
+        "duration": 24,
+        "romaji": "Shishunki-chan no Shitsukekata",
+        "english": null,
+        "total_chapters": 53
     }
 }
