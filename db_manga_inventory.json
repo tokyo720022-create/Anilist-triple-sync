@@ -4716,5 +4716,19 @@
         "romaji": "Imouto ga Boku ni Taninboux wo Okutte kuru",
         "english": null,
         "total_chapters": 1
+    },
+    "Drugstore in Another World: The Slow Life of a Cheat Pharmacist": {
+        "mediaId": 106820,
+        "progress": 4,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx106820-4aWNuKUcs5sa.jpg",
+        "color": "#e4ae50",
+        "duration": 24,
+        "romaji": "Cheat Kusushi no Slow Life: Isekai ni Tsukurou Drugstore",
+        "english": "Drugstore in Another World: The Slow Life of a Cheat Pharmacist",
+        "total_chapters": null
     }
 }
