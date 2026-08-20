@@ -4621,7 +4621,7 @@
     },
     "Hoshihimemura no Naishobanashi": {
         "mediaId": 104261,
-        "progress": 5,
+        "progress": 23,
         "status": "CURRENT",
         "list_category": "Loli",
         "scoreRaw": 0,
@@ -4632,5 +4632,47 @@
         "romaji": "Hoshihimemura no Naishobanashi",
         "english": null,
         "total_chapters": 38
+    },
+    "Voice Work!": {
+        "mediaId": 40837,
+        "progress": 14,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx40837-wBDyfoHHIhEE.jpg",
+        "color": "#e48650",
+        "duration": 24,
+        "romaji": "Koe de Oshigoto!",
+        "english": "Voice Work!",
+        "total_chapters": 60
+    },
+    "Ore no Joyuu ga Ichiban Midara": {
+        "mediaId": 162548,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx162548-uQ8620qRtnbO.jpg",
+        "color": "#c90078",
+        "duration": 24,
+        "romaji": "Ore no Joyuu ga Ichiban Midara",
+        "english": null,
+        "total_chapters": 62
+    },
+    "Mujaki no Rakuen": {
+        "mediaId": 67885,
+        "progress": 14,
+        "status": "CURRENT",
+        "list_category": "Loli",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx67885-zaOahoaORJN2.jpg",
+        "color": "#e46b5d",
+        "duration": 24,
+        "romaji": "Mujaki no Rakuen",
+        "english": null,
+        "total_chapters": 86
     }
 }
