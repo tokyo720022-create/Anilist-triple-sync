@@ -133,7 +133,7 @@ TODAY
 ─────────────────────────
 Anime             0 eps
 Time              0 min
-Gamerscore     364 G
+Gamerscore       0 G
 
 THIS WEEK
 ─────────────────────────
