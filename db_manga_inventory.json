@@ -4674,5 +4674,47 @@
         "romaji": "Mujaki no Rakuen",
         "english": null,
         "total_chapters": 86
+    },
+    "Teisou Kannen ZERO": {
+        "mediaId": 92659,
+        "progress": 16,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 70,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx92659-ufjNjE8JOiZh.jpg",
+        "color": "#e43578",
+        "duration": 24,
+        "romaji": "Teisou Kannen ZERO",
+        "english": null,
+        "total_chapters": 16
+    },
+    "Isekai Chanko: Yokozuna Mokuzen ni Shoukan sareta n da ga": {
+        "mediaId": 112630,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b112630-ZbcK5e28tPNe.jpg",
+        "color": "#f1ae1a",
+        "duration": 24,
+        "romaji": "Isekai Chanko: Yokozuna Mokuzen ni Shoukan sareta n da ga",
+        "english": null,
+        "total_chapters": null
+    },
+    "Imouto ga Boku ni Taninboux wo Okutte kuru": {
+        "mediaId": 163483,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx163483-33d2iYJZuugE.jpg",
+        "color": "#f18650",
+        "duration": 24,
+        "romaji": "Imouto ga Boku ni Taninboux wo Okutte kuru",
+        "english": null,
+        "total_chapters": 1
     }
 }
