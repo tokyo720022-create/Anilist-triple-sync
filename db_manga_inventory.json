@@ -4730,5 +4730,33 @@
         "romaji": "Cheat Kusushi no Slow Life: Isekai ni Tsukurou Drugstore",
         "english": "Drugstore in Another World: The Slow Life of a Cheat Pharmacist",
         "total_chapters": null
+    },
+    "The Fledgling Demon Lord's Starter Shop": {
+        "mediaId": 138876,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx138876-3KIKn3LVQZUa.png",
+        "color": "#5dc9e4",
+        "duration": 24,
+        "romaji": "Sudachi no Maoujou",
+        "english": "The Fledgling Demon Lord's Starter Shop",
+        "total_chapters": null
+    },
+    "Isshiki-san Wants to Know About Love": {
+        "mediaId": 120945,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx120945-K8HwjiYMAlDz.jpg",
+        "color": "#e41a35",
+        "duration": 24,
+        "romaji": "Isshiki-san wa Koi wo Shiritai.",
+        "english": "Isshiki-san Wants to Know About Love",
+        "total_chapters": null
     }
 }
