@@ -10477,5 +10477,20 @@
         "romaji": "Kanata Kara",
         "english": null,
         "total_episodes": null
+    },
+    "Pen to Wappa to Jijitsukon": {
+        "mediaId": 211070,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx211070-ECOdD6WOC6gF.jpg",
+        "color": "#e45d93",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Pen to Wappa to Jijitsukon",
+        "english": null,
+        "total_episodes": null
     }
 }
