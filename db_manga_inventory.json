@@ -1542,7 +1542,7 @@
     "Dorei Senshi no Isekai Taneuma Seikatsu: Mahou mo Bujutsu mo Saikyou Dashi Harem made!?": {
         "mediaId": 162334,
         "progress": 1,
-        "status": "CURRENT",
+        "status": "COMPLETED",
         "list_category": "Iseki",
         "scoreRaw": 0,
         "type": "MANGA",
@@ -4747,8 +4747,8 @@
     },
     "Isshiki-san Wants to Know About Love": {
         "mediaId": 120945,
-        "progress": 0,
-        "status": "PLANNING",
+        "progress": 1,
+        "status": "CURRENT",
         "list_category": "Hentai",
         "scoreRaw": 0,
         "type": "MANGA",
@@ -4757,6 +4757,62 @@
         "duration": 24,
         "romaji": "Isshiki-san wa Koi wo Shiritai.",
         "english": "Isshiki-san Wants to Know About Love",
+        "total_chapters": null
+    },
+    "Elf Dorei to Kizuku Dungeon Harem: Isekai de Netotte Nakama wo Fuyashimasu": {
+        "mediaId": 154219,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx154219-74h41lsnOaza.jpg",
+        "color": null,
+        "duration": 24,
+        "romaji": "Elf Dorei to Kizuku Dungeon Harem: Isekai de Netotte Nakama wo Fuyashimasu",
+        "english": null,
+        "total_chapters": null
+    },
+    "Senki Survival Saga: Isekai no Unmei wo Kaketa Mujintou Fujun Iseikouyuu": {
+        "mediaId": 184773,
+        "progress": 11,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b184773-qs75HCeLpJ3Q.jpg",
+        "color": "#e49343",
+        "duration": 24,
+        "romaji": "Senki Survival Saga: Isekai no Unmei wo Kaketa Mujintou Fujun Iseikouyuu",
+        "english": null,
+        "total_chapters": null
+    },
+    "Arasaa Majutsushi no Yuruui Harem Life: Black Shachiku ga Isekai de Jiyuu Kimama ni Yuukyuu Shouka": {
+        "mediaId": 194301,
+        "progress": 5,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx194301-GDrNzTKotjZT.png",
+        "color": "#ff931a",
+        "duration": 24,
+        "romaji": "Arasaa Majutsushi no Yuruui Harem Life: Black Shachiku ga Isekai de Jiyuu Kimama ni Yuukyuu Shouka",
+        "english": null,
+        "total_chapters": null
+    },
+    "Full Clearing Another World under a Goddess with Zero Believers": {
+        "mediaId": 117946,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx117946-nPC2t5RIyhl2.jpg",
+        "color": "#1aa1d6",
+        "duration": 24,
+        "romaji": "Shinja Zero no Megami-sama to Hajimeru Isekai Kouryaku",
+        "english": "Full Clearing Another World under a Goddess with Zero Believers",
         "total_chapters": null
     }
 }
