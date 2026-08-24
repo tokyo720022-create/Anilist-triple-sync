@@ -52,7 +52,7 @@
     },
     "Mushoku Tensei: Jobless Reincarnation Season 3": {
         "mediaId": 178789,
-        "progress": 8,
+        "progress": 9,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 100,
@@ -61,8 +61,8 @@
         "color": "#28bbe4",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1787497200,
-            "episode": 9
+            "airingAt": 1788102000,
+            "episode": 10
         },
         "romaji": "Mushoku Tensei III: Isekai Ittara Honki Dasu",
         "english": "Mushoku Tensei: Jobless Reincarnation Season 3",
