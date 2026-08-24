@@ -4257,7 +4257,7 @@
     },
     "Kanojo no Tomodachi": {
         "mediaId": 133932,
-        "progress": 69,
+        "progress": 72,
         "status": "CURRENT",
         "list_category": "Hentai",
         "scoreRaw": 0,
@@ -4814,5 +4814,19 @@
         "romaji": "Shinja Zero no Megami-sama to Hajimeru Isekai Kouryaku",
         "english": "Full Clearing Another World under a Goddess with Zero Believers",
         "total_chapters": null
+    },
+    "Arasaa Mama no Watashi de Ii no?": {
+        "mediaId": 123286,
+        "progress": 2,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx123286-hvW9b1c8RNGN.jpg",
+        "color": "#e46b5d",
+        "duration": 24,
+        "romaji": "Arasaa Mama no Watashi de Ii no?",
+        "english": null,
+        "total_chapters": 55
     }
 }
