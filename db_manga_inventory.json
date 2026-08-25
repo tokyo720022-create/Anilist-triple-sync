@@ -71,7 +71,7 @@
     },
     "One Piece": {
         "mediaId": 30013,
-        "progress": 1190,
+        "progress": 1191,
         "status": "CURRENT",
         "list_category": "Fav",
         "scoreRaw": 100,
@@ -773,7 +773,7 @@
         "mediaId": 139732,
         "progress": 37,
         "status": "CURRENT",
-        "list_category": "Current",
+        "list_category": "Fav",
         "scoreRaw": 100,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx139732-q0LY7boA5cO9.jpg",
@@ -4481,7 +4481,7 @@
     },
     "Jitsu wa Imouto Deshita.: Saikin Giri no Otouto no Kyourikan ga Yatara Chikai Wake": {
         "mediaId": 151750,
-        "progress": 40,
+        "progress": 41,
         "status": "CURRENT",
         "list_category": "Rom Com",
         "scoreRaw": 100,
