@@ -313,17 +313,17 @@
     },
     "Oh Boy, Was I Wrong About Her": {
         "mediaId": 169583,
-        "progress": 7,
-        "status": "CURRENT",
-        "list_category": "Favourite",
+        "progress": 8,
+        "status": "PLANNING",
+        "list_category": "Plan to continue",
         "scoreRaw": 100,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx169583-0ZTdBGrKNIbe.jpg",
         "color": "#50c9fe",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1787581800,
-            "episode": 8
+            "airingAt": 1788186600,
+            "episode": 9
         },
         "romaji": "Tenkousaki no Seiso Karen na Bishoujo ga, Mukashi Danshi to Omotte Issho ni Asonda Osananajimi datta Ken",
         "english": "Oh Boy, Was I Wrong About Her",
