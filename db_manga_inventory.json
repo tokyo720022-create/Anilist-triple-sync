@@ -4859,9 +4859,9 @@
     },
     "My [Repair] Skill Became a Versatile Cheat, So I Think I\u2019ll Open a Weapon Shop": {
         "mediaId": 134531,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Planning",
+        "progress": 10,
+        "status": "CURRENT",
+        "list_category": "Current",
         "scoreRaw": 0,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx134531-BW11VM4ZSpL2.png",
@@ -4869,6 +4869,20 @@
         "duration": 24,
         "romaji": "[Shuufuku] Skill ga Bannou Chiito-ka Shitanode, Buki-ya demo Hirakou ka to Omoimasu",
         "english": "My [Repair] Skill Became a Versatile Cheat, So I Think I\u2019ll Open a Weapon Shop",
+        "total_chapters": null
+    },
+    "An Adventurer's Daily Grind at Age 29": {
+        "mediaId": 96738,
+        "progress": 15,
+        "status": "CURRENT",
+        "list_category": "Loli",
+        "scoreRaw": 90,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx96738-TA3zQJLU1uQ7.jpg",
+        "color": "#febb50",
+        "duration": 24,
+        "romaji": "29-sai Dokushin Chuuken Boukensha no Nichijou",
+        "english": "An Adventurer's Daily Grind at Age 29",
         "total_chapters": null
     }
 }
