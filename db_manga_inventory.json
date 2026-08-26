@@ -4884,5 +4884,19 @@
         "romaji": "29-sai Dokushin Chuuken Boukensha no Nichijou",
         "english": "An Adventurer's Daily Grind at Age 29",
         "total_chapters": null
+    },
+    "Mitsu ni Muragaru Mushi": {
+        "mediaId": 103116,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx103116-JJZGGUEljwUm.jpg",
+        "color": "#e4c943",
+        "duration": 24,
+        "romaji": "Mitsu ni Muragaru Mushi",
+        "english": null,
+        "total_chapters": 10
     }
 }
