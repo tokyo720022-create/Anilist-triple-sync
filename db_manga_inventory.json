@@ -4663,7 +4663,7 @@
     },
     "Mujaki no Rakuen": {
         "mediaId": 67885,
-        "progress": 40,
+        "progress": 56,
         "status": "CURRENT",
         "list_category": "Loli",
         "scoreRaw": 0,
@@ -4898,5 +4898,19 @@
         "romaji": "Mitsu ni Muragaru Mushi",
         "english": null,
         "total_chapters": 10
+    },
+    "Ingi no Hate": {
+        "mediaId": 96560,
+        "progress": 7,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 100,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx96560-7Xq9Xaa06Uqe.jpg",
+        "color": "#935028",
+        "duration": 24,
+        "romaji": "Ingi no Hate",
+        "english": null,
+        "total_chapters": 18
     }
 }
