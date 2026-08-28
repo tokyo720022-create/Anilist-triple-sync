@@ -280,7 +280,7 @@
     },
     "The Forsaken Saintess and Her Foodie Roadtrip in Another World": {
         "mediaId": 209504,
-        "progress": 6,
+        "progress": 7,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 98,
@@ -289,8 +289,8 @@
         "color": "#bbe40d",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1786975200,
-            "episode": 7
+            "airingAt": 1788184800,
+            "episode": 9
         },
         "romaji": "Suterare Seijo no Isekai Gohantabi: Kakure Skill de Camping Car wo Shoukan Shimashita",
         "english": "The Forsaken Saintess and Her Foodie Roadtrip in Another World",
@@ -10555,5 +10555,20 @@
         "romaji": "Hitozuma no Kuchibiru wa Kan Chu-Hi no Aji ga Shite",
         "english": "Chuhai Lips: Canned Flavor of Married Women",
         "total_episodes": 8
+    },
+    "The Wrong Way to Use Healing Magic": {
+        "mediaId": 137908,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx137908-50af3lKVbst2.jpg",
+        "color": "#78e435",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Chiyu Mahou no Machigatta Tsukaikata",
+        "english": "The Wrong Way to Use Healing Magic",
+        "total_episodes": 13
     }
 }
