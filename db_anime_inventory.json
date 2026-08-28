@@ -193,7 +193,7 @@
     },
     "I Made Friends with the Second Prettiest Girl in My Class": {
         "mediaId": 169580,
-        "progress": 8,
+        "progress": 9,
         "status": "CURRENT",
         "list_category": "Current",
         "scoreRaw": 100,
@@ -2704,8 +2704,8 @@
     },
     "Do You Like Big Girls?": {
         "mediaId": 204319,
-        "progress": 11,
-        "status": "CURRENT",
+        "progress": 12,
+        "status": "COMPLETED",
         "list_category": "Hentai ",
         "scoreRaw": 100,
         "type": "ANIME",
@@ -2719,9 +2719,9 @@
     },
     "Kusunoki's Garden of Gods": {
         "mediaId": 196029,
-        "progress": 11,
-        "status": "CURRENT",
-        "list_category": "Current",
+        "progress": 12,
+        "status": "COMPLETED",
+        "list_category": "Completed",
         "scoreRaw": 100,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx196029-4ML0UHngkZhn.jpg",
@@ -10540,5 +10540,20 @@
         "romaji": "Ochiru Part Tsuma - Toshishita Otoko to no Jouji ni Oboreta Hate ni...",
         "english": null,
         "total_episodes": null
+    },
+    "Chuhai Lips: Canned Flavor of Married Women": {
+        "mediaId": 186789,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx186789-MNl0ZBiRzDqY.jpg",
+        "color": "#fef150",
+        "duration": 5,
+        "nextAiring": null,
+        "romaji": "Hitozuma no Kuchibiru wa Kan Chu-Hi no Aji ga Shite",
+        "english": "Chuhai Lips: Canned Flavor of Married Women",
+        "total_episodes": 8
     }
 }
