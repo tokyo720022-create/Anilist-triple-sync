@@ -244,7 +244,7 @@
     },
     "Dara-san of the Reiwa Era": {
         "mediaId": 203880,
-        "progress": 8,
+        "progress": 9,
         "status": "CURRENT",
         "list_category": "Milf",
         "scoreRaw": 100,
@@ -253,8 +253,8 @@
         "color": null,
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1787833800,
-            "episode": 9
+            "airingAt": 1788438600,
+            "episode": 10
         },
         "romaji": "Reiwa no Dara-san",
         "english": "Dara-san of the Reiwa Era",
@@ -10490,6 +10490,54 @@
         "duration": 24,
         "nextAiring": null,
         "romaji": "Pen to Wappa to Jijitsukon",
+        "english": null,
+        "total_episodes": null
+    },
+    "Isekai Tensei Soudouki": {
+        "mediaId": 209221,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx209221-QBpwh553rVNr.png",
+        "color": "#e4ae5d",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Isekai Tensei Soudouki",
+        "english": null,
+        "total_episodes": null
+    },
+    "ONE PIECE FILM: GOD VALLEY": {
+        "mediaId": 215855,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Anime movies",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b215855-z86bqRqVcr13.png",
+        "color": null,
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "ONE PIECE FILM: GOD VALLEY",
+        "english": null,
+        "total_episodes": 1
+    },
+    "Ochiru Part Tsuma - Toshishita Otoko to no Jouji ni Oboreta Hate ni...": {
+        "mediaId": 215989,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx215989-jXzvgQ6QVAhj.png",
+        "color": "#e4ae93",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1795705200,
+            "episode": 1
+        },
+        "romaji": "Ochiru Part Tsuma - Toshishita Otoko to no Jouji ni Oboreta Hate ni...",
         "english": null,
         "total_episodes": null
     }
