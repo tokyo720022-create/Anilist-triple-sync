@@ -2,7 +2,7 @@ name: Anime Overdrive Core
 
 on:
   schedule:
-    # Fires at 08:00, 11:00, 14:00, 17:00, 20:00, 23:00 IST
+    # 08:00, 11:00, 14:00, 17:00, 20:00, 23:00 IST
     # GitHub Actions cron uses UTC.
     - cron: '30 2,5,8,11,14,17 * * *'
   workflow_dispatch:
@@ -24,6 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,6 +37,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
+      # ---------------------------------------------------------
+      # Sync with latest main BEFORE Anime Engine modifies files
+      # ---------------------------------------------------------
+      - name: Sync Repository Before Engine
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "Fetching latest main..."
+          git fetch origin main
+
+          echo "Syncing local branch with origin/main..."
+          git rebase origin/main
+
+          echo "Repository is up to date."
+
+      # ---------------------------------------------------------
+      # Run Anime Engine
+      # ---------------------------------------------------------
       - name: Detonate Anime Engine
         env:
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
@@ -58,6 +81,9 @@ jobs:
         run: |
           python anime_engine.py
 
+      # ---------------------------------------------------------
+      # Commit Anime Engine output
+      # ---------------------------------------------------------
       - name: Lock Anime Memory to Git Vault
         shell: bash
         run: |
@@ -66,23 +92,43 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          echo "Fetching latest main branch..."
-          git fetch origin main
+          echo "Checking Anime Engine changes..."
+          git status --short
 
-          echo "Rebasing local changes onto latest main..."
-          git rebase origin/main
+          echo "Staging generated files..."
 
-          echo "Staging Anime Engine output..."
-          
-          git add -- db_anime_*.json performance/ README.md 2>/dev/null || true
+          git add -- \
+            'db_anime_*.json' \
+            performance/ \
+            README.md
 
           if git diff --cached --quiet; then
-            echo "No Anime Engine changes detected. Nothing to commit."
+            echo "No changes detected."
             exit 0
           fi
 
           echo "Changes detected. Creating commit..."
-          git commit -m "chore: Anime Telemetry Matrix Sync [skip ci]"
+
+          git commit \
+            -m "chore: Anime Telemetry Matrix Sync [skip ci]"
+
+          # ---------------------------------------------------
+          # Refresh remote before pushing in case main changed
+          # while the engine was running.
+          # ---------------------------------------------------
+          echo "Checking remote for new commits..."
+
+          git fetch origin main
+
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "Remote main changed while the engine was running."
+            echo "Rebasing Anime Engine commit onto latest main..."
+
+            git rebase origin/main
+          fi
 
           echo "Pushing changes to main..."
+
           git push origin HEAD:main
+
+          echo "Anime Memory successfully locked to Git Vault."
