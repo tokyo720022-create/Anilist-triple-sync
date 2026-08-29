@@ -967,9 +967,9 @@
     },
     "Shoujo Ramune": {
         "mediaId": 21828,
-        "progress": 1,
-        "status": "COMPLETED",
-        "list_category": "Hentai",
+        "progress": 4,
+        "status": "CURRENT",
+        "list_category": "Loli",
         "scoreRaw": 100,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21828-3KDKm3Zu2DyX.jpg",
@@ -10570,5 +10570,23 @@
         "romaji": "Chiyu Mahou no Machigatta Tsukaikata",
         "english": "The Wrong Way to Use Healing Magic",
         "total_episodes": 13
+    },
+    "Now That I Can Control Reality With A Mouse Cursor, I'm Gonna Click Away On The Girls!": {
+        "mediaId": 206774,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx206774-s1a2BAAifoUD.png",
+        "color": "#43c9ff",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791129600,
+            "episode": 1
+        },
+        "romaji": "Mouse Cursor de Genjitsu wo Sousa Dekiru You ni Natta node, Onnanoko wo Ippai Click Shimasu",
+        "english": "Now That I Can Control Reality With A Mouse Cursor, I'm Gonna Click Away On The Girls!",
+        "total_episodes": null
     }
 }
