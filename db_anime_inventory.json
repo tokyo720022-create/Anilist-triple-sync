@@ -1,7 +1,7 @@
 {
     "That Time I Got Reincarnated as a Slime Season 4": {
         "mediaId": 182205,
-        "progress": 19,
+        "progress": 20,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 100,
@@ -10,12 +10,12 @@
         "color": "#1abbd6",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1787925600,
-            "episode": 20
+            "airingAt": 1788530400,
+            "episode": 21
         },
         "romaji": "Tensei Shitara Slime Datta Ken 4th Season",
         "english": "That Time I Got Reincarnated as a Slime Season 4",
-        "total_episodes": null
+        "total_episodes": 24
     },
     "SANDA": {
         "mediaId": 179302,
