@@ -16,38 +16,66 @@ on:
     - cron: '0 15 * * *'
     - cron: '30 16 * * *'
 
-  # Manual trigger remains available.
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: maximum-overdrive-v2-manga
+  cancel-in-progress: false
+
 jobs:
   manga_engine:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip'
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests
 
+      # ---------------------------------------------------------
+      # Sync repository BEFORE manga_engine.py modifies files
+      # ---------------------------------------------------------
+      - name: Sync Repository Before Engine
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "Fetching latest main..."
+          git fetch origin main
+
+          echo "Rebasing local branch onto latest main..."
+          git rebase origin/main
+
+          echo "Repository is up to date."
+
+      # ---------------------------------------------------------
+      # Run Manga Engine
+      # ---------------------------------------------------------
       - name: Run Manga Engine
         env:
           # AniList
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
 
-          # Discord - Manga engine uses Manga + shared feature webhooks
+          # Discord
           DISCORD_ANILIST_MANGA_WEBHOOK: ${{ secrets.DISCORD_ANILIST_MANGA_WEBHOOK }}
           DISCORD_ANILIST_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
@@ -68,20 +96,54 @@ jobs:
         run: |
           python -u manga_engine.py
 
+      # ---------------------------------------------------------
+      # Commit Manga Engine output
+      # ---------------------------------------------------------
       - name: Lock Memory to Git Vault
         if: success()
+        shell: bash
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          set -euo pipefail
 
-          git pull origin main --rebase || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Manga-specific DBs + shared performance/README telemetry.
-          git add '*.json' performance/ README.md || true
+          echo "Checking Manga Engine changes..."
+          git status --short
 
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: Manga Engine Telemetry Sync [skip ci]"
-            git push
-          else
+          echo "Staging Manga databases and telemetry..."
+
+          git add -- \
+            '*.json' \
+            performance/ \
+            README.md
+
+          if git diff --cached --quiet; then
             echo "No Manga database or telemetry changes to commit."
+            exit 0
           fi
+
+          echo "Changes detected. Creating commit..."
+
+          git commit \
+            -m "chore: Manga Engine Telemetry Sync [skip ci]"
+
+          # -----------------------------------------------------
+          # Make sure main did not change while engine was running
+          # -----------------------------------------------------
+          echo "Fetching latest remote main..."
+
+          git fetch origin main
+
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "Remote main changed while Manga Engine was running."
+            echo "Rebasing Manga Engine commit onto latest main..."
+
+            git rebase origin/main
+          fi
+
+          echo "Pushing Manga Engine changes..."
+
+          git push origin HEAD:main
+
+          echo "Manga memory successfully locked to Git Vault."
