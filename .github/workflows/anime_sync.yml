@@ -2,14 +2,18 @@ name: Anime Overdrive Core
 
 on:
   schedule:
-    # 08:00, 11:00, 14:00, 17:00, 20:00, 23:00 IST
+    # Fires at 08:00, 11:00, 14:00, 17:00, 20:00, 23:00 IST
     # GitHub Actions cron uses UTC.
     - cron: '30 2,5,8,11,14,17 * * *'
+
+  # Manual trigger
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# Prevent two Anime Engine runs from modifying the same Git state
+# at the same time.
 concurrency:
   group: anime-overdrive-core
   cancel-in-progress: false
@@ -17,28 +21,39 @@ concurrency:
 jobs:
   run_anime_core:
     runs-on: ubuntu-latest
+
+    # Prevent an unexpectedly stuck engine from consuming runner time.
     timeout-minutes: 30
 
     steps:
+      # =========================================================
+      # 1. CHECKOUT
+      # =========================================================
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
 
+      # =========================================================
+      # 2. PYTHON
+      # =========================================================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: 'pip'
 
+      # =========================================================
+      # 3. DEPENDENCIES
+      # =========================================================
       - name: Install Dependencies
-  run: |
-    pip install -r requirements.txt
+        run: |
+          python -m pip install -r requirements.txt
 
-      # ---------------------------------------------------------
-      # Sync with latest main BEFORE Anime Engine modifies files
-      # ---------------------------------------------------------
+      # =========================================================
+      # 4. SYNC GIT BEFORE ENGINE MODIFIES FILES
+      # =========================================================
       - name: Sync Repository Before Engine
         shell: bash
         run: |
@@ -50,18 +65,24 @@ jobs:
           echo "Fetching latest main..."
           git fetch origin main
 
-          echo "Syncing local branch with origin/main..."
+          echo "Synchronizing local branch with origin/main..."
           git rebase origin/main
 
-          echo "Repository is up to date."
+          echo "Repository synchronized successfully."
 
-      # ---------------------------------------------------------
-      # Run Anime Engine
-      # ---------------------------------------------------------
+      # =========================================================
+      # 5. RUN ANIME ENGINE
+      # =========================================================
       - name: Detonate Anime Engine
         env:
+          # -----------------------------------------------------
+          # AniList
+          # -----------------------------------------------------
           ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
 
+          # -----------------------------------------------------
+          # Discord
+          # -----------------------------------------------------
           DISCORD_ANILIST_ANIME_WEBHOOK: ${{ secrets.DISCORD_ANILIST_ANIME_WEBHOOK }}
           DISCORD_ANILIST_LOG_WEBHOOK: ${{ secrets.DISCORD_ANILIST_LOG_WEBHOOK }}
           DISCORD_AIRING_WEBHOOK: ${{ secrets.DISCORD_AIRING_WEBHOOK }}
@@ -70,20 +91,27 @@ jobs:
           DISCORD_ACHIEVEMENTS_WEBHOOK: ${{ secrets.DISCORD_ACHIEVEMENTS_WEBHOOK }}
           DISCORD_PERFORMANCE_WEBHOOK: ${{ secrets.DISCORD_PERFORMANCE_WEBHOOK }}
 
+          # -----------------------------------------------------
+          # Telegram
+          # -----------------------------------------------------
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
+          # -----------------------------------------------------
+          # Zulip
+          # -----------------------------------------------------
           ZULIP_SERVER_URL: ${{ secrets.ZULIP_SERVER_URL }}
           ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
           ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
 
         run: |
-          python anime_engine.py
+          python -u anime_engine.py
 
-      # ---------------------------------------------------------
-      # Commit Anime Engine output
-      # ---------------------------------------------------------
+      # =========================================================
+      # 6. SAVE ANIME ENGINE MEMORY
+      # =========================================================
       - name: Lock Anime Memory to Git Vault
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -91,42 +119,70 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          echo "Checking Anime Engine changes..."
+          echo "Checking Anime Engine output..."
           git status --short
 
-          echo "Staging generated files..."
+          # -----------------------------------------------------
+          # Stage Anime database files safely
+          # -----------------------------------------------------
+          shopt -s nullglob
 
-          git add -- \
-            'db_anime_*.json' \
-            performance/ \
-            README.md
+          anime_db_files=(db_anime_*.json)
 
+          if (( ${#anime_db_files[@]} > 0 )); then
+            git add -- "${anime_db_files[@]}"
+          fi
+
+          # -----------------------------------------------------
+          # Stage performance telemetry if it exists
+          # -----------------------------------------------------
+          if [ -d "performance" ]; then
+            git add -- performance/
+          fi
+
+          # -----------------------------------------------------
+          # Stage README if it exists
+          # -----------------------------------------------------
+          if [ -f "README.md" ]; then
+            git add -- README.md
+          fi
+
+          # -----------------------------------------------------
+          # Nothing changed
+          # -----------------------------------------------------
           if git diff --cached --quiet; then
-            echo "No changes detected."
+            echo "No Anime database or telemetry changes detected."
+            echo "Skipping commit and push."
             exit 0
           fi
 
-          echo "Changes detected. Creating commit..."
+          # -----------------------------------------------------
+          # Create commit
+          # -----------------------------------------------------
+          echo "Anime changes detected."
+          echo "Creating Git Vault commit..."
 
           git commit \
             -m "chore: Anime Telemetry Matrix Sync [skip ci]"
 
-          # ---------------------------------------------------
-          # Refresh remote before pushing in case main changed
-          # while the engine was running.
-          # ---------------------------------------------------
-          echo "Checking remote for new commits..."
+          # -----------------------------------------------------
+          # Remote may have changed while Anime Engine was running
+          # -----------------------------------------------------
+          echo "Checking latest remote main..."
 
           git fetch origin main
 
           if ! git merge-base --is-ancestor HEAD origin/main; then
-            echo "Remote main changed while the engine was running."
+            echo "Remote main changed during engine execution."
             echo "Rebasing Anime Engine commit onto latest main..."
 
             git rebase origin/main
           fi
 
-          echo "Pushing changes to main..."
+          # -----------------------------------------------------
+          # Push
+          # -----------------------------------------------------
+          echo "Pushing Anime Engine memory..."
 
           git push origin HEAD:main
 
