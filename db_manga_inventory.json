@@ -5024,5 +5024,19 @@
         "romaji": "Kodomo no Ou-sama Game",
         "english": null,
         "total_chapters": 1
+    },
+    "Click Me All Over": {
+        "mediaId": 199993,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx199993-BEuSe7qiOcTY.jpg",
+        "color": "#0da1e4",
+        "duration": 24,
+        "romaji": "Mouse Cursor de Genjitsu wo Sousa Dekiru You ni Natta node, Onnanoko wo Ippai Click Shimasu",
+        "english": "Click Me All Over",
+        "total_chapters": null
     }
 }
