@@ -533,7 +533,7 @@
     },
     "Tomodachi no Haha wa Boku no Mono": {
         "mediaId": 115659,
-        "progress": 13,
+        "progress": 14,
         "status": "COMPLETED",
         "list_category": "Hentai",
         "scoreRaw": 100,
@@ -4943,7 +4943,7 @@
     },
     "The Quintessential Quintuplets": {
         "mediaId": 100230,
-        "progress": 15,
+        "progress": 35,
         "status": "CURRENT",
         "list_category": "Rom Com",
         "scoreRaw": 100,
@@ -5038,5 +5038,19 @@
         "romaji": "Mouse Cursor de Genjitsu wo Sousa Dekiru You ni Natta node, Onnanoko wo Ippai Click Shimasu",
         "english": "Click Me All Over",
         "total_chapters": null
+    },
+    "Zecchou Boshi": {
+        "mediaId": 50387,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx50387-RGrr3pkdAFyo.jpg",
+        "color": "#e47850",
+        "duration": 24,
+        "romaji": "Zecchou Boshi",
+        "english": null,
+        "total_chapters": 29
     }
 }
