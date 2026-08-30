@@ -1003,7 +1003,7 @@
     },
     "Hanaori-san Still Wants to Fight in the Next Life": {
         "mediaId": 199066,
-        "progress": 7,
+        "progress": 8,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 100,
@@ -1012,8 +1012,8 @@
         "color": "#43bbe4",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1788022800,
-            "episode": 8
+            "airingAt": 1788627600,
+            "episode": 9
         },
         "romaji": "Hanaori-san wa Tensei Shite mo Kenka ga Shitai",
         "english": "Hanaori-san Still Wants to Fight in the Next Life",
@@ -1021,7 +1021,7 @@
     },
     "The Cat and the Dragon": {
         "mediaId": 186863,
-        "progress": 9,
+        "progress": 10,
         "status": "CURRENT",
         "list_category": "Current",
         "scoreRaw": 100,
@@ -1030,8 +1030,8 @@
         "color": "#e4e45d",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1788004800,
-            "episode": 10
+            "airingAt": 1788609600,
+            "episode": 11
         },
         "romaji": "Neko to Ryuu",
         "english": "The Cat and the Dragon",
@@ -9961,7 +9961,7 @@
     },
     "The 100 Girlfriends Who Really, Really, Really, Really, REALLY Love You Season 2": {
         "mediaId": 172258,
-        "progress": 8,
+        "progress": 10,
         "status": "CURRENT",
         "list_category": "Milf",
         "scoreRaw": 80,
