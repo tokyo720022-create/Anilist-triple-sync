@@ -4943,7 +4943,7 @@
     },
     "The Quintessential Quintuplets": {
         "mediaId": 100230,
-        "progress": 79,
+        "progress": 85,
         "status": "CURRENT",
         "list_category": "Rom Com",
         "scoreRaw": 100,
@@ -5052,5 +5052,33 @@
         "romaji": "Zecchou Boshi",
         "english": null,
         "total_chapters": 29
+    },
+    "Nisemono Kazoku: Gifu ni Ochite Iku Musume": {
+        "mediaId": 151735,
+        "progress": 8,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 95,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx151735-yUUMVe6qlhzv.png",
+        "color": "#f1e400",
+        "duration": 24,
+        "romaji": "Nisemono Kazoku: Gifu ni Ochite Iku Musume",
+        "english": null,
+        "total_chapters": 8
+    },
+    "We Never Learn": {
+        "mediaId": 98235,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Rom Com",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx98235-V6yBxNIrsOp0.jpg",
+        "color": "#f1ae50",
+        "duration": 24,
+        "romaji": "Bokutachi wa Benkyou ga Dekinai",
+        "english": "We Never Learn",
+        "total_chapters": 187
     }
 }
