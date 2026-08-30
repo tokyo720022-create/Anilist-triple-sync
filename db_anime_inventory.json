@@ -10588,5 +10588,20 @@
         "romaji": "Mouse Cursor de Genjitsu wo Sousa Dekiru You ni Natta node, Onnanoko wo Ippai Click Shimasu",
         "english": "Now That I Can Control Reality With A Mouse Cursor, I'm Gonna Click Away On The Girls!",
         "total_episodes": null
+    },
+    "The Quintessential Quintuplets": {
+        "mediaId": 103572,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx103572-cchriAdH95cQ.png",
+        "color": "#e4436b",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Go-toubun no Hanayome",
+        "english": "The Quintessential Quintuplets",
+        "total_episodes": 12
     }
 }
