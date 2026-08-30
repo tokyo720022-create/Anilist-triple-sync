@@ -5080,5 +5080,19 @@
         "romaji": "Bokutachi wa Benkyou ga Dekinai",
         "english": "We Never Learn",
         "total_chapters": 187
+    },
+    "Tsuma ga Kanpeki Sugiru node, Chotto Midashite Ii desu ka?": {
+        "mediaId": 141565,
+        "progress": 2,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx141565-hT20IHogdUK3.jpg",
+        "color": "#e42893",
+        "duration": 24,
+        "romaji": "Tsuma ga Kanpeki Sugiru node, Chotto Midashite Ii desu ka?",
+        "english": null,
+        "total_chapters": null
     }
 }
