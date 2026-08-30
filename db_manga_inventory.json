@@ -5083,10 +5083,10 @@
     },
     "Tsuma ga Kanpeki Sugiru node, Chotto Midashite Ii desu ka?": {
         "mediaId": 141565,
-        "progress": 2,
+        "progress": 16,
         "status": "CURRENT",
         "list_category": "Current",
-        "scoreRaw": 0,
+        "scoreRaw": 100,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx141565-hT20IHogdUK3.jpg",
         "color": "#e42893",
@@ -5094,5 +5094,19 @@
         "romaji": "Tsuma ga Kanpeki Sugiru node, Chotto Midashite Ii desu ka?",
         "english": null,
         "total_chapters": null
+    },
+    "Chichi to Ani to Dorei na Watashi": {
+        "mediaId": 137953,
+        "progress": 5,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 94,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx137953-I9PWB73qvnWO.jpg",
+        "color": "#e4a193",
+        "duration": 24,
+        "romaji": "Chichi to Ani to Dorei na Watashi",
+        "english": null,
+        "total_chapters": 5
     }
 }
