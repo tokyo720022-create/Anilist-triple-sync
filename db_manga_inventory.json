@@ -5108,5 +5108,19 @@
         "romaji": "Chichi to Ani to Dorei na Watashi",
         "english": null,
         "total_chapters": 5
+    },
+    "Girlfriend, Girlfriend": {
+        "mediaId": 116266,
+        "progress": 5,
+        "status": "CURRENT",
+        "list_category": "Fav",
+        "scoreRaw": 100,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx116266-VouBBsn4mVHc.jpg",
+        "color": "#e43586",
+        "duration": 24,
+        "romaji": "Kanojo mo Kanojo",
+        "english": "Girlfriend, Girlfriend",
+        "total_chapters": 144
     }
 }
