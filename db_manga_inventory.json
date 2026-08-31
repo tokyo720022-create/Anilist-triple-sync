@@ -5111,7 +5111,7 @@
     },
     "Girlfriend, Girlfriend": {
         "mediaId": 116266,
-        "progress": 10,
+        "progress": 12,
         "status": "CURRENT",
         "list_category": "Fav",
         "scoreRaw": 100,
@@ -5122,5 +5122,19 @@
         "romaji": "Kanojo mo Kanojo",
         "english": "Girlfriend, Girlfriend",
         "total_chapters": 144
+    },
+    "Kodomo no Jikan": {
+        "mediaId": 30582,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx30582-YvVkjMplMxPz.jpg",
+        "color": "#e4785d",
+        "duration": 24,
+        "romaji": "Kodomo no Jikan",
+        "english": "Kodomo no Jikan",
+        "total_chapters": 93
     }
 }
