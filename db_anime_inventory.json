@@ -10753,5 +10753,35 @@
         "romaji": "Kaiko sareta Ankoku Heishi (30-dai) no Slow na Second Life",
         "english": "Chillin\u2019 in My 30s after Getting Fired from the Demon King\u2019s Army",
         "total_episodes": 12
+    },
+    "We Never Learn!: BOKUBEN Season 2": {
+        "mediaId": 110229,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Favourite",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx110229-uBjHp2cbXYVL.jpg",
+        "color": "#aed6f1",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Bokutachi wa Benkyou ga Dekinai!",
+        "english": "We Never Learn!: BOKUBEN Season 2",
+        "total_episodes": 13
+    },
+    "We Never Learn OVAs": {
+        "mediaId": 109492,
+        "progress": 2,
+        "status": "COMPLETED",
+        "list_category": "Rom Com",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx109492-DphM0bHcV0LD.jpg",
+        "color": null,
+        "duration": 25,
+        "nextAiring": null,
+        "romaji": "Bokutachi wa Benkyou ga Dekinai OVAs",
+        "english": "We Never Learn OVAs",
+        "total_episodes": 2
     }
 }
