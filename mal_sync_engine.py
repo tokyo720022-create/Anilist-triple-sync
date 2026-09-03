@@ -229,7 +229,7 @@ def fetch_mal_list(access_token: str) -> dict[int, dict]:
                     "status,score,num_episodes_watched,"
                     "start_date,finish_date"
                 ),
-                "sort": "anime_id",
+                "sort": "list_updated_at",
             },
         )
 
