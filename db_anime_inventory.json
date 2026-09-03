@@ -10738,5 +10738,20 @@
         "romaji": "Yozakura-san Chi no Daisakusen 2nd Season Part 2",
         "english": "Mission: Yozakura Family Season 2 Part 2",
         "total_episodes": null
+    },
+    "Chillin\u2019 in My 30s after Getting Fired from the Demon King\u2019s Army": {
+        "mediaId": 152523,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx152523-1I1KPnKyOwhe.jpg",
+        "color": "#e48650",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Kaiko sareta Ankoku Heishi (30-dai) no Slow na Second Life",
+        "english": "Chillin\u2019 in My 30s after Getting Fired from the Demon King\u2019s Army",
+        "total_episodes": 12
     }
 }
