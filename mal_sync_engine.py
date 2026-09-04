@@ -1,24 +1,33 @@
 import json
 import os
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import requests
 
 # ============================================================
-# MAL ← ANIList MANUAL SYNC ENGINE
+# MAL <- ANILIST SHORT DELTA SYNC v2
 # ============================================================
-# Source: AniList
-# Target: MyAnimeList
+# Source : AniList user "Orewatokyo"
+# Target : MyAnimeList
+# Mode   : Manual GitHub Actions only
 #
-# Required GitHub Actions secrets:
+# The previous deep run is assumed to have synchronized the existing
+# library. This engine therefore uses a persistent per-media timestamp
+# baseline and only writes AniList entries whose updatedAt changed.
+#
+# GitHub Actions secrets required:
 #   ANILIST_TARGET_TOKEN
 #   MAL_CLIENT_ID
 #   MAL_CLIENT_SECRET
 #   MAL_REFRESH_TOKEN
 #
-# The engine syncs current anime status, score and watched episodes.
-# It does NOT modify AniList and does NOT touch manga.
+# Persistent repository state:
+#   mal_delta_state.json
+#
+# IMPORTANT:
+# The workflow commits mal_delta_state.json after successful processing.
+# This is required because GitHub-hosted runners are temporary.
 # ============================================================
 
 SOURCE_USERNAME = "Orewatokyo"
@@ -28,11 +37,13 @@ MAL_CLIENT_ID = os.environ.get("MAL_CLIENT_ID", "").strip()
 MAL_CLIENT_SECRET = os.environ.get("MAL_CLIENT_SECRET", "").strip()
 MAL_REFRESH_TOKEN = os.environ.get("MAL_REFRESH_TOKEN", "").strip()
 
+STATE_FILE = "mal_delta_state.json"
+
 ANILIST_URL = "https://graphql.anilist.co"
 MAL_TOKEN_URL = "https://myanimelist.net/v1/oauth2/token"
-MAL_ANIMELIST_URL = "https://api.myanimelist.net/v2/users/@me/animelist"
+MAL_ME_URL = "https://api.myanimelist.net/v2/users/@me"
+MAL_ANIME_DETAILS_URL = "https://api.myanimelist.net/v2/anime/{anime_id}"
 MAL_UPDATE_URL = "https://api.myanimelist.net/v2/anime/{anime_id}/my_list_status"
-STATE_FILE = "mal_delta_state.json"
 
 ANILIST_HEADERS = {
     "Authorization": f"Bearer {ANILIST_TOKEN}" if ANILIST_TOKEN else "",
@@ -49,25 +60,51 @@ MAL_STATUS_MAP = {
     "DROPPED": "dropped",
 }
 
+ANILIST_QUERY = """
+query ($userName: String, $page: Int) {
+  Page(page: $page, perPage: 50) {
+    pageInfo { hasNextPage }
+    mediaList(
+      userName: $userName,
+      type: ANIME,
+      sort: [UPDATED_TIME_DESC]
+    ) {
+      updatedAt
+      status
+      score(format: POINT_100)
+      progress
+      startedAt { year month day }
+      completedAt { year month day }
+      media {
+        id
+        idMal
+        title { romaji english }
+        episodes
+      }
+    }
+  }
+}
+"""
 
 
 def load_state() -> dict:
     if not os.path.exists(STATE_FILE):
         return {}
+
     try:
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, dict) else {}
-    except Exception:
+    except Exception as exc:
+        print(f"⚠️ Could not read {STATE_FILE}: {exc}")
         return {}
 
 
 def save_state(state: dict) -> None:
     tmp = STATE_FILE + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2)
+        json.dump(state, f, indent=2, sort_keys=True)
     os.replace(tmp, STATE_FILE)
-
 
 
 def require_config() -> None:
@@ -84,7 +121,7 @@ def require_config() -> None:
 
     if missing:
         raise SystemExit(
-            "❌ Missing required secrets: " + ", ".join(missing)
+            "❌ Missing GitHub Secrets: " + ", ".join(missing)
         )
 
 
@@ -93,11 +130,12 @@ def request_with_retry(
     url: str,
     *,
     headers: Optional[Dict[str, str]] = None,
+    retries: int = 4,
     **kwargs: Any,
 ) -> requests.Response:
-    last_error = None
+    last_error: Optional[str] = None
 
-    for attempt in range(3):
+    for attempt in range(retries):
         try:
             response = requests.request(
                 method,
@@ -107,26 +145,37 @@ def request_with_retry(
                 **kwargs,
             )
 
-            if response.status_code not in (429, 500, 502, 503, 504):
-                return response
+            if response.status_code in (429, 500, 502, 503, 504):
+                last_error = (
+                    f"HTTP {response.status_code}: "
+                    f"{response.text[:300]}"
+                )
+                retry_after = response.headers.get("Retry-After")
+                try:
+                    delay = max(2, int(float(retry_after))) if retry_after else 0
+                except ValueError:
+                    delay = 0
+                time.sleep(delay or (2 + attempt * 2))
+                continue
 
-            last_error = f"HTTP {response.status_code}: {response.text[:300]}"
+            return response
 
         except requests.RequestException as exc:
             last_error = str(exc)
+            time.sleep(2 + attempt * 2)
 
-        time.sleep(2 + attempt * 2)
-
-    raise RuntimeError(last_error or "Request failed after retries.")
+    raise RuntimeError(last_error or "HTTP request failed after retries.")
 
 
-def refresh_mal_token() -> tuple[str, str]:
+def refresh_mal_token() -> Tuple[str, str]:
     print("🔐 Refreshing MAL OAuth token...")
 
     response = request_with_retry(
         "POST",
         MAL_TOKEN_URL,
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
         data={
             "client_id": MAL_CLIENT_ID,
             "client_secret": MAL_CLIENT_SECRET,
@@ -157,35 +206,35 @@ def refresh_mal_token() -> tuple[str, str]:
     return access_token, new_refresh_token
 
 
-def fetch_anilist_delta(last_sync: int) -> tuple[list[dict], int]:
-    query = """
-    query ($userName: String, $page: Int) {
-      Page(page: $page, perPage: 50) {
-        pageInfo { hasNextPage }
-        mediaList(
-          userName: $userName,
-          type: ANIME,
-          sort: [UPDATED_TIME_DESC]
-        ) {
-          updatedAt
-          status
-          score(format: POINT_100)
-          progress
-          startedAt { year month day }
-          completedAt { year month day }
-          media {
-            idMal
-            title { romaji english }
-            episodes
-          }
-        }
-      }
-    }
-    """
+def verify_mal(access_token: str) -> None:
+    response = request_with_retry(
+        "GET",
+        MAL_ME_URL,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/json",
+        },
+    )
 
-    changed = []
-    highest_seen = last_sync
+    if response.status_code == 401:
+        raise PermissionError("MAL access token rejected.")
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"MAL account test failed: HTTP {response.status_code} "
+            f"{response.text[:300]}"
+        )
+
+    username = response.json().get("name", "unknown")
+    print(f"✅ MAL account authenticated: {username}")
+
+
+def fetch_anilist_changes(previous_updates: dict) -> Tuple[list[dict], dict]:
+    """Inspect AniList newest-first and return only changed entries."""
+    changed: list[dict] = []
+    current_updates: dict[str, int] = {}
     page = 1
+    page_count = 0
 
     while True:
         response = request_with_retry(
@@ -193,8 +242,11 @@ def fetch_anilist_delta(last_sync: int) -> tuple[list[dict], int]:
             ANILIST_URL,
             headers=ANILIST_HEADERS,
             json={
-                "query": query,
-                "variables": {"userName": SOURCE_USERNAME, "page": page},
+                "query": ANILIST_QUERY,
+                "variables": {
+                    "userName": SOURCE_USERNAME,
+                    "page": page,
+                },
             },
         )
 
@@ -205,62 +257,67 @@ def fetch_anilist_delta(last_sync: int) -> tuple[list[dict], int]:
             raise SystemExit(1)
 
         payload = response.json()
-
         if payload.get("errors"):
-            print("❌ AniList GraphQL error:")
+            print("❌ AniList GraphQL errors:")
             print(payload["errors"])
             raise SystemExit(1)
 
         page_data = payload.get("data", {}).get("Page", {})
         batch = page_data.get("mediaList", [])
-
         if not batch:
             break
 
-        stop = False
+        page_count += 1
+
         for entry in batch:
+            media = entry.get("media") or {}
+            media_id = media.get("id")
+            if media_id is None:
+                continue
+
             updated_at = int(entry.get("updatedAt") or 0)
-            highest_seen = max(highest_seen, updated_at)
+            media_key = str(media_id)
+            current_updates[media_key] = updated_at
 
-            if last_sync and updated_at <= last_sync:
-                stop = True
-                break
+            previous = int(previous_updates.get(media_key, 0) or 0)
+            if updated_at > previous:
+                changed.append(entry)
 
-            changed.append(entry)
-
-        if stop or not page_data.get("pageInfo", {}).get("hasNextPage"):
+        if not page_data.get("pageInfo", {}).get("hasNextPage"):
             break
 
         page += 1
-        time.sleep(0.25)
+        time.sleep(0.15)
 
-    return changed, highest_seen
+    print(
+        f"✅ AniList checked: {len(current_updates)} anime "
+        f"across {page_count} page(s)."
+    )
+    return changed, current_updates
 
 
-def anilist_score_to_mal(score_100: Any) -> Optional[int]:
-    if score_100 is None:
+def anilist_score_to_mal(score: Any) -> Optional[int]:
+    if score is None:
         return None
 
     try:
-        score = float(score_100)
+        value = float(score)
     except (TypeError, ValueError):
         return None
 
-    if score <= 0:
+    if value <= 0:
         return None
 
-    # AniList POINT_100 → MAL 1–10.
-    converted = int(round(score / 10.0))
-    return max(1, min(10, converted))
+    return max(1, min(10, int(round(value / 10.0))))
 
 
-def format_date(date_obj: Optional[dict]) -> Optional[str]:
-    if not date_obj:
+def format_date(value: Optional[dict]) -> Optional[str]:
+    if not value:
         return None
 
-    year = date_obj.get("year")
-    month = date_obj.get("month")
-    day = date_obj.get("day")
+    year = value.get("year")
+    month = value.get("month")
+    day = value.get("day")
 
     if not year or not month or not day:
         return None
@@ -268,83 +325,117 @@ def format_date(date_obj: Optional[dict]) -> Optional[str]:
     return f"{year:04d}-{month:02d}-{day:02d}"
 
 
-def sync_entry(
+def title_for(entry: dict) -> str:
+    media = entry.get("media") or {}
+    titles = media.get("title") or {}
+    return (
+        titles.get("english")
+        or titles.get("romaji")
+        or f"MAL ID {media.get('idMal', '?')}"
+    )
+
+
+def fetch_mal_entry(access_token: str, mal_id: int) -> dict:
+    """Fetch only the one MAL anime corresponding to a changed AniList entry."""
+    response = request_with_retry(
+        "GET",
+        MAL_ANIME_DETAILS_URL.format(anime_id=mal_id),
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/json",
+        },
+        params={
+            "fields": "my_list_status"
+        },
+    )
+
+    if response.status_code == 401:
+        raise PermissionError("MAL access token rejected.")
+
+    if response.status_code == 404:
+        return {}
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"MAL lookup failed for {mal_id}: HTTP {response.status_code} "
+            f"{response.text[:300]}"
+        )
+
+    return response.json().get("my_list_status") or {}
+
+
+def build_mal_update(entry: dict, current: dict) -> dict:
+    desired_status = MAL_STATUS_MAP.get(entry.get("status"))
+    desired_progress = int(entry.get("progress") or 0)
+    desired_score = anilist_score_to_mal(entry.get("score"))
+
+    current_status = current.get("status")
+    current_progress = int(current.get("num_watched_episodes") or 0)
+    current_score = int(current.get("score") or 0)
+
+    update: dict[str, Any] = {}
+
+    if desired_status and desired_status != current_status:
+        update["status"] = desired_status
+
+    if desired_progress != current_progress:
+        update["num_watched_episodes"] = desired_progress
+
+    if desired_score is not None and desired_score != current_score:
+        update["score"] = desired_score
+
+    desired_start = format_date(entry.get("startedAt"))
+    desired_finish = format_date(entry.get("completedAt"))
+
+    if desired_start and desired_start != current.get("start_date"):
+        update["start_date"] = desired_start
+
+    if (
+        desired_finish
+        and desired_status == "completed"
+        and desired_finish != current.get("finish_date")
+    ):
+        update["finish_date"] = desired_finish
+
+    return update
+
+
+def update_mal_entry(
     access_token: str,
-    anilist_entry: dict,
-    mal_current: dict,
+    entry: dict,
+    current: dict,
 ) -> bool:
-    media = anilist_entry.get("media") or {}
+    media = entry.get("media") or {}
     mal_id = media.get("idMal")
 
     if not mal_id:
         return False
 
-    desired_status = MAL_STATUS_MAP.get(anilist_entry.get("status"))
-    desired_progress = int(anilist_entry.get("progress") or 0)
-    desired_score = anilist_score_to_mal(anilist_entry.get("score"))
-
-    current_status = mal_current.get("status")
-    current_progress = int(mal_current.get("num_episodes_watched") or 0)
-    current_score = int(mal_current.get("score") or 0)
-
-    # Only send fields that actually need changing.
-    update_data: dict[str, Any] = {}
-
-    if desired_status and desired_status != current_status:
-        update_data["status"] = desired_status
-
-    if desired_progress != current_progress:
-        update_data["num_watched_episodes"] = desired_progress
-
-    if desired_score is not None and desired_score != current_score:
-        update_data["score"] = desired_score
-
-    # Preserve AniList start/finish dates when present.
-    start_date = format_date(anilist_entry.get("startedAt"))
-    finish_date = format_date(anilist_entry.get("completedAt"))
-
-    if start_date:
-        update_data["start_date"] = start_date
-
-    if finish_date and desired_status == "completed":
-        update_data["finish_date"] = finish_date
-
-    if not update_data:
+    update = build_mal_update(entry, current)
+    if not update:
         return False
 
-    title = (
-        media.get("title", {}).get("english")
-        or media.get("title", {}).get("romaji")
-        or f"MAL ID {mal_id}"
-    )
-
-    print(
-        f"🔄 {title} | "
-        f"status={current_status}->{desired_status} "
-        f"episodes={current_progress}->{desired_progress} "
-        f"score={current_score}->{desired_score}"
-    )
-
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json",
-    }
+    title = title_for(entry)
+    print(f"🔄 {title} -> MAL {mal_id}")
+    print("   Fields:", ", ".join(update.keys()))
 
     response = request_with_retry(
         "PUT",
-        MAL_UPDATE_URL.format(anime_id=mal_id),
-        headers=headers,
-        data=update_data,
+        MAL_UPDATE_URL.format(anime_id=int(mal_id)),
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+        },
+        data=update,
     )
 
     if response.status_code == 401:
-        raise PermissionError("MAL access token expired or rejected.")
+        raise PermissionError("MAL access token rejected.")
 
     if response.status_code not in (200, 201):
         print(
-            f"   ❌ MAL update failed for {title}: "
-            f"HTTP {response.status_code}"
+            f"   ❌ MAL update failed: HTTP {response.status_code}"
         )
         print(response.text[:500])
         return False
@@ -354,112 +445,152 @@ def sync_entry(
 
 
 def main() -> None:
+    print("=" * 64)
+    print("       MAL <- ANILIST SHORT DELTA SYNC v2")
+    print("=" * 64)
+
     require_config()
 
     state = load_state()
-    last_sync = int(state.get("last_anilist_update", 0) or 0)
+    previous_updates = state.get("media_updates", {})
+    if not isinstance(previous_updates, dict):
+        previous_updates = {}
 
-    if last_sync:
-        print("⚡ SHORT DELTA MODE")
-        print(f"   Last AniList cursor: {last_sync}")
+    if previous_updates:
+        print("⚡ DELTA MODE ACTIVE")
+        print(f"   Stored AniList media states: {len(previous_updates)}")
     else:
-        print("🧭 Creating initial delta baseline.")
-        print("   The existing MAL library will NOT be downloaded again.")
-        print("   The existing MAL data is assumed to be synchronized by the previous deep run.")
+        print("🧭 INITIAL BASELINE MODE")
+        print("   No MAL library scan will be performed.")
+        print("   No MAL writes will be performed on this baseline run.")
 
     access_token, new_refresh_token = refresh_mal_token()
+    verify_mal(access_token)
 
-    print("📡 Checking AniList for changes...")
-    changed_entries, highest_seen = fetch_anilist_delta(last_sync)
+    print("📡 Checking AniList for new/updated entries...")
+    changed_entries, current_updates = fetch_anilist_changes(previous_updates)
 
-    # First run of this version: only establish the cursor.
-    if not last_sync:
-        if highest_seen <= 0:
-            raise SystemExit("❌ Could not establish AniList update cursor.")
-
-        save_state({"last_anilist_update": highest_seen})
+    # Initial baseline: record the complete AniList timestamp map only.
+    if not previous_updates:
+        save_state({
+            "version": 2,
+            "media_updates": current_updates,
+        })
 
         print()
         print("=" * 64)
         print("✅ DELTA BASELINE CREATED")
         print("=" * 64)
-        print("Changed entries processed:", 0)
-        print("AniList cursor:", highest_seen)
-        print("Future runs will process only NEW/UPDATED AniList entries.")
+        print("AniList entries remembered:", len(current_updates))
+        print("MAL writes performed       : 0")
+        print("Next run will process only entries whose AniList updatedAt changed.")
+
+        if new_refresh_token != MAL_REFRESH_TOKEN:
+            print("⚠️ MAL returned a new refresh token; update the GitHub Secret.")
         return
 
-    print(f"✅ AniList changes found: {len(changed_entries)}")
+    print(f"✅ Changed/new AniList entries: {len(changed_entries)}")
 
     updated = 0
     unchanged = 0
     skipped_no_mal_id = 0
     failed = 0
+    successful_media_ids: set[str] = set()
 
     for entry in changed_entries:
         media = entry.get("media") or {}
+        media_id = media.get("id")
         mal_id = media.get("idMal")
+        title = title_for(entry)
+
+        if media_id is None:
+            failed += 1
+            print(f"❌ {title}: AniList media ID missing.")
+            continue
+
+        media_key = str(media_id)
 
         if not mal_id:
             skipped_no_mal_id += 1
+            print(f"⏭️ {title}: no MAL ID; nothing to update.")
+            successful_media_ids.add(media_key)
             continue
 
-        title_data = media.get("title") or {}
-        title = title_data.get("english") or title_data.get("romaji") or f"MAL ID {mal_id}"
-
         try:
-            mal_current = fetch_mal_entry(access_token, int(mal_id))
-            changed = sync_entry(access_token, entry, mal_current)
+            current = fetch_mal_entry(access_token, int(mal_id))
+            changed = update_mal_entry(access_token, entry, current)
 
             if changed:
                 updated += 1
             else:
                 unchanged += 1
 
+            successful_media_ids.add(media_key)
+
         except PermissionError:
-            print("🔄 MAL access token expired. Refreshing...")
+            print("🔄 MAL access token expired/rejected. Refreshing once...")
+
             access_token, new_refresh_token = refresh_mal_token()
 
             try:
-                mal_current = fetch_mal_entry(access_token, int(mal_id))
-                changed = sync_entry(access_token, entry, mal_current)
+                current = fetch_mal_entry(access_token, int(mal_id))
+                changed = update_mal_entry(access_token, entry, current)
 
                 if changed:
                     updated += 1
                 else:
                     unchanged += 1
 
+                successful_media_ids.add(media_key)
+
             except Exception as exc:
-                print(f"❌ Retry failed for {title}: {exc}")
                 failed += 1
+                print(f"❌ Retry failed for {title}: {exc}")
 
         except Exception as exc:
-            print(f"❌ {title}: {exc}")
             failed += 1
+            print(f"❌ {title}: {exc}")
 
-        time.sleep(0.5)
+        time.sleep(0.4)
 
-    # Save the newest AniList timestamp after processing this batch.
-    # Next run therefore starts strictly after this point.
-    state["last_anilist_update"] = highest_seen
-    save_state(state)
+    # Merge only successfully handled entries into the persistent map.
+    # Failed entries deliberately keep their previous timestamp so they
+    # are detected and retried on the next manual run.
+    merged_updates = dict(previous_updates)
+    for entry in changed_entries:
+        media = entry.get("media") or {}
+        media_id = media.get("id")
+        if media_id is None:
+            continue
+
+        media_key = str(media_id)
+        if media_key in successful_media_ids:
+            merged_updates[media_key] = int(entry.get("updatedAt") or 0)
+
+    new_cursor = max(merged_updates.values(), default=0)
+    save_state({
+        "version": 2,
+        "last_anilist_update": new_cursor,
+        "media_updates": merged_updates,
+    })
 
     print()
     print("=" * 64)
     print("⚡ MAL SHORT DELTA SYNC COMPLETE")
     print("=" * 64)
-    print("AniList changed entries:", len(changed_entries))
-    print("Updated on MAL         :", updated)
-    print("Already synchronized   :", unchanged)
-    print("No MAL ID              :", skipped_no_mal_id)
-    print("Failed                 :", failed)
-    print("New AniList cursor     :", highest_seen)
+    print("AniList changed/new entries:", len(changed_entries))
+    print("Updated on MAL             :", updated)
+    print("Already synchronized       :", unchanged)
+    print("No MAL ID                  :", skipped_no_mal_id)
+    print("Failed                     :", failed)
+    print("Stored AniList states      :", len(merged_updates))
+    print("AniList cursor             :", new_cursor)
+
+    if failed:
+        print("⚠️ Failed entries were NOT advanced and will be retried next run.")
 
     if new_refresh_token != MAL_REFRESH_TOKEN:
-        print()
-        print(
-            "⚠️ MAL returned a new refresh token. "
-            "Update MAL_REFRESH_TOKEN before the next run."
-        )
+        print("⚠️ MAL returned a new refresh token; update the GitHub Secret before the next run.")
     else:
         print("✅ MAL refresh token unchanged.")
 
