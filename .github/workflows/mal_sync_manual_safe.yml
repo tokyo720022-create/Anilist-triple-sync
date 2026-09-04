@@ -1,0 +1,94 @@
+name: Manual AniList → MAL Sync
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: mal-anilist-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync-mal:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip requests
+
+      - name: Run AniList → MAL sync
+        env:
+          ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          MAL_REFRESH_TOKEN: ${{ secrets.MAL_REFRESH_TOKEN }}
+        run: python mal_sync_engine.py
+
+      - name: Persist delta state safely
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STATE_FILE="mal_delta_state.json"
+
+          if [[ ! -f "$STATE_FILE" ]]; then
+            echo "ℹ️ No $STATE_FILE was created; nothing to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          cp "$STATE_FILE" "/tmp/mal_delta_state.json"
+
+          echo "🔄 Synchronizing local main with origin/main..."
+          git fetch origin main
+          git rebase origin/main
+
+          cp "/tmp/mal_delta_state.json" "$STATE_FILE"
+          git add "$STATE_FILE"
+
+          if git diff --cached --quiet; then
+            echo "✅ Delta state is already up to date."
+            exit 0
+          fi
+
+          git commit -m "Update MAL sync delta state"
+
+          for attempt in 1 2 3; do
+            echo "🚀 Pushing delta state (attempt $attempt/3)..."
+
+            if git push origin HEAD:main; then
+              echo "✅ Delta state persisted successfully."
+              exit 0
+            fi
+
+            if [[ "$attempt" -lt 3 ]]; then
+              echo "⚠️ Remote main moved. Rebasing and retrying..."
+              git fetch origin main
+              git rebase origin/main
+              cp "/tmp/mal_delta_state.json" "$STATE_FILE"
+              git add "$STATE_FILE"
+
+              if ! git diff --cached --quiet; then
+                git commit --amend --no-edit
+              fi
+            fi
+
+            sleep 2
+          done
+
+          echo "❌ Could not persist delta state after 3 push attempts."
+          exit 1
