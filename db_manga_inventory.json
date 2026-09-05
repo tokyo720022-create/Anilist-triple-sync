@@ -5111,7 +5111,7 @@
     },
     "Girlfriend, Girlfriend": {
         "mediaId": 116266,
-        "progress": 47,
+        "progress": 56,
         "status": "CURRENT",
         "list_category": "Fav",
         "scoreRaw": 100,
@@ -5360,5 +5360,33 @@
         "romaji": "Tensei Shitara Slime Datta Ken",
         "english": "That Time I Got Reincarnated as a Slime",
         "total_chapters": null
+    },
+    "The Legendary Hero is an Academy Honors Student": {
+        "mediaId": 185979,
+        "progress": 8,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx185979-0PIJkgbfPZhZ.jpg",
+        "color": "#f1785d",
+        "duration": 24,
+        "romaji": "Jeonseolgeup Yeongungeun Academy Udeungsaeng",
+        "english": "The Legendary Hero is an Academy Honors Student",
+        "total_chapters": null
+    },
+    "The Legendary Hero Is Dead!": {
+        "mediaId": 85952,
+        "progress": 50,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx85952-sVeZzRflb4AI.png",
+        "color": "#f1e4c9",
+        "duration": 24,
+        "romaji": "Yuusha ga Shinda! Murabito no Ore ga Hotta Otoshiana ni Yuusha ga Ochita Kekka.",
+        "english": "The Legendary Hero Is Dead!",
+        "total_chapters": 202
     }
 }
