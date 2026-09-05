@@ -967,7 +967,7 @@
     },
     "Shoujo Ramune": {
         "mediaId": 21828,
-        "progress": 4,
+        "progress": 6,
         "status": "CURRENT",
         "list_category": "Loli",
         "scoreRaw": 100,
@@ -975,10 +975,7 @@
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21828-3KDKm3Zu2DyX.jpg",
         "color": "#50c9f1",
         "duration": 19,
-        "nextAiring": {
-            "airingAt": 1788447600,
-            "episode": 8
-        },
+        "nextAiring": null,
         "romaji": "Shoujo Ramune",
         "english": null,
         "total_episodes": null
