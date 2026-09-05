@@ -1,0 +1,384 @@
+name: 🔍 MAL Sync Diagnostic v2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run static diagnostic
+        shell: python
+        run: |
+          import ast
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          ENGINE = Path("mal_sync_engine.py")
+          WORKFLOW = Path(".github/workflows/mal_sync_manual.yml")
+          STATE = Path("mal_delta_state.json")
+
+          errors = []
+          warnings = []
+          passed = []
+
+          def ok(msg):
+              passed.append(msg)
+              print(f"✅ {msg}")
+
+          def warn(msg):
+              warnings.append(msg)
+              print(f"⚠️ {msg}")
+
+          def err(msg):
+              errors.append(msg)
+              print(f"❌ {msg}")
+
+          print("=" * 76)
+          print("MAL SYNC DIAGNOSTIC v2")
+          print("=" * 76)
+          print()
+
+          # Files
+          if ENGINE.exists():
+              ok("mal_sync_engine.py exists")
+          else:
+              err("mal_sync_engine.py is missing")
+
+          if WORKFLOW.exists():
+              ok("mal_sync_manual.yml exists")
+          else:
+              err("mal_sync_manual.yml is missing")
+
+          # Engine AST
+          tree = None
+          source = ""
+          if ENGINE.exists():
+              source = ENGINE.read_text(encoding="utf-8")
+              try:
+                  tree = ast.parse(source, filename=str(ENGINE))
+                  ok("Engine Python syntax is valid")
+              except SyntaxError as exc:
+                  err(
+                      f"Engine syntax error: line {exc.lineno}, "
+                      f"column {exc.offset}: {exc.msg}"
+                  )
+
+          defs = set()
+          calls = set()
+
+          if tree:
+              defs = {
+                  node.name
+                  for node in ast.walk(tree)
+                  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+              }
+              calls = {
+                  node.func.id
+                  for node in ast.walk(tree)
+                  if isinstance(node, ast.Call)
+                  and isinstance(node.func, ast.Name)
+              }
+
+              expected = {
+                  "load_state",
+                  "save_state",
+                  "require_config",
+                  "request_with_retry",
+                  "refresh_mal_token",
+                  "verify_mal",
+                  "fetch_anilist_changes",
+                  "fetch_mal_entry",
+                  "build_mal_update",
+                  "update_mal_entry",
+                  "main",
+              }
+
+              for name in sorted(expected):
+                  if name in defs:
+                      ok(f"Core function exists: {name}()")
+                  else:
+                      err(f"Core function missing: {name}()")
+
+              optional = {
+                  "remove_mal_entry",
+                  "entry_fingerprint",
+                  "normalize_previous_state",
+              }
+              for name in sorted(optional):
+                  if name in defs:
+                      ok(f"Enhanced function exists: {name}()")
+                  else:
+                      warn(f"Enhanced function missing: {name}()")
+
+              local_prefixes = (
+                  "fetch_", "save_", "load_", "sync_",
+                  "refresh_", "require_", "verify_",
+                  "build_", "update_", "remove_", "normalize_",
+              )
+              for name in sorted(c for c in calls if c.startswith(local_prefixes)):
+                  if name not in defs:
+                      err(f"Undefined local function call: {name}()")
+
+              for module in ("os", "json", "time", "requests", "hashlib"):
+                  pattern = rf"(?m)^(?:import\s+{module}\b|from\s+{module}\b)"
+                  if re.search(pattern, source):
+                      ok(f"Import present: {module}")
+                  else:
+                      err(f"Required import missing: {module}")
+
+              # AniList/source design
+              if "updatedAt" in source:
+                  ok("AniList query requests updatedAt")
+              else:
+                  err("AniList query does not request updatedAt")
+
+              if "UPDATED_TIME_DESC" in source:
+                  ok("AniList query is newest-first")
+              else:
+                  warn("AniList query is not explicitly newest-first")
+
+              if "perPage: 50" in source:
+                  ok("AniList query uses paginated media-list reads")
+              else:
+                  warn("AniList page size is not explicitly 50")
+
+              # MAL target design
+              if "@me/animelist" in source:
+                  err("Full MAL library scan endpoint detected")
+              else:
+                  ok("No full MAL library scan endpoint detected")
+
+              if "/v2/anime/{anime_id}" in source:
+                  ok("Targeted MAL anime lookup endpoint detected")
+              else:
+                  err("Targeted MAL anime lookup endpoint missing")
+
+              if "my_list_status" in source:
+                  ok("MAL my_list_status lookup/update path detected")
+              else:
+                  err("MAL my_list_status path missing")
+
+              if 'request_with_retry(\n        "PUT"' in source:
+                  ok("MAL PUT update path detected")
+              else:
+                  warn("Could not statically verify MAL PUT update call")
+
+              if 'request_with_retry(\n        "DELETE"' in source:
+                  ok("MAL DELETE removal path detected")
+              else:
+                  warn("MAL DELETE removal handling is not present")
+
+              # State
+              if "STATE_FILE = \"mal_delta_state.json\"" in source:
+                  ok("Persistent state file is mal_delta_state.json")
+              else:
+                  err("Expected persistent state file reference missing")
+
+              if "last_anilist_update" in source:
+                  ok("Global AniList cursor is maintained")
+              else:
+                  warn("Global AniList cursor missing")
+
+              if "media" in source and "updated_at" in source:
+                  ok("Per-media state stores updated_at")
+              else:
+                  err("Per-media updated_at state missing")
+
+              if "fingerprint" in source and "sha256" in source:
+                  ok("Content fingerprint protection detected")
+              else:
+                  warn("Equal-timestamp fingerprint protection missing")
+
+              if "successful_media_ids" in source:
+                  ok("Per-entry success tracking detected")
+              else:
+                  err("Per-entry success tracking missing")
+
+              if "merged_media = dict(current_media)" in source:
+                  ok("Complete source-state merge is present")
+              else:
+                  warn("Source-state merge pattern not detected")
+
+              # Mapping
+              for token in (
+                  "CURRENT", "REPEATING", "PLANNING",
+                  "COMPLETED", "PAUSED", "DROPPED"
+              ):
+                  if token in source:
+                      ok(f"AniList status mapping includes {token}")
+                  else:
+                      warn(f"AniList status mapping missing {token}")
+
+              if "num_watched_episodes" in source:
+                  ok("Watched episode synchronization detected")
+              else:
+                  err("Watched episode synchronization missing")
+
+              if '"is_rewatching"' in source:
+                  ok("MAL rewatch flag synchronization detected")
+              else:
+                  warn("MAL rewatch flag synchronization missing")
+
+              if "score = 0" in source or 'update["score"] = desired_score' in source:
+                  ok("Score=0 clearing path is represented")
+              else:
+                  warn("Score=0 clearing path not detected")
+
+              if 'update["start_date"] = desired_start_form' in source:
+                  ok("Start-date clearing is supported")
+              else:
+                  warn("Start-date clearing not detected")
+
+              if 'update["finish_date"] = desired_finish_form' in source:
+                  ok("Finish-date clearing is supported")
+              else:
+                  warn("Finish-date clearing not detected")
+
+              if "removed_entries" in source and "remove_mal_entry" in source:
+                  ok("AniList removal detection + MAL removal handling detected")
+              else:
+                  warn("AniList removal handling is incomplete")
+
+              # Token refresh
+              if "PermissionError" in source and "refresh_mal_token()" in source:
+                  ok("401/token refresh retry path detected")
+              else:
+                  err("401/token refresh retry path missing")
+
+              if "new_refresh_token" in source:
+                  ok("Refresh-token rotation detection present")
+              else:
+                  warn("Refresh-token rotation warning not detected")
+
+              # No AniList writes
+              if "SaveMediaListEntry" in source:
+                  err("AniList SaveMediaListEntry mutation found")
+              else:
+                  ok("No AniList SaveMediaListEntry mutation detected")
+
+              # Workflow
+              if WORKFLOW.exists():
+                  workflow = WORKFLOW.read_text(encoding="utf-8")
+
+                  if re.search(r"(?m)^\s*workflow_dispatch:\s*$", workflow):
+                      ok("Workflow is manual-only via workflow_dispatch")
+                  else:
+                      err("Workflow does not contain workflow_dispatch")
+
+                  forbidden = re.findall(
+                      r"(?m)^\s*(push|pull_request|schedule|workflow_run):",
+                      workflow,
+                  )
+                  if forbidden:
+                      err("Automatic workflow trigger(s) found: " + ", ".join(forbidden))
+                  else:
+                      ok("No push/pull_request/schedule/workflow_run trigger found")
+
+                  if "contents: write" in workflow:
+                      ok("Workflow has contents: write")
+                  else:
+                      err("Workflow lacks contents: write for state persistence")
+
+                  if "fetch-depth: 0" in workflow:
+                      ok("Workflow uses fetch-depth: 0")
+                  else:
+                      warn("Workflow does not use fetch-depth: 0")
+
+                  if "git fetch origin main" in workflow:
+                      ok("Workflow fetches origin/main before persistence")
+                  else:
+                      warn("Workflow does not explicitly fetch origin/main")
+
+                  if "git rebase origin/main" in workflow:
+                      ok("Workflow has rebase protection")
+                  else:
+                      warn("Workflow lacks explicit rebase protection")
+
+                  if "mal_delta_state.json" in workflow:
+                      ok("Workflow persists mal_delta_state.json")
+                  else:
+                      err("Workflow does not mention mal_delta_state.json")
+
+                  if "git push" in workflow:
+                      ok("Workflow pushes persistent state")
+                  else:
+                      err("Workflow does not push persistent state")
+
+                  if "concurrency:" in workflow:
+                      ok("Workflow has concurrency protection")
+                  else:
+                      warn("Workflow has no concurrency protection")
+
+                  for secret in (
+                      "ANILIST_TARGET_TOKEN",
+                      "MAL_CLIENT_ID",
+                      "MAL_CLIENT_SECRET",
+                      "MAL_REFRESH_TOKEN",
+                  ):
+                      if secret in workflow:
+                          ok(f"Workflow passes {secret}")
+                      else:
+                          err(f"Workflow does not pass {secret}")
+
+                  if "mal_sync_engine.py" in workflow:
+                      ok("Workflow runs mal_sync_engine.py")
+                  else:
+                      err("Workflow does not run mal_sync_engine.py")
+
+          # Existing state
+          if STATE.exists():
+              try:
+                  state = json.loads(STATE.read_text(encoding="utf-8"))
+                  if isinstance(state, dict):
+                      ok("Existing mal_delta_state.json is valid JSON")
+
+                      media = state.get("media")
+                      legacy = state.get("media_updates")
+
+                      if isinstance(media, dict):
+                          ok(f"State contains {len(media)} v3 media records")
+                      elif isinstance(legacy, dict):
+                          warn(
+                              f"State is legacy v2 format with "
+                              f"{len(legacy)} media records; engine will upgrade it."
+                          )
+                      else:
+                          warn("State JSON is valid but contains no media map")
+                  else:
+                      err("State JSON root is not an object")
+              except Exception as exc:
+                  err(f"State JSON is invalid: {exc}")
+          else:
+              warn("mal_delta_state.json does not exist yet; baseline will create it")
+
+          print()
+          print("=" * 76)
+          print("DIAGNOSTIC SUMMARY")
+          print("=" * 76)
+          print(f"✅ PASS : {len(passed)}")
+          print(f"⚠️ WARN : {len(warnings)}")
+          print(f"❌ ERROR: {len(errors)}")
+          print()
+
+          if errors:
+              print("❌ RESULT: FIX REQUIRED")
+              sys.exit(1)
+
+          print("✅ RESULT: ENGINE/WORFLOW STRUCTURE LOOKS GOOD")
