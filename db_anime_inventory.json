@@ -5542,17 +5542,17 @@
     },
     "The 100 Girlfriends Who Really, Really, Really, Really, REALLY Love You Season 3": {
         "mediaId": 200637,
-        "progress": 0,
-        "status": "PLANNING",
+        "progress": 3,
+        "status": "CURRENT",
         "list_category": "Plan to continue",
-        "scoreRaw": 0,
+        "scoreRaw": 100,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx200637-QLR5uv9SbQ69.jpg",
         "color": "#f193bb",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1786887000,
-            "episode": 7
+            "airingAt": 1788701400,
+            "episode": 10
         },
         "romaji": "Kimi no Koto ga Dai Dai Dai Dai Daisuki na 100-nin no Kanojo 3rd Season",
         "english": "The 100 Girlfriends Who Really, Really, Really, Really, REALLY Love You Season 3",
