@@ -1,10 +1,14 @@
 name: Manual AniList → MAL Sync
 
 on:
-  workflow_dispatch:  # Manual trigger for precise control
+  workflow_dispatch:
 
 permissions:
-  contents: write     # Essential: Grants the authority to push changes back to the repository
+  contents: write
+
+concurrency:
+  group: mal-anilist-sync
+  cancel-in-progress: false
 
 jobs:
   sync-mal:
@@ -14,39 +18,57 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Pulls the full history to guarantee a clean, conflict-free rebase
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'  # Locked to 3.12 to match the optimal runner environment
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install requests
+          fi
 
       - name: Run AniList → MAL sync
-        run: python mal_sync_engine.py
         env:
-          # If your Python engine requires API keys to fetch the tracker data, map them here:
-          # ANILIST_TOKEN: ${{ secrets.ANILIST_TOKEN }}
-          # MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          ANILIST_TARGET_TOKEN: ${{ secrets.ANILIST_TARGET_TOKEN }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          MAL_REFRESH_TOKEN: ${{ secrets.MAL_REFRESH_TOKEN }}
+        run: python -u mal_sync_engine.py
 
       - name: Persist delta state safely
         run: |
-          # 1. Lock in the new state data first
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Auto-update MAL sync state [skip ci]" || echo "No changes to commit"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # 2. Sync with remote and execute the push
+          # Only persist the sync state.
+          git add mal_delta_state.json
+
+          # Don't create an empty commit.
+          git commit -m "Update MAL sync state [skip ci]" || echo "No state changes to commit"
+
+          # Rebase onto the latest main before pushing.
+          git fetch origin main
+          git rebase origin/main
+
+          # Push with a few retries in case main moved between fetch/rebase/push.
           for i in 1 2 3; do
-            git pull --rebase origin main
-            git push && exit 0
+            if git push origin HEAD:main; then
+              echo "✅ Delta state persisted successfully."
+              exit 0
+            fi
+
+            echo "⚠️ Push attempt $i failed. Refreshing remote main..."
+            git fetch origin main
+            git rebase origin/main || exit 1
             sleep 2
           done
-          
+
           echo "❌ Could not persist delta state after 3 push attempts."
           exit 1
