@@ -50,7 +50,7 @@ jobs:
           MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
           MAL_REFRESH_TOKEN: ${{ secrets.MAL_REFRESH_TOKEN }}
           MANGA_SYNC_MODE: ${{ inputs.sync_mode }}
-        run: python -u mal_manga_sync_engine_v2.py
+        run: python -u mal_manga_sync_engine.py
 
       - name: Persist manga delta state safely
         run: |
