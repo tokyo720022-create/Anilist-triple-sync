@@ -1018,7 +1018,7 @@
     },
     "The Cat and the Dragon": {
         "mediaId": 186863,
-        "progress": 10,
+        "progress": 11,
         "status": "CURRENT",
         "list_category": "Current",
         "scoreRaw": 100,
@@ -1027,8 +1027,8 @@
         "color": "#e4e45d",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1788609600,
-            "episode": 11
+            "airingAt": 1789214400,
+            "episode": 12
         },
         "romaji": "Neko to Ryuu",
         "english": "The Cat and the Dragon",
