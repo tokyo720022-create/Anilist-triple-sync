@@ -3320,7 +3320,7 @@
     "Ikenie no Haha": {
         "mediaId": 138853,
         "progress": 4,
-        "status": "COMPLETED",
+        "status": "CURRENT",
         "list_category": "Hentai",
         "scoreRaw": 100,
         "type": "MANGA",
@@ -5363,10 +5363,10 @@
     },
     "The Legendary Hero is an Academy Honors Student": {
         "mediaId": 185979,
-        "progress": 10,
+        "progress": 14,
         "status": "CURRENT",
         "list_category": "Current",
-        "scoreRaw": 0,
+        "scoreRaw": 95,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx185979-0PIJkgbfPZhZ.jpg",
         "color": "#f1785d",
