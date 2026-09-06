@@ -5542,7 +5542,7 @@
     },
     "The 100 Girlfriends Who Really, Really, Really, Really, REALLY Love You Season 3": {
         "mediaId": 200637,
-        "progress": 3,
+        "progress": 6,
         "status": "CURRENT",
         "list_category": "Milf",
         "scoreRaw": 100,
@@ -5551,8 +5551,8 @@
         "color": "#f193bb",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1788701400,
-            "episode": 10
+            "airingAt": 1789306200,
+            "episode": 11
         },
         "romaji": "Kimi no Koto ga Dai Dai Dai Dai Daisuki na 100-nin no Kanojo 3rd Season",
         "english": "The 100 Girlfriends Who Really, Really, Really, Really, REALLY Love You Season 3",
@@ -10753,7 +10753,7 @@
     },
     "We Never Learn!: BOKUBEN Season 2": {
         "mediaId": 110229,
-        "progress": 9,
+        "progress": 10,
         "status": "CURRENT",
         "list_category": "Favourite",
         "scoreRaw": 100,
