@@ -5500,5 +5500,19 @@
         "romaji": "N\u00fcshen Zhizao Xitong",
         "english": "Goddess Creation System",
         "total_chapters": 538
+    },
+    "Yokujou Boshi": {
+        "mediaId": 83993,
+        "progress": 50,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 88,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/53993.jpg",
+        "color": "#e49350",
+        "duration": 24,
+        "romaji": "Yokujou Boshi",
+        "english": null,
+        "total_chapters": 50
     }
 }
