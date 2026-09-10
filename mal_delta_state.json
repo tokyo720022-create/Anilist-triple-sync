@@ -1,5 +1,5 @@
 {
-  "last_anilist_update": 1789014021,
+  "last_anilist_update": 1789014294,
   "media": {
     "100182": {
       "fingerprint": "d24d0ab51d2124433a6273686a25f213ed8650a15c1c597641b704062730eda1",
@@ -170,6 +170,11 @@
       "fingerprint": "9f4d2a49508eed569e1ad62195c72b9c4d98b38aa80af6cecd18e483a557ea21",
       "mal_id": 38680,
       "updated_at": 1765104523
+    },
+    "10534": {
+      "fingerprint": "3d536c18fffd0bb627e65ac8727ea4468f65c187e0cf6191905d60a5577e2708",
+      "mal_id": 10534,
+      "updated_at": 1789014294
     },
     "105989": {
       "fingerprint": "e4b268d9ec6b6cab68417b9deaf418705210755a11fa0ef8e38d1f2d65118dd3",
