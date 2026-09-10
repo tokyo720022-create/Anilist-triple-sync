@@ -5556,5 +5556,47 @@
         "romaji": "AV Kazoku",
         "english": null,
         "total_chapters": 10
+    },
+    "Love Kome\u2665": {
+        "mediaId": 131114,
+        "progress": 6,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 74,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx131114-zFuHKoSNYAUC.jpg",
+        "color": "#e45086",
+        "duration": 24,
+        "romaji": "Love Kome\u2665",
+        "english": null,
+        "total_chapters": 6
+    },
+    "One Show Time!": {
+        "mediaId": 154250,
+        "progress": 9,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 82,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx154250-kcZH1DaEireh.png",
+        "color": "#e4a15d",
+        "duration": 24,
+        "romaji": "One Show Time!",
+        "english": null,
+        "total_chapters": 9
+    },
+    "Mankai Otome": {
+        "mediaId": 49689,
+        "progress": 11,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 81,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx49689-1sP52a6Hmgxl.png",
+        "color": "#f15d93",
+        "duration": 24,
+        "romaji": "Mankai Otome",
+        "english": null,
+        "total_chapters": 11
     }
 }
