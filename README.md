@@ -133,20 +133,20 @@ TODAY
 ─────────────────────────
 Anime             0 eps
 Time              0 min
-Gamerscore     238 G
+Gamerscore     590 G
 
 THIS WEEK
 ─────────────────────────
 Anime             6 eps
 Time            132 min
-Gamerscore     652 G
+Gamerscore   1,004 G
 
 ALL TIME
 ─────────────────────────
 Episodes         99
 Minutes       2,087
-Gamerscore  34,148 G
-Completed       129
+Gamerscore  34,500 G
+Completed       132
 
 ```
 <!-- ANIME_TELEMETRY_END -->
