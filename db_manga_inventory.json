@@ -5668,5 +5668,19 @@
         "romaji": "Chiisana Toiki",
         "english": null,
         "total_chapters": 8
+    },
+    "The Lazy Lord Masters the Sword": {
+        "mediaId": 135325,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx135325-YAhEGWro8zFK.jpg",
+        "color": "#e4a11a",
+        "duration": 24,
+        "romaji": "Natae Gongja, Nolyeog Cheonjae Doeda",
+        "english": "The Lazy Lord Masters the Sword",
+        "total_chapters": null
     }
 }
