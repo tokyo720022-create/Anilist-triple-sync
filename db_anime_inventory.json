@@ -10897,5 +10897,20 @@
         "romaji": "Midara na Ao-chan wa Benkyou ga Dekinai",
         "english": "Ao-chan Can't Study!",
         "total_episodes": 12
+    },
+    "The Magical Revolution of the Reincarnated Princess and the Genius Young Lady": {
+        "mediaId": 153629,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153629-LNRlLFrbDTi8.jpg",
+        "color": "#35bbe4",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Tensei Oujo to Tensai Reijou no Mahou Kakumei",
+        "english": "The Magical Revolution of the Reincarnated Princess and the Genius Young Lady",
+        "total_episodes": 12
     }
 }
