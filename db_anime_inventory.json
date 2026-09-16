@@ -10912,5 +10912,53 @@
         "romaji": "Tensei Oujo to Tensai Reijou no Mahou Kakumei",
         "english": "The Magical Revolution of the Reincarnated Princess and the Genius Young Lady",
         "total_episodes": 12
+    },
+    "Fate Rewinder": {
+        "mediaId": 195787,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195787-Ct3WxeyXouhh.png",
+        "color": "#d6c91a",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Unmei no Makimodoshi",
+        "english": "Fate Rewinder",
+        "total_episodes": null
+    },
+    "SSS-Class Revival Hunter": {
+        "mediaId": 216624,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx216624-ZgSowlLTtu3G.png",
+        "color": "#e4bb43",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Shishite Ikiru SSS-kyuu Hunter",
+        "english": "SSS-Class Revival Hunter",
+        "total_episodes": null
+    },
+    "My Happy Marriage Special Episodes": {
+        "mediaId": 190054,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx190054-8h0AuqQjwcCL.png",
+        "color": "#e44378",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1792922400,
+            "episode": 1
+        },
+        "romaji": "Watashi no Shiawase na Kekkon Tokubetsu-hen",
+        "english": "My Happy Marriage Special Episodes",
+        "total_episodes": 3
     }
 }
