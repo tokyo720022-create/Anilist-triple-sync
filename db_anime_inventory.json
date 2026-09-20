@@ -1,7 +1,7 @@
 {
     "That Time I Got Reincarnated as a Slime Season 4": {
         "mediaId": 182205,
-        "progress": 22,
+        "progress": 23,
         "status": "CURRENT",
         "list_category": "Iseki",
         "scoreRaw": 100,
@@ -10,8 +10,8 @@
         "color": "#1abbd6",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1789740000,
-            "episode": 23
+            "airingAt": 1790344800,
+            "episode": 24
         },
         "romaji": "Tensei Shitara Slime Datta Ken 4th Season",
         "english": "That Time I Got Reincarnated as a Slime Season 4",
@@ -10960,5 +10960,65 @@
         "romaji": "Watashi no Shiawase na Kekkon Tokubetsu-hen",
         "english": "My Happy Marriage Special Episodes",
         "total_episodes": 3
+    },
+    "AHO-GIRL": {
+        "mediaId": 98251,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b98251-6miVBNYEXzaF.jpg",
+        "color": "#5daee4",
+        "duration": 13,
+        "nextAiring": null,
+        "romaji": "Aho-Girl",
+        "english": "AHO-GIRL",
+        "total_episodes": 12
+    },
+    "Pok\u00e9mon: Destiny Deoxys": {
+        "mediaId": 1122,
+        "progress": 1,
+        "status": "COMPLETED",
+        "list_category": "Anime movies",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1122-HCkAs0hqlJwK.jpg",
+        "color": "#e47850",
+        "duration": 98,
+        "nextAiring": null,
+        "romaji": "Pocket Monsters Advanced Generation: Rekkuu no Houmonsha Deoxys",
+        "english": "Pok\u00e9mon: Destiny Deoxys",
+        "total_episodes": 1
+    },
+    "Pok\u00e9mon 4Ever": {
+        "mediaId": 1119,
+        "progress": 1,
+        "status": "COMPLETED",
+        "list_category": "Anime movies",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx1119-Vz0ohBLmZ5uP.jpg",
+        "color": "#f1e40d",
+        "duration": 75,
+        "nextAiring": null,
+        "romaji": "Pocket Monsters: Celebi Toki wo Koeta Deai",
+        "english": "Pok\u00e9mon 4Ever",
+        "total_episodes": 1
+    },
+    "Neko to Ryuu 2nd Season": {
+        "mediaId": 217011,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx217011-6mO4XKPf42rM.jpg",
+        "color": "#5dc9e4",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Neko to Ryuu 2nd Season",
+        "english": null,
+        "total_episodes": null
     }
 }
