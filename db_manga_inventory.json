@@ -5766,5 +5766,19 @@
         "romaji": "Dabo Hame!",
         "english": null,
         "total_chapters": 8
+    },
+    "Jouhou Kaihen Lolicon Oji-san": {
+        "mediaId": 154849,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx154849-KqylCASE6ZgY.jpg",
+        "color": "#f1781a",
+        "duration": 24,
+        "romaji": "Jouhou Kaihen Lolicon Oji-san",
+        "english": null,
+        "total_chapters": 5
     }
 }
