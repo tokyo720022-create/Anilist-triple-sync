@@ -1,5 +1,5 @@
 {
-  "last_anilist_update": 1789712814,
+  "last_anilist_update": 1789868244,
   "media": {
     "100182": {
       "fingerprint": "d24d0ab51d2124433a6273686a25f213ed8650a15c1c597641b704062730eda1",
@@ -286,10 +286,20 @@
       "mal_id": 40417,
       "updated_at": 1758522682
     },
+    "1119": {
+      "fingerprint": "d7231c19a595b066f8784d8a9a7a25f2e6f25ec02d42ae4374fc62e79994dc2b",
+      "mal_id": 1119,
+      "updated_at": 1789868208
+    },
     "112124": {
       "fingerprint": "c1596b064db8d8f2cfcd957eb64d4c7ca8d5cdb6b4d551561d905b049264511c",
       "mal_id": 40454,
       "updated_at": 1760927943
+    },
+    "1122": {
+      "fingerprint": "31fcd4299c7ad20a658e50f0ed5f5905c7670f8bb43f92efc35874d9b7331657",
+      "mal_id": 1122,
+      "updated_at": 1789868244
     },
     "112323": {
       "fingerprint": "4e794c610e1ff9201ec2080fc388a2eb9abf7926668793777da52e2cf8c14c5e",
@@ -1682,9 +1692,9 @@
       "updated_at": 1764250355
     },
     "182205": {
-      "fingerprint": "12d2cd8b6d49fb91a7bd633516a2fe084b671b47b61ce3538c38b3482ec29df5",
+      "fingerprint": "747ba94fb895f5c71aad1ce7e5d8d5fbd8d0c65ba1220091c5b29d38f01ec880",
       "mal_id": 59970,
-      "updated_at": 1789176748
+      "updated_at": 1789868113
     },
     "182206": {
       "fingerprint": "aa51cb0294d5419869cd1157424ba68b999cc654c40b5e1f1ec7bc80a7acd07d",
@@ -3077,8 +3087,8 @@
       "updated_at": 1759903103
     },
     "213360": {
-      "fingerprint": "37519e5712e1169adbd2d589f3be24ccbfa5d3d9d4e97a60734003d76932bdd7",
-      "mal_id": null,
+      "fingerprint": "4c6339601ff0cad133fc9b8b067c122f2c77475ce08e178f7289b1cd2ef547d3",
+      "mal_id": 64439,
       "updated_at": 1787324078
     },
     "213497": {
@@ -3180,6 +3190,11 @@
       "fingerprint": "0ea4f120d201780b1b69a7a3ed48acae0b7ecbd2b464a996ba20016e6dadb55f",
       "mal_id": 32937,
       "updated_at": 1766902280
+    },
+    "217011": {
+      "fingerprint": "37519e5712e1169adbd2d589f3be24ccbfa5d3d9d4e97a60734003d76932bdd7",
+      "mal_id": null,
+      "updated_at": 1789868136
     },
     "21776": {
       "fingerprint": "16e228ef181c23c66e448f56c6131a53e4cc48778ae785c864304a176274ee30",
