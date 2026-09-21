@@ -5780,5 +5780,19 @@
         "romaji": "Jouhou Kaihen Lolicon Oji-san",
         "english": null,
         "total_chapters": 5
+    },
+    "The Diary of a Middle-Aged Teacher's Carefree Life in Another World": {
+        "mediaId": 164730,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx164730-mnujOdUSGcaK.jpg",
+        "color": "#e4a135",
+        "duration": 24,
+        "romaji": "Arafou Kenja no Isekai Seikatsu Nikki: Kimamana Isekai Kyoushi Life",
+        "english": "The Diary of a Middle-Aged Teacher's Carefree Life in Another World",
+        "total_chapters": null
     }
 }
