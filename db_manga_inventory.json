@@ -5794,5 +5794,19 @@
         "romaji": "Arafou Kenja no Isekai Seikatsu Nikki: Kimamana Isekai Kyoushi Life",
         "english": "The Diary of a Middle-Aged Teacher's Carefree Life in Another World",
         "total_chapters": null
+    },
+    "TenPuru -No One Can Live on Loneliness-": {
+        "mediaId": 109122,
+        "progress": 27,
+        "status": "CURRENT",
+        "list_category": "Rom Com",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx109122-86JvQEePvySE.jpg",
+        "color": "#e4935d",
+        "duration": 24,
+        "romaji": "Temple",
+        "english": "TenPuru -No One Can Live on Loneliness-",
+        "total_chapters": null
     }
 }
