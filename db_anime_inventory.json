@@ -11110,5 +11110,20 @@
         "romaji": "Temple",
         "english": "TenPuru",
         "total_episodes": 12
+    },
+    "Majutsu wo Kiwamete Tabi ni Deta Tensei Elf, Moteamashita Jumyou de Ikeru Densetsu to Naru": {
+        "mediaId": 202503,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx202503-U8b43fpnu9EI.png",
+        "color": "#35bbff",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Majutsu wo Kiwamete Tabi ni Deta Tensei Elf, Moteamashita Jumyou de Ikeru Densetsu to Naru",
+        "english": null,
+        "total_episodes": null
     }
 }
