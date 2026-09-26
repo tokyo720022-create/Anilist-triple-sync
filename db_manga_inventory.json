@@ -5808,5 +5808,19 @@
         "romaji": "Temple",
         "english": "TenPuru -No One Can Live on Loneliness-",
         "total_chapters": null
+    },
+    "Mama Dorei": {
+        "mediaId": 150564,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx150564-BiKKSxonzojE.png",
+        "color": "#f1f100",
+        "duration": 24,
+        "romaji": "Mama Dorei",
+        "english": null,
+        "total_chapters": 8
     }
 }
