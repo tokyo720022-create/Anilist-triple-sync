@@ -1,5 +1,5 @@
 {
-  "last_anilist_update": 1790418659,
+  "last_anilist_update": 1790500318,
   "media": {
     "100114": {
       "fingerprint": "99737d8996e3d86e31028811684c063b047c2543cb49d7e8141fa74d92d26121",
@@ -145,6 +145,11 @@
       "fingerprint": "21d960d1ff11f720a9d0a804c81232cd9ed3b0288783bcf7dc626d8e77c51362",
       "mal_id": 117078,
       "updated_at": 1781600388
+    },
+    "106720": {
+      "fingerprint": "458028e922c96ed8591cb3c053456d2169f7dfc63c4c9a04759a3caa2221155a",
+      "mal_id": 117175,
+      "updated_at": 1790499934
     },
     "106820": {
       "fingerprint": "d76a374d7381c331611762c8a0d2873431a3d2fb4d33a9406aed9fe49aa0f4c8",
@@ -611,6 +616,11 @@
       "mal_id": 134679,
       "updated_at": 1786122953
     },
+    "128368": {
+      "fingerprint": "9fed7e92746dd97d4a0f4222469a718ffc9bc8899a661fa6ece459748ad69d91",
+      "mal_id": 117174,
+      "updated_at": 1790499979
+    },
     "129122": {
       "fingerprint": "c630ee8365aecf2b9b54b203042bfac502bd9758a3b8829cf3d1f20818f76c92",
       "mal_id": 134942,
@@ -730,6 +740,11 @@
       "fingerprint": "74da86bfa7a1bb0987c513119a401ac1622e96a9d20db57c5641978600ded4a2",
       "mal_id": 139593,
       "updated_at": 1768183946
+    },
+    "136622": {
+      "fingerprint": "29c4fb10e2ec9eceec60f36c3d0960237f448bc5ec401766d916ae431a6e7714",
+      "mal_id": 108150,
+      "updated_at": 1790500318
     },
     "136902": {
       "fingerprint": "7ea14b51b30ecaecff55c77e8beffceeb4bbf0f40ebe7322d06e9232de685178",
@@ -1055,6 +1070,11 @@
       "fingerprint": "ac9ad1215dc19f4d4cc18efa8ac0565042faa59637bf4c3ede7efa19813e4de9",
       "mal_id": null,
       "updated_at": 1760448813
+    },
+    "154739": {
+      "fingerprint": "e9cd843aa2f7d01e308fdc43c57ee8206c4136561ce8c52ca7ce6b91f6bb06b5",
+      "mal_id": 124472,
+      "updated_at": 1790500037
     },
     "155901": {
       "fingerprint": "52afcc45788d749705660bdbd291bee180e63b7dd541eb25573c811ca8eab271",
@@ -1950,6 +1970,11 @@
       "fingerprint": "ec77c5011b57b79b9867538ca83deeca5024e128ee2783038e9ea7e7b2e9d0d1",
       "mal_id": 89703,
       "updated_at": 1786815592
+    },
+    "95515": {
+      "fingerprint": "5800e0ea71a877e2a3b33b768486fd6d249f4dd48d6427f6e2ee99b7ee3791b5",
+      "mal_id": 91353,
+      "updated_at": 1790499885
     },
     "96095": {
       "fingerprint": "4407781998491d94955f4dd6b529eba634b67b87839c5573d129f9fc30d21eb3",
