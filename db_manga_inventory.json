@@ -5937,10 +5937,10 @@
     },
     "Boku no Kaa-san wa Yuujin no Mesuinu": {
         "mediaId": 154739,
-        "progress": 0,
-        "status": "PLANNING",
+        "progress": 10,
+        "status": "COMPLETED",
         "list_category": "Hentai",
-        "scoreRaw": 0,
+        "scoreRaw": 90,
         "type": "MANGA",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx154739-X3S2nN9ycRA5.jpg",
         "color": "#e4865d",
@@ -6032,5 +6032,33 @@
         "romaji": "Wo Yong Dingji Xitong Chongsu Shijie",
         "english": "Leveling Up: Reshaping the World",
         "total_chapters": null
+    },
+    "Shiiku Danchi": {
+        "mediaId": 172924,
+        "progress": 5,
+        "status": "COMPLETED",
+        "list_category": "Hentai",
+        "scoreRaw": 80,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx172924-7HumBMQgsOZr.jpg",
+        "color": "#f15035",
+        "duration": 24,
+        "romaji": "Shiiku Danchi",
+        "english": null,
+        "total_chapters": 5
+    },
+    "A Married Woman, My First Love, and My Mother": {
+        "mediaId": 165724,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx165724-lz3vttzIXBTf.png",
+        "color": "#fe0dd6",
+        "duration": 24,
+        "romaji": "Hitozuma de Mama de Hatsukano",
+        "english": "A Married Woman, My First Love, and My Mother",
+        "total_chapters": 1
     }
 }
