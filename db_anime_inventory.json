@@ -6595,10 +6595,10 @@
     },
     "The Dangers in My Heart: The Movie": {
         "mediaId": 182317,
-        "progress": 0,
-        "status": "PLANNING",
+        "progress": 1,
+        "status": "COMPLETED",
         "list_category": "Anime movies",
-        "scoreRaw": 0,
+        "scoreRaw": 100,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx182317-zzpOnAECrM2o.png",
         "color": "#ae5de4",
