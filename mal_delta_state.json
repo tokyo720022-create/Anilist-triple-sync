@@ -1,5 +1,5 @@
 {
-  "last_anilist_update": 1790524192,
+  "last_anilist_update": 1790685742,
   "media": {
     "100182": {
       "fingerprint": "d24d0ab51d2124433a6273686a25f213ed8650a15c1c597641b704062730eda1",
@@ -1562,9 +1562,9 @@
       "updated_at": 1760153983
     },
     "178789": {
-      "fingerprint": "3d1b33f467c69c463b43eb0dfc186b5ca1117b8cf073db00c22e26807b2a9c54",
+      "fingerprint": "1d3025109eedcaebd8c3860ce738b3cf099d5b4b698c02322cf33777222e718b",
       "mal_id": 59193,
-      "updated_at": 1790219511
+      "updated_at": 1790558491
     },
     "178868": {
       "fingerprint": "a45ae537e6094eee06e7c10f683e8bcba455ce5b630e8723f8b89661e92e06b3",
@@ -1737,9 +1737,9 @@
       "updated_at": 1758264679
     },
     "182317": {
-      "fingerprint": "b0c3d38b8abb6255d8c543fa8f1d596dba7cae8aa008157629950e026b097993",
+      "fingerprint": "77bb0a4a30aed209f2cda03b852f895a06bc9966f90fce09ec13932b60ab5f58",
       "mal_id": 59985,
-      "updated_at": 1764416745
+      "updated_at": 1790685742
     },
     "182469": {
       "fingerprint": "9ce9f11b9fa96c2e981f4d9454e0ef8f3833177188aa98dfefd86a227f5669a8",
@@ -3252,8 +3252,8 @@
       "updated_at": 1790385013
     },
     "217434": {
-      "fingerprint": "37519e5712e1169adbd2d589f3be24ccbfa5d3d9d4e97a60734003d76932bdd7",
-      "mal_id": null,
+      "fingerprint": "b24ba64ce2c1212c60f804638bf68b19226400c70da295a038384f7f8f0a9ff1",
+      "mal_id": 65077,
       "updated_at": 1790524192
     },
     "21776": {
@@ -3335,6 +3335,11 @@
       "fingerprint": "12d201d2678c7180cea6b3de291bca0d1f9c6e4b9016f6386470dfe9122e99c9",
       "mal_id": 269,
       "updated_at": 1758025099
+    },
+    "2955": {
+      "fingerprint": "6fe25366c1e1fea9f5021453514af50bb59c9bec584db26e31ff60fa4c8360a7",
+      "mal_id": 2955,
+      "updated_at": 1790524474
     },
     "2989": {
       "fingerprint": "ba167a3f49617d1300d765be9ef5587fd6e268fe2946a7e97abf0ded8bbd25fc",
