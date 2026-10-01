@@ -11242,5 +11242,215 @@
         "romaji": "Tensei Shitara Slime Datta Ken: Clayman REVENGE",
         "english": null,
         "total_episodes": null
+    },
+    "Otaku no Boku ga Ichigun Gal to Tsukiaeru Made no Hanashi": {
+        "mediaId": 202895,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx202895-sAj8ZJSRQ2SR.png",
+        "color": "#e4bba1",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Otaku no Boku ga Ichigun Gal to Tsukiaeru Made no Hanashi",
+        "english": null,
+        "total_episodes": null
+    },
+    "Kyonyuu ga Futari Inai to Bokki Shinai Otto no tame ni Tomodachi wo Tsuretekita Tsuma": {
+        "mediaId": 208314,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx208314-Lw3CFRCPkprM.png",
+        "color": "#f1bba1",
+        "duration": 16,
+        "nextAiring": null,
+        "romaji": "Kyonyuu ga Futari Inai to Bokki Shinai Otto no tame ni Tomodachi wo Tsuretekita Tsuma",
+        "english": null,
+        "total_episodes": 2
+    },
+    "Gals Fiction THE ANIMATION": {
+        "mediaId": 217009,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx217009-jcuGzZxbNDQo.png",
+        "color": "#f1e45d",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1797519600,
+            "episode": 1
+        },
+        "romaji": "Gals Fiction THE ANIMATION",
+        "english": null,
+        "total_episodes": null
+    },
+    "Hitori Tsuma": {
+        "mediaId": 214443,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx214443-0xrurj3XnjFD.png",
+        "color": "#e4aec9",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1793286000,
+            "episode": 1
+        },
+        "romaji": "Hitori Tsuma",
+        "english": null,
+        "total_episodes": null
+    },
+    "Otonari no Nie": {
+        "mediaId": 216926,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx216926-Bs1OpKtHYY9a.png",
+        "color": "#e4aea1",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1795705200,
+            "episode": 1
+        },
+        "romaji": "Otonari no Nie",
+        "english": null,
+        "total_episodes": null
+    },
+    "Majime na Kimi ni Hamaru Karada THE ANIMATION": {
+        "mediaId": 216171,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx216171-IhhbG5GAio2C.png",
+        "color": "#281a78",
+        "duration": 30,
+        "nextAiring": {
+            "airingAt": 1795705200,
+            "episode": 1
+        },
+        "romaji": "Majime na Kimi ni Hamaru Karada THE ANIMATION",
+        "english": null,
+        "total_episodes": null
+    },
+    "CARDFIGHT!! VANGUARD Divinez: Parallactic Fate": {
+        "mediaId": 214536,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx214536-dl2KJdHcKWJl.jpg",
+        "color": "#f14335",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1794061800,
+            "episode": 1
+        },
+        "romaji": "Cardfight!! Vanguard Divinez Unmei Seisen-hen",
+        "english": "CARDFIGHT!! VANGUARD Divinez: Parallactic Fate",
+        "total_episodes": 3
+    },
+    "Aoki Denshou: Welsh & Shedar": {
+        "mediaId": 216895,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx216895-Ofx4FSKFa4CQ.jpg",
+        "color": "#5d93f1",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1790943960,
+            "episode": 1
+        },
+        "romaji": "Aoki Denshou: Welsh & Shedar",
+        "english": null,
+        "total_episodes": null
+    },
+    "Battle Spirits [Re] Zekkai No Ku": {
+        "mediaId": 187990,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx187990-tNyQPmr9TkYi.png",
+        "color": "#f17835",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791295200,
+            "episode": 1
+        },
+        "romaji": "Battle Spirits [Re] Zekkai No Ku",
+        "english": null,
+        "total_episodes": null
+    },
+    "Dandivine": {
+        "mediaId": 213068,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx213068-aFSedkY5bQ4m.png",
+        "color": "#5daef1",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791387000,
+            "episode": 1
+        },
+        "romaji": "Jyu\u043eu Mujin Dandivine",
+        "english": "Dandivine",
+        "total_episodes": null
+    },
+    "HORROR COLLECTOR": {
+        "mediaId": 203473,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b203473-pzyaqV432Qko.jpg",
+        "color": null,
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791643500,
+            "episode": 1
+        },
+        "romaji": "Kyoufu Collector",
+        "english": "HORROR COLLECTOR",
+        "total_episodes": 12
+    },
+    "Even Though I'm a Super Timid Noble Girl, I Accepted the Bet From My Cunning Fianc\u00e9": {
+        "mediaId": 200455,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx200455-P3XStRQMJ7Di.png",
+        "color": "#e45d35",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791124200,
+            "episode": 1
+        },
+        "romaji": "Yowaki MAX Reijou Nano ni, Ratsuwan Konyakusha-sama no Kake ni Notte Shimatta",
+        "english": "Even Though I'm a Super Timid Noble Girl, I Accepted the Bet From My Cunning Fianc\u00e9",
+        "total_episodes": null
     }
 }
