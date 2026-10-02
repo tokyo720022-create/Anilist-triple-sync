@@ -1270,15 +1270,18 @@
     },
     "FX Fighter Kurumi-chan": {
         "mediaId": 206401,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Planning",
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
         "scoreRaw": 0,
         "type": "ANIME",
-        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx206401-tToJHZcMGrvp.jpg",
-        "color": "#e44378",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx206401-8cAebkI0i8BA.png",
+        "color": "#f1d678",
         "duration": 24,
-        "nextAiring": null,
+        "nextAiring": {
+            "airingAt": 1791462600,
+            "episode": 2
+        },
         "romaji": "FX Senshi Kurumi-chan",
         "english": "FX Fighter Kurumi-chan",
         "total_episodes": null
@@ -11452,5 +11455,20 @@
         "romaji": "Yowaki MAX Reijou Nano ni, Ratsuwan Konyakusha-sama no Kake ni Notte Shimatta",
         "english": "Even Though I'm a Super Timid Noble Girl, I Accepted the Bet From My Cunning Fianc\u00e9",
         "total_episodes": null
+    },
+    "Step MILF": {
+        "mediaId": 7612,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/7612.jpg",
+        "color": "#e4d61a",
+        "duration": 30,
+        "nextAiring": null,
+        "romaji": "Haha Sange",
+        "english": "Step MILF",
+        "total_episodes": 2
     }
 }
