@@ -2116,17 +2116,17 @@
     },
     "Tokyo Revengers: Santen Sensou-hen": {
         "mediaId": 178083,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Planning",
-        "scoreRaw": 0,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Favourite",
+        "scoreRaw": 100,
         "type": "ANIME",
-        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx178083-ORQ5BtwQsTbY.jpg",
-        "color": null,
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx178083-bg7pg6TCHwtG.jpg",
+        "color": "#c99350",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1790959980,
-            "episode": 1
+            "airingAt": 1791564780,
+            "episode": 2
         },
         "romaji": "Tokyo Revengers: Santen Sensou-hen",
         "english": null,
@@ -11470,5 +11470,50 @@
         "romaji": "Haha Sange",
         "english": "Step MILF",
         "total_episodes": 2
+    },
+    "Tokyo Revengers": {
+        "mediaId": 120120,
+        "progress": 24,
+        "status": "COMPLETED",
+        "list_category": "Completed",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx120120-cWDmnmeEntSe.jpg",
+        "color": "#f1865d",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Tokyo Revengers",
+        "english": "Tokyo Revengers",
+        "total_episodes": 24
+    },
+    "Tokyo Revengers Season 2": {
+        "mediaId": 142853,
+        "progress": 13,
+        "status": "COMPLETED",
+        "list_category": "Completed",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx142853-nxEZDE9oDRLG.png",
+        "color": "#d6431a",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Tokyo Revengers: Seiya Kessen-hen",
+        "english": "Tokyo Revengers Season 2",
+        "total_episodes": 13
+    },
+    "Tokyo Revengers Season 2 Part 2": {
+        "mediaId": 163329,
+        "progress": 13,
+        "status": "COMPLETED",
+        "list_category": "Completed",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163329-lGJRnYV9dcjc.jpg",
+        "color": "#d65d1a",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Tokyo Revengers: Tenjiku-hen",
+        "english": "Tokyo Revengers Season 2 Part 2",
+        "total_episodes": 13
     }
 }

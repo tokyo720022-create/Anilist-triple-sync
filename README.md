@@ -137,15 +137,15 @@ Gamerscore      10 G
 
 THIS WEEK
 ─────────────────────────
-Anime             3 eps
-Time            144 min
-Gamerscore     258 G
+Anime             4 eps
+Time            166 min
+Gamerscore     268 G
 
 ALL TIME
 ─────────────────────────
-Episodes        213
-Minutes       4,673
-Gamerscore  38,182 G
+Episodes        214
+Minutes       4,695
+Gamerscore  38,192 G
 Completed       153
 
 ```
