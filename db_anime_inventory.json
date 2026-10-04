@@ -2149,15 +2149,18 @@
     },
     "Black Clover Season 2": {
         "mediaId": 195604,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Planning",
-        "scoreRaw": 0,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Favourite",
+        "scoreRaw": 100,
         "type": "ANIME",
-        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195604-BjvWdT5jOcM6.jpg",
-        "color": "#e4c9a1",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195604-tSZcfKbVqSEG.jpg",
+        "color": "#f1a143",
         "duration": 24,
-        "nextAiring": null,
+        "nextAiring": {
+            "airingAt": 1791640800,
+            "episode": 2
+        },
         "romaji": "Black Clover 2nd Season",
         "english": "Black Clover Season 2",
         "total_episodes": null
@@ -11515,5 +11518,59 @@
         "romaji": "Tokyo Revengers: Tenjiku-hen",
         "english": "Tokyo Revengers Season 2 Part 2",
         "total_episodes": 13
+    },
+    "Magical Explorer": {
+        "mediaId": 169581,
+        "progress": 2,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 98,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx169581-UlAviVH36Hxi.png",
+        "color": "#f1a150",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791584160,
+            "episode": 3
+        },
+        "romaji": "Magical\u2605Explorer: Eroge no Yuujin Chara ni Tensei Shitakedo, Game Chishiki Tsukatte Jiyuu ni Ikiru",
+        "english": "Magical Explorer",
+        "total_episodes": 13
+    },
+    "#I'm Looking For a Zombie": {
+        "mediaId": 199007,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 94,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx199007-qxUDe3KA6AGI.jpg",
+        "color": "#5d86f1",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791642600,
+            "episode": 2
+        },
+        "romaji": "#Zombie Sagashitemasu",
+        "english": "#I'm Looking For a Zombie",
+        "total_episodes": null
+    },
+    "Magic Repo Man: Dumped by My Party, I\u2019ll Cash In With a Cute Support Fairy to Become the Strongest!": {
+        "mediaId": 202250,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 97,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx202250-duq4XpZP8TU3.jpg",
+        "color": null,
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791649800,
+            "episode": 2
+        },
+        "romaji": "Kashita Maryoku wa [Revo Barai] de Kyousei Choushuu",
+        "english": "Magic Repo Man: Dumped by My Party, I\u2019ll Cash In With a Cute Support Fairy to Become the Strongest!",
+        "total_episodes": null
     }
 }
