@@ -6074,5 +6074,61 @@
         "romaji": "Tokyo\u534dRevengers",
         "english": "Tokyo Revengers",
         "total_chapters": 279
+    },
+    "A Tale of the Secret Saint": {
+        "mediaId": 114203,
+        "progress": 19,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx114203-fIdB2UHuf3Ut.jpg",
+        "color": "#e47835",
+        "duration": 24,
+        "romaji": "Tensei shita Dai Seijo wa, Seijo de Aru Koto wo Hita Kakusu: A Tale of The Great Saint",
+        "english": "A Tale of the Secret Saint",
+        "total_chapters": null
+    },
+    "Dark Summoner to Dekiteiru": {
+        "mediaId": 157391,
+        "progress": 20,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx157391-9fQGSJMDe5tf.jpg",
+        "color": "#d6931a",
+        "duration": 24,
+        "romaji": "Dark Summoner to Dekiteiru",
+        "english": null,
+        "total_chapters": null
+    },
+    "Arafou Riman no Cinderella Tensei": {
+        "mediaId": 113128,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx113128-o7LWhKX4U9Jk.jpg",
+        "color": "#35aee4",
+        "duration": 24,
+        "romaji": "Arafou Riman no Cinderella Tensei",
+        "english": null,
+        "total_chapters": null
+    },
+    "Immoral Guild": {
+        "mediaId": 99933,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx99933-dmH4PNs2jXnt.jpg",
+        "color": "#e4c950",
+        "duration": 24,
+        "romaji": "Futoku no Guild",
+        "english": "Immoral Guild",
+        "total_chapters": null
     }
 }
