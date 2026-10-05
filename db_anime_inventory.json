@@ -1147,15 +1147,18 @@
     },
     "I'm Dating a Dark Summoner": {
         "mediaId": 208025,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Hentai",
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Hentai ",
         "scoreRaw": 0,
         "type": "ANIME",
-        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx208025-PnD29aNdmSCt.jpg",
-        "color": "#9343f1",
-        "duration": 24,
-        "nextAiring": null,
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx208025-JKvqWNr8rz8l.jpg",
+        "color": "#fff1ae",
+        "duration": 12,
+        "nextAiring": {
+            "airingAt": 1791735600,
+            "episode": 2
+        },
         "romaji": "Dark Summoner to Dekiteiru",
         "english": "I'm Dating a Dark Summoner",
         "total_episodes": null
@@ -11631,6 +11634,54 @@
         "nextAiring": null,
         "romaji": "Seiken Tsukai no World Break",
         "english": "World Break: Aria of Curse for a Holy Swordsman",
+        "total_episodes": 12
+    },
+    "So What's Wrong with Getting Reborn as a Goblin?": {
+        "mediaId": 209219,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx209219-3yhKlRx0LX3p.jpg",
+        "color": "#a1c950",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Tensei Goblin Dakedo Shitsumon Aru?",
+        "english": "So What's Wrong with Getting Reborn as a Goblin?",
+        "total_episodes": null
+    },
+    "A Tale of the Secret Saint": {
+        "mediaId": 187402,
+        "progress": 2,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx187402-ReKkLwFmMV3q.jpg",
+        "color": "#50bbe4",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791637200,
+            "episode": 3
+        },
+        "romaji": "Tensei shita Dai Seijo wa, Seijo de Aru Koto wo Hita Kakusu",
+        "english": "A Tale of the Secret Saint",
+        "total_episodes": null
+    },
+    "Immoral Guild": {
+        "mediaId": 146233,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Hentai",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146233-iJW5lfwNFH5a.jpg",
+        "color": "#e4785d",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Futoku no Guild",
+        "english": "Immoral Guild",
         "total_episodes": 12
     }
 }
