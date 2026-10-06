@@ -6144,5 +6144,19 @@
         "romaji": "Danshi Kokosei Dakedo Gal ni TS Shimashita",
         "english": null,
         "total_chapters": null
+    },
+    "So What's Wrong with Getting Reborn as a Goblin?": {
+        "mediaId": 120236,
+        "progress": 31,
+        "status": "CURRENT",
+        "list_category": "Iseki",
+        "scoreRaw": 0,
+        "type": "MANGA",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx120236-8RSopHXGTHWH.jpg",
+        "color": "#f1a150",
+        "duration": 24,
+        "romaji": "Tensei Goblin Dakedo Shitsumon Aru?",
+        "english": "So What's Wrong with Getting Reborn as a Goblin?",
+        "total_chapters": null
     }
 }
