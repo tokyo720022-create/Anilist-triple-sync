@@ -11638,15 +11638,18 @@
     },
     "So What's Wrong with Getting Reborn as a Goblin?": {
         "mediaId": 209219,
-        "progress": 0,
-        "status": "PLANNING",
-        "list_category": "Planning",
-        "scoreRaw": 0,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Tensai",
+        "scoreRaw": 100,
         "type": "ANIME",
         "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx209219-3yhKlRx0LX3p.jpg",
         "color": "#a1c950",
         "duration": 24,
-        "nextAiring": null,
+        "nextAiring": {
+            "airingAt": 1791810000,
+            "episode": 3
+        },
         "romaji": "Tensei Goblin Dakedo Shitsumon Aru?",
         "english": "So What's Wrong with Getting Reborn as a Goblin?",
         "total_episodes": null
@@ -11683,5 +11686,23 @@
         "romaji": "Futoku no Guild",
         "english": "Immoral Guild",
         "total_episodes": 12
+    },
+    "Hello, I am a Witch and my Crush Wants me to Make a Love Potion!": {
+        "mediaId": 207191,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b207191-MV0uJNxN7LNY.jpg",
+        "color": null,
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791808200,
+            "episode": 2
+        },
+        "romaji": "Doumo, Suki na Hito ni Horegusuri wo Irai Sareta Majo desu.",
+        "english": "Hello, I am a Witch and my Crush Wants me to Make a Love Potion!",
+        "total_episodes": null
     }
 }
