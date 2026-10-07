@@ -73,7 +73,7 @@ def safe_int(val, default=0):
 # ==========================================
 TARGET_LISTS = [
     "anime movies", "iseki", "isekai", "milf", "loli", "rom com",
-    "plan to continue", "hentai", "favourite", "fav", "planning" , "Tensei" ,
+    "plan to continue", "hentai", "favourite", "fav", "planning" , "Tensei" 
 ]
 
 def get_or_create_thread(list_name, media_type, base_webhook):
