@@ -11755,5 +11755,41 @@
         "romaji": "Shiotaiou no Satou-san ga Ore ni dake Amai",
         "english": "The Cold Sato-san is Only Sweet to Me",
         "total_episodes": null
+    },
+    "Super Psychic Policeman Chojo": {
+        "mediaId": 200294,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx200294-E6KIgkFaJOfG.jpg",
+        "color": null,
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791900000,
+            "episode": 2
+        },
+        "romaji": "Choujun! Choujou Senpai",
+        "english": "Super Psychic Policeman Chojo",
+        "total_episodes": null
+    },
+    "The World's Strongest Witch": {
+        "mediaId": 211778,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx211778-0MXK5HqVFBYH.jpg",
+        "color": "#5dbbf1",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1791982800,
+            "episode": 2
+        },
+        "romaji": "Sekai Saikyou no Majo, Hajimemashita",
+        "english": "The World's Strongest Witch",
+        "total_episodes": null
     }
 }
