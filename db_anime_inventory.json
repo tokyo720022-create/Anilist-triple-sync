@@ -1273,7 +1273,7 @@
     },
     "FX Fighter Kurumi-chan": {
         "mediaId": 206401,
-        "progress": 1,
+        "progress": 2,
         "status": "CURRENT",
         "list_category": "Current",
         "scoreRaw": 0,
@@ -1282,12 +1282,12 @@
         "color": "#f1d678",
         "duration": 24,
         "nextAiring": {
-            "airingAt": 1791462600,
-            "episode": 2
+            "airingAt": 1792067400,
+            "episode": 3
         },
         "romaji": "FX Senshi Kurumi-chan",
         "english": "FX Fighter Kurumi-chan",
-        "total_episodes": null
+        "total_episodes": 12
     },
     "Nia Liston: The Merciless Maiden": {
         "mediaId": 206949,
@@ -11791,5 +11791,20 @@
         "romaji": "Sekai Saikyou no Majo, Hajimemashita",
         "english": "The World's Strongest Witch",
         "total_episodes": null
+    },
+    "The Iceblade Sorcerer Shall Rule the World": {
+        "mediaId": 148116,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx148116-t6E73U8SJhYD.jpg",
+        "color": "#4378e4",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Hyouken no Majutsushi ga Sekai wo Suberu",
+        "english": "The Iceblade Sorcerer Shall Rule the World",
+        "total_episodes": 12
     }
 }
