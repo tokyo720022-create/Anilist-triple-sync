@@ -11929,5 +11929,53 @@
         "romaji": "Odebu Akujo ni Tensei Shitara, Naze ka Last Boss Ouji-sama ni Shuuchaku Sareteimasu",
         "english": null,
         "total_episodes": null
+    },
+    "Dark Gathering 2nd Season": {
+        "mediaId": 201388,
+        "progress": 0,
+        "status": "PLANNING",
+        "list_category": "Planning",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx201388-YCEfdfCgY3Yi.png",
+        "color": "#ff4335",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Dark Gathering 2nd Season",
+        "english": null,
+        "total_episodes": null
+    },
+    "Dark Gathering": {
+        "mediaId": 152802,
+        "progress": 25,
+        "status": "COMPLETED",
+        "list_category": "Favourite",
+        "scoreRaw": 100,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx152802-ENRcnqD5axhQ.jpg",
+        "color": "#e46b5d",
+        "duration": 24,
+        "nextAiring": null,
+        "romaji": "Dark Gathering",
+        "english": "Dark Gathering",
+        "total_episodes": 25
+    },
+    "A Certain Dark Item": {
+        "mediaId": 186742,
+        "progress": 1,
+        "status": "CURRENT",
+        "list_category": "Current",
+        "scoreRaw": 0,
+        "type": "ANIME",
+        "cover": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx186742-v7yfbefc8fuO.png",
+        "color": "#35f1a1",
+        "duration": 24,
+        "nextAiring": {
+            "airingAt": 1792157400,
+            "episode": 2
+        },
+        "romaji": "Toaru Anbu no ITEM",
+        "english": "A Certain Dark Item",
+        "total_episodes": null
     }
 }
